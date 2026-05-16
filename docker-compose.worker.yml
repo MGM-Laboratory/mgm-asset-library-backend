@@ -1,0 +1,33 @@
+# =============================================================================
+# Worker overlay. Compose this in *addition* to docker-compose.yml so the
+# worker shares Postgres + Redis + Mongo + Meilisearch + MinIO with the api.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.worker.yml up
+# =============================================================================
+
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    env_file: .env
+    environment:
+      PROCESS_ROLE: worker
+      PORT: "4001"
+    ports:
+      - "4001:4001"   # /healthz + /metrics
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+    # Blender allocates a lot of VRAM-shaped temp buffers; keep tmpfs cheap.
+    tmpfs:
+      - /tmp/mgm-analyze:size=4g

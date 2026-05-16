@@ -1,0 +1,80 @@
+import { Asset, AssetEngine, AssetStatus } from '@prisma/client';
+import { PublishChecklistService } from '../../src/modules/assets/publish-checklist.service';
+
+function makeAsset(overrides: Partial<Asset> = {}): Asset {
+  return {
+    id: 'cln_asset',
+    slug: 'demo-asset',
+    title: 'Demo',
+    ownerId: 'cln_user',
+    categoryId: 'cat_id',
+    licenseId: 'lic_id',
+    engine: AssetEngine.UNITY,
+    status: AssetStatus.DRAFT,
+    thumbnailKey: 'thumbs/cln_asset/thumb.png',
+    requiresEmptyProject: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    publishedAt: null,
+    archivedAt: null,
+    ...overrides,
+  };
+}
+
+describe('PublishChecklistService', () => {
+  it('flags every missing prerequisite at once', async () => {
+    const prisma = {
+      assetTranslation: { count: jest.fn().mockResolvedValue(0) },
+      assetVersion: { findFirst: jest.fn().mockResolvedValue(null) },
+    } as never;
+    const svc = new PublishChecklistService(prisma);
+    const asset = makeAsset({ thumbnailKey: null, categoryId: '', licenseId: '' });
+    const violations = await svc.evaluate(asset);
+    const codes = violations.map((v) => v.code).sort();
+    expect(codes).toEqual(
+      expect.arrayContaining(['category.missing', 'license.missing', 'thumbnail.missing', 'translations.empty', 'version.missing']),
+    );
+  });
+
+  it('flags AV infection as a *warning*, not an error', async () => {
+    const prisma = {
+      assetTranslation: { count: jest.fn().mockResolvedValue(1) },
+      assetVersion: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'v1',
+          semver: '1.0.0',
+          analysisStatus: 'READY',
+          avStatus: 'INFECTED',
+          _count: { files: 2, compatibility: 1 },
+        }),
+      },
+    } as never;
+    const svc = new PublishChecklistService(prisma);
+    const violations = await svc.evaluate(makeAsset());
+    const av = violations.find((v) => v.code === 'av.infected');
+    expect(av).toBeDefined();
+    expect(av!.severity).toBe('warning');
+    expect(violations.filter((v) => v.severity === 'error')).toHaveLength(0);
+  });
+
+  it('requires compatibility for engine-specific assets', async () => {
+    const prisma = {
+      assetTranslation: { count: jest.fn().mockResolvedValue(1) },
+      assetVersion: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'v1',
+          semver: '1.0.0',
+          analysisStatus: 'READY',
+          avStatus: 'CLEAN',
+          _count: { files: 2, compatibility: 0 },
+        }),
+      },
+    } as never;
+    const svc = new PublishChecklistService(prisma);
+    const violations = await svc.evaluate(makeAsset({ engine: 'UNITY' }));
+    expect(violations.find((v) => v.code === 'compatibility.missing')).toBeDefined();
+
+    const agnostic = await svc.evaluate(makeAsset({ engine: 'ENGINE_AGNOSTIC' }));
+    expect(agnostic.find((v) => v.code === 'compatibility.missing')).toBeUndefined();
+  });
+});
