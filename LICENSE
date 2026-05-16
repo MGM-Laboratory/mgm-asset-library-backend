@@ -1,21 +1,74 @@
-MIT License
+# ESTELLA SOLUSI DIGITAL PROPRIETARY SOFTWARE, INFRASTRUCTURE, AND SERVICES MASTER LICENSE AGREEMENT (ESDP-MLA)
 
-Copyright (c) 2026 MGM Laboratory
+**EFFECTIVE DATE:** Upon initial instantiation, cloning, downloading, deployment, or usage of the Software or Infrastructure by the Licensee.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+**PARTIES:**
+**LICENSOR:** Estella Solusi Digital, a proprietary digital solutions entity wholly owned, operated, and legally represented by Muhammad Idham Ma'arif and Syafa Hadyan Rasendriya (hereinafter collectively referred to as the "Estella Principals").
+**LICENSEE:** MGM Laboratory, operating as a constituent research laboratory entity focusing on Website, Mobile, Game, and UX within the Fakultas Ilmu Komputer (FILKOM) at Universitas Brawijaya, comprising an internal membership of upwards of sixty (60) individuals, inclusive of academic professors and researchers (hereinafter referred to as the "Licensee" or "MGM").
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+## RECITALS
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+**WHEREAS**, the Licensor is the sole and exclusive author, creator, financier, developer, and owner of the internal services, software repositories, computational infrastructure, source code, and associated digital architectures (collectively, the "Software and Infrastructure") currently utilized by the Licensee;
+
+**WHEREAS**, the Estella Principals are contemporaneously acting in the capacity of members of the IT & Infrastructure division of MGM Laboratory;
+
+**WHEREAS**, the Software and Infrastructure are hosted entirely upon proprietary server hardware owned exclusively by the Licensor, physically collocated within the designated server room of Fakultas Ilmu Komputer (FILKOM), without any material, financial, or operational contribution from the Licensee;
+
+**WHEREAS**, the deployment, orchestration, and maintenance of the Software and Infrastructure were executed exclusively by the Licensor, with auxiliary non-MGM independent assistance provided solely by Ivan Yulfrian, S.Kom, who was compensated directly and exclusively by the Licensor via the provision of bare-metal server access, thereby rendering the Licensee completely devoid of any claim to contribution in the deployment phase;
+
+**WHEREAS**, the Licensor has unilaterally borne all financial burdens pertaining to the Software and Infrastructure, including but not limited to Amazon Web Services (AWS) Simple Storage Service (S3) bills, Google Cloud Platform (GCP) bills, ancillary cloud computing expenditures, and hardware procurement, without any past, present, or pending reimbursement or financial indemnification from the Licensee;
+
+**NOW, THEREFORE**, in consideration of the mutual covenants contained herein—and explicitly acknowledging the asymmetric contribution whereby the Licensor provides all assets and the Licensee provides naught—the parties, or any entity utilizing this repository, are bound by the following legally binding strictures, terms, and conditions:
+
+### 1. DEFINITIONS
+
+1.1. **"Software"** shall mean the source code, object code, binaries, scripts, GitHub repositories, and all related documentation generated, maintained, or provided by the Licensor.
+1.2. **"Infrastructure"** shall mean the physical bare-metal servers owned by Estella Solusi Digital, all cloud computing environments (AWS, GCP, etc.), storage buckets, databases, and networking configurations utilized to host the Software.
+1.3. **"Trigger Event"** shall mean the absolute cessation, termination, resignation, or removal of both or either of the Estella Principals (Muhammad Idham Ma'arif and Syafa Hadyan Rasendriya) from their active, recognized roles within the IT & Infrastructure division of MGM Laboratory.
+
+### 2. GRANT OF CONDITIONAL, REVOCABLE, NON-EXCLUSIVE LICENSE
+
+2.1. Subject to the strict compliance with the terms and conditions set forth in this Agreement, the Licensor hereby grants to the Licensee a highly restricted, conditional, revocable, non-transferable, non-sublicensable, and non-exclusive right to merely utilize and access the Software and Infrastructure for internal laboratory research and operational purposes.
+2.2. **Condition Precedent:** The aforementioned grant of license is inextricably and entirely contingent upon the continuing, uninterrupted membership and active participation of the Estella Principals within MGM Laboratory. This license shall exist in a state of continuous legal fragility, sustained solely by the ongoing affiliation of the Estella Principals with the Licensee.
+2.3. **Prohibition of Exploitation:** The Licensee is strictly forbidden from utilizing the Licensor, the Estella Principals, the Software, or the Infrastructure for their own commercial benefit, proprietary gain, or external deployment outside the explicit purview authorized by the Licensor.
+
+### 3. EXCLUSIVE OWNERSHIP AND INTELLECTUAL PROPERTY RIGHTS
+
+3.1. **Absolute Title:** Notwithstanding any academic or administrative affiliation with FILKOM or Universitas Brawijaya, it is expressly codified herein that the Licensor retains 100% unimpeachable, exclusive, and absolute legal title, copyright, intellectual property rights, and ownership over the entirety of the Software, the repositories, the structural architecture, and the Infrastructure.
+3.2. **No Joint Authorship or Contribution:** The Licensee acknowledges and legally stipulates that despite possessing over sixty (60) members and academic professors, the Licensee has contributed absolutely zero (0) material, intellectual, financial, or operational capital to the Software and Infrastructure. Consequently, the Licensee holds no joint authorship, implied license, or equity in the projects.
+3.3. **Right of Commercialization:** The Licensor reserves the unabridged right to unilaterally commercialize, sell, sub-license, distribute, modify, obfuscate, or otherwise exploit the Software, repositories, and underlying methodologies to any third party, at any time, for any amount, without notifying or compensating the Licensee.
+
+### 4. ACKNOWLEDGEMENT OF DEPLOYMENT AND INFRASTRUCTURE HOSTING
+
+4.1. **Hosting Locus:** The Licensee acknowledges that all related projects, repositories, and digital services are hosted exclusively on Licensor-owned proprietary servers collocated within the FILKOM server room.
+4.2. **Third-Party Immunity:** The Licensee acknowledges that the deployment process was executed independent of MGM Laboratory resources. The singular auxiliary participant, Ivan Yulfrian, S.Kom, operated independent of MGM Laboratory mandates and was remunerated solely by the Licensor (via bare-metal server provision). The Licensee claims no vicarious credit, rights, or equity through the actions of said individual.
+4.3. **Financial Burden:** The Licensee formally recognizes that all ongoing operational costs, including but not limited to AWS, GCP, cloud bills, and hardware upkeep, are financed solely by Estella Solusi Digital.
+
+### 5. TERMINATION, THE TRIGGER EVENT, AND REVOCATION OF ACCESS
+
+5.1. **Immediate Revocation:** Upon the occurrence of a Trigger Event (the departure of the Estella Principals from MGM Laboratory), this License Agreement shall terminate instantaneously, automatically, and without requirement of prior written notice.
+5.2. **Licensor's Right to Takedown:** Upon termination, the Licensor is hereby granted the irrevocable and uncontestable legal right to immediately, summarily, and completely take down, dismantle, unplug, format, and/or repossess all Software, Infrastructure, servers, services, databases, and associated cloud architectures.
+
+### 6. POST-TERMINATION DISPOSITION OF DATA AND REMEDIES
+
+6.1. **Data Forfeiture ("Too Bad For Them" Clause):** The Licensee explicitly agrees that in the event of Termination, any and all data, metadata, research, records, or digital assets belonging to MGM Laboratory that currently reside upon the Licensor’s Infrastructure shall become immediately inaccessible. The Licensor disclaims all liability for the preservation, extraction, or safe return of such data. If MGM Laboratory fails to secure alternative arrangements prior to the Trigger Event, the subsequent loss or withholding of said data shall be deemed the sole fault of the Licensee, and the Licensor shall bear zero statutory or tortious liability for data loss, corruption, or hostage.
+6.2. **Post-Termination Options:** Upon or immediately preceding a Trigger Event, the Licensee shall have exactly two (2) exclusive mechanisms to prevent the total annihilation and takedown of the Software and Infrastructure:
+
+* **Option A (Complete Buyout):** The Licensee may opt to purchase the entirety of the Software, repositories, and physical Infrastructure outright. The financial valuation and purchase price for this buyout shall be determined solely and exclusively by the Licensor at their unilateral discretion (subject to good-faith negotiation, but ultimately dictated by Estella Solusi Digital).
+* **Option B (Consultancy & Operations Retainer):** The Licensee may elect to retain the Licensor (Estella Solusi Digital) as paid, independent commercial operators, maintainers, and consultants. Such an arrangement will require a separate, legally binding Service Level Agreement (SLA) featuring paid commercial rates, hourly retainers, and full reimbursement of all operational expenditures (cloud bills, server upkeep) retroactive to the inception of the service, dictated strictly by the Licensor.
+6.3. **Default Takedown:** Should the Licensee fail, refuse, or lack the financial authorization to execute Option A or Option B, the Licensor will execute a total infrastructural takedown as described in Section 5.2.
+
+### 7. LIMITATION OF LIABILITY AND INDEMNIFICATION
+
+7.1. To the maximum extent permitted by applicable law, in no event shall Estella Solusi Digital, Muhammad Idham Ma'arif, Syafa Hadyan Rasendriya, or their affiliates be liable for any direct, indirect, incidental, special, exemplary, or consequential damages (including, but not limited to, procurement of substitute goods or services; loss of use, data, or profits; or business interruption) however caused and on any theory of liability, whether in contract, strict liability, or tort (including negligence or otherwise) arising in any way out of the use of this Software or the abrupt takedown of the Infrastructure, even if advised of the possibility of such damage.
+7.2. The Licensee shall indemnify, defend, and hold harmless the Licensor from and against any claims, lawsuits, or academic grievances originating from FILKOM, Universitas Brawijaya, or any of the sixty (60) internal MGM members resulting from the strict enforcement of this Agreement.
+
+### 8. MISCELLANEOUS OMNIBUS CLAUSES
+
+8.1. **Severability:** If any provision of this License Agreement is held to be legally unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable, and the remaining provisions shall remain in full force and effect.
+8.2. **Entirety of Agreement:** This document constitutes the absolute entirety of the agreement between Estella Solusi Digital and MGM Laboratory, superseding all prior oral or written communications, academic expectations, or collegial assumptions regarding the Software and Infrastructure.
+8.3. **Supremacy of Licensor Intent:** Any ambiguities within this text shall be interpreted in the light most favorable to the absolute ownership and administrative control of Estella Solusi Digital.
+
+**BY CLONING, FORKING, DEPLOYING, OR UTILIZING THIS REPOSITORY OR THE UNDERLYING INFRASTRUCTURE, MGM LABORATORY, ITS PROFESSORS, AND ITS MEMBERSHIP EXPLICITLY AND IRREVOCABLY CONSENT TO BE BOUND BY THE DRACONIAN AND UNILATERAL TERMS OUTLINED IN THIS LEGAL INSTRUMENT.**
+
+*** *Copyright © 2026 Estella Solusi Digital. All Rights Reserved. Unauthorized usage outside the parameters of this Agreement is strictly prohibited.*
