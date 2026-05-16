@@ -57,10 +57,7 @@ flowchart TB
 
 ---
 
-## 1. Status — feature-complete (Parts 1 + 2 + 3 + 4)
-
-All four parts of the backend roadmap are landed. Part 4 closed out admin
-panel surfaces, hardening, and the E2E framework:
+## 1. Feature
 
 - **Admin namespace** under `/admin/*` (composite `AdminGuard` = Keycloak
   + admin role). Audit-logged via the global `AuditInterceptor` reading
@@ -98,9 +95,6 @@ panel surfaces, hardening, and the E2E framework:
 - **Production runbook**: `docs/RUNBOOK.md` covers architecture,
   provisioning, secrets, migrations, rollback, ops tasks, backups, DR,
   and monitoring.
-
-The earlier parts (1–3) shipped earlier:
-
 - **PROCESS_ROLE split** (`api` | `worker`) — workers register every BullMQ
   processor; API replicas only enqueue. Two Docker images
   (`Dockerfile`, `Dockerfile.worker`).
@@ -131,11 +125,6 @@ The earlier parts (1–3) shipped earlier:
 - **Ops surface** — `/admin/queues` Bull Board (admin-only),
   `/metrics` Prometheus endpoint (admin OR `METRICS_ALLOW_CIDRS`),
   `/admin/webhook-deliveries` log viewer.
-
-Parts 1 and 2 are unchanged. Part 4 (admin panel features, featured slots,
-reports moderation, analytics dashboard endpoints, audit log read) still
-lives in stub modules.
-
 - **Auth**: `/auth/me`, locale patch, plugin device-token flow (`exchange`,
   `refresh`, `revoke`, `devices`), `FlexibleAuthGuard` (Bearer **or**
   `PluginToken`).
@@ -173,8 +162,9 @@ See section 8 for the part-by-part roadmap.
 ### 2.2 Server-side software (production / staging host)
 
 The API container itself ships with only Node, `ca-certificates`, `curl`, and
-`dumb-init`. The **worker container** that runs the BullMQ jobs in Part 3
-needs the heavy media-processing toolchain installed. Run this once on every
+`dumb-init`. The **worker container** that runs the BullMQ jobs.
+
+This project needs the heavy media-processing toolchain installed. Run this once on every
 worker host:
 
 ```bash
@@ -229,7 +219,7 @@ The API host itself doesn't need any of this — only the worker host.
 ## 3. Local development
 
 ```bash
-git clone git@github.com:mgm-laboratory/mgm-asset-library-backend.git
+git clone git@github.com:MGM-Laboratory/mgm-asset-library-backend.git
 cd mgm-asset-library-backend
 cp .env.example .env       # fill in values; defaults match docker-compose.yml
 pnpm install
@@ -349,20 +339,9 @@ malformed; refer to `src/config/env.schema.ts` for the authoritative shape.
 
 ---
 
-## 8. Roadmap
+## 8. Deployment
 
-| Part | Scope                                                                                              |
-| ---- | -------------------------------------------------------------------------------------------------- |
-| 1    | Foundation: config, infra modules, Keycloak guard, Prisma schema, `/auth/me`, health probes.       |
-| 2    | Asset / version / file lifecycle: presigned uploads, search proxy, library, read endpoints.        |
-| 3    | Workers: analyzer, AV scan, glTF convert, thumbnail gen, notification fan-out, archive purge.      |
-| 4    | Admin panel: comments / issues, reports, requests, featured, analytics, audit log, WS gateway.     |
-
----
-
-## 9. Deployment
-
-### 9.1 Build & push the image
+### 8.1 Build & push the image
 
 GitHub Actions does this on every push to `staging` / `production`:
 
@@ -371,7 +350,7 @@ GitHub Actions does this on every push to `staging` / `production`:
 .github/workflows/deploy-prod.yml     → ghcr.io/<org>/mgm-asset-library-backend:prod-<sha>
 ```
 
-### 9.2 Wiring SWAG (nginx) on the production host
+### 8.2 Wiring SWAG (nginx) on the production host
 
 SWAG terminates TLS and proxies to the API container on `PORT`. A minimal
 server block:
@@ -390,7 +369,7 @@ location / {
 `TRUST_PROXY=true` in `.env` is what tells Fastify to honour the
 `X-Forwarded-*` headers SWAG sets.
 
-### 9.3 Env management
+### 8.3 Env management
 
 We recommend **sops + age** committed to a private ops repo, or `--env-file` on
 the host with strict file permissions (`chmod 600 .env`). The deploy
@@ -399,7 +378,7 @@ on the target host.
 
 ---
 
-## 10. CI/CD overview
+## 9. CI/CD overview
 
 | Workflow                              | Trigger                                       | Purpose                                                            |
 | ------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------ |
@@ -416,7 +395,7 @@ on the target host.
 
 ---
 
-## 11. Endpoint reference (Parts 1 + 2 + 3)
+## 10. Endpoint reference
 
 ### Auth
 - `GET /auth/me` — current user + role + avatar + counters.
@@ -489,7 +468,7 @@ on the target host.
 - `GET /admin/webhook-deliveries[?status=&type=&limit=]` — n8n delivery log.
 - `GET /metrics` — Prometheus scrape (admin role OR `METRICS_ALLOW_CIDRS`).
 
-### Part 4 — Admin namespace
+### Admin namespace
 All endpoints below mount under `/admin/*`, guarded by `AdminGuard`
 (Keycloak Bearer + `User.isAdmin`). Mutating handlers carry
 `@AuditAction(...)` so every change lands in `AuditLog`.
@@ -518,7 +497,7 @@ All endpoints below mount under `/admin/*`, guarded by `AdminGuard`
 - `GET /admin/av/infected`, `POST /admin/av/:versionId/{quarantine,acknowledge,rescan}`.
 - `GET /admin/analytics/platform`, `/admin/analytics/assets`, `/admin/analytics/users`.
 
-### Part 4 — Profile + analytics for the authenticated user
+### Profile + analytics for the authenticated user
 - `GET /me` — extends `/auth/me` with the device list.
 - `POST /me/devices/:id/revoke`, `POST /me/logout`.
 - `GET /me/analytics/summary`, `GET /me/analytics/assets/:assetId`.
@@ -531,7 +510,7 @@ All endpoints below mount under `/admin/*`, guarded by `AdminGuard`
 | `POST /comments`               | 60 s   | 60  | user  |
 | `POST /auth/plugin/exchange`   | 60 s   | 20  | ip    |
 
-## 12. Quickstart — publishing your first asset (curl)
+## 11. Quickstart — publishing your first asset (curl)
 
 The flow exercised by Part 2 integration tests. Replace `$TOKEN` with a valid
 Keycloak bearer token (use any IdP-managed user for staging/dev).
@@ -600,7 +579,7 @@ curl -s -H "$H" "$API/discover" | jq '.rows[].assets[].slug'
 A consumer can now `POST /downloads` with the asset/version to get signed
 file URLs and have the asset auto-saved to their Library.
 
-## 13. Coding conventions
+## 12. Coding conventions
 
 - TypeScript strict mode, ESLint + Prettier, Husky pre-commit running
   lint-staged.
