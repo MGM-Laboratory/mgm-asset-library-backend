@@ -146,8 +146,6 @@ flowchart TB
   `GET /asset-requests/:id`.
 - **Workers**: Part 3 ships the processors.
 
-See section 8 for the part-by-part roadmap.
-
 ---
 
 ## 2. Prerequisites
