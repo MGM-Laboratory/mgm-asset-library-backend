@@ -43,6 +43,7 @@ export class JobsProducer implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
+    if (process.env.OPENAPI_EXPORT === '1') return;
     for (const name of Object.values(QUEUE)) this.queue(name);
     // The batch indexer runs on a fixed repeatable schedule.
     await this.scheduleSearchIndexBatch();
