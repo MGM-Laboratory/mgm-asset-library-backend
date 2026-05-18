@@ -31,12 +31,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - Name: Setup pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
           version: 9
 
-      - Name: Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 20
