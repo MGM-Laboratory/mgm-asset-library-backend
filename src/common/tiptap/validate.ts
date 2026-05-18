@@ -120,7 +120,9 @@ function isTipTapNode(node: TipTapNode | TipTapDoc): node is TipTapNode {
 }
 
 function walk(node: TipTapNode | TipTapDoc, path: string, state: WalkState): TipTapNode {
-  const typedNode: TipTapNode = isTipTapNode(node) ? node : { type: node.type, content: node.content };
+  const typedNode: TipTapNode = isTipTapNode(node)
+    ? node
+    : { type: node.type, content: node.content };
   const out: TipTapNode = { type: node.type };
   if (!state.allowlist.nodes.has(node.type)) {
     state.violations.push({

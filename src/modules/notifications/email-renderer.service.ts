@@ -20,7 +20,11 @@ export class EmailRendererService {
   private readonly logger = new Logger(EmailRendererService.name);
   private readonly htmlCache = new Map<string, string>();
 
-  async render(type: NotificationType, locale: Locale, vars: Record<string, unknown>): Promise<RenderedEmail> {
+  async render(
+    type: NotificationType,
+    locale: Locale,
+    vars: Record<string, unknown>,
+  ): Promise<RenderedEmail> {
     const spec = EMAIL_SPECS[type];
     if (!spec) throw new Error(`No email spec for notification type ${type}`);
     const html = await this.compileHtml(type, spec, locale);
@@ -32,7 +36,11 @@ export class EmailRendererService {
     };
   }
 
-  private async compileHtml(type: NotificationType, spec: EmailSpec, locale: Locale): Promise<string> {
+  private async compileHtml(
+    type: NotificationType,
+    spec: EmailSpec,
+    locale: Locale,
+  ): Promise<string> {
     const cacheKey = `${type}:${locale}`;
     const cached = this.htmlCache.get(cacheKey);
     if (cached) return cached;

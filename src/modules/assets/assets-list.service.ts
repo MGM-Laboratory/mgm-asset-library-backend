@@ -89,7 +89,11 @@ export class AssetsListService {
    * Hydrate a list of asset ids in their incoming order (the Meilisearch path
    * uses this). Skips assets the requester is not allowed to see.
    */
-  async hydrate(ids: string[], _requester: User | null, locale: Locale): Promise<AssetSummaryDto[]> {
+  async hydrate(
+    ids: string[],
+    _requester: User | null,
+    locale: Locale,
+  ): Promise<AssetSummaryDto[]> {
     if (ids.length === 0) return [];
     const rows = await this.prisma.asset.findMany({
       where: { id: { in: ids }, status: 'PUBLISHED' },
