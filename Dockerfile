@@ -14,7 +14,7 @@ RUN corepack enable
 
 COPY package.json pnpm-lock.yaml* ./
 COPY prisma ./prisma
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 COPY tsconfig*.json nest-cli.json ./
 COPY src ./src
