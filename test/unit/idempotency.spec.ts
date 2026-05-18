@@ -1,5 +1,6 @@
 import { IdempotencyService } from '../../src/common/idempotency/idempotency.service';
 import { ConflictDomainException } from '../../src/common/errors/problem.dto';
+import { RedisService } from '../../src/infra/redis/redis.service';
 
 class FakeRedisClient {
   private store = new Map<string, string>();
@@ -15,7 +16,7 @@ class FakeRedisClient {
 describe('IdempotencyService', () => {
   function build() {
     const client = new FakeRedisClient();
-    const svc = new IdempotencyService({ client } as unknown as { client: FakeRedisClient });
+    const svc = new IdempotencyService({ client } as unknown as RedisService);
     return { svc, client };
   }
 

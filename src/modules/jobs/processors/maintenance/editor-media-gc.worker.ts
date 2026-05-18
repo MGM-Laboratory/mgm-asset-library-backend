@@ -30,7 +30,7 @@ export class EditorMediaGcWorker extends JobWorkerBase<EditorMediaGcJob> impleme
     super(QUEUE.EDITOR_MEDIA_GC, config, sentry);
   }
 
-  async onModuleInit(): Promise<void> {
+  override async onModuleInit(): Promise<void> {
     super.onModuleInit();
     await this.producer
       .queue(QUEUE.EDITOR_MEDIA_GC)
@@ -41,7 +41,7 @@ export class EditorMediaGcWorker extends JobWorkerBase<EditorMediaGcJob> impleme
       );
   }
 
-  async process(_job: Job<EditorMediaGcJob>): Promise<void> {
+  override async process(_job: Job<EditorMediaGcJob>): Promise<void> {
     const referenced = await this.collectReferencedKeys();
     await this.prisma.editorMediaUpload.updateMany({
       where: { key: { in: Array.from(referenced) } },

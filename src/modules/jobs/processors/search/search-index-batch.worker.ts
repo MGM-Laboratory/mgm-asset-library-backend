@@ -69,12 +69,12 @@ export class SearchIndexBatchWorker
     super(QUEUE.SEARCH_INDEX_BATCH, config, sentry, { concurrency: 1 });
   }
 
-  async onModuleInit(): Promise<void> {
+  override async onModuleInit(): Promise<void> {
     super.onModuleInit();
     await this.ensureSettings();
   }
 
-  async process(_job: Job<SearchIndexBatchJob>): Promise<void> {
+  override async process(_job: Job<SearchIndexBatchJob>): Promise<void> {
     const ids: string[] = await this.redis.client.smembers(SEARCH_DIRTY_SET);
     if (ids.length === 0) return;
     // Atomically empty the set so concurrent enqueues collect into a fresh batch.

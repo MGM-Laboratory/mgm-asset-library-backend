@@ -10,9 +10,7 @@ import { buildTestModuleWithFakeKeycloak } from './harness/fake-keycloak';
  */
 describe('E2E [01] onboarding', () => {
   let app: NestFastifyApplication;
-  let fake: ReturnType<typeof buildTestModuleWithFakeKeycloak> extends Promise<infer T>
-    ? T['fake']
-    : never;
+  let fake: Awaited<ReturnType<typeof buildTestModuleWithFakeKeycloak>>['fake'];
 
   beforeAll(async () => {
     const { fake: f, builder } = await buildTestModuleWithFakeKeycloak();

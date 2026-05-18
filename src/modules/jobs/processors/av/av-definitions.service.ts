@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { stat } from 'node:fs/promises';
 
 /**
@@ -7,7 +7,6 @@ import { stat } from 'node:fs/promises';
  */
 @Injectable()
 export class AvDefinitionsService implements OnModuleInit {
-  private readonly logger = new Logger(AvDefinitionsService.name);
   private lastUpdate: Date | null = null;
   /** Path to the daily.{cvd,cld} file ClamAV ships. Default Debian path. */
   private readonly probePath = '/var/lib/clamav/daily.cvd';

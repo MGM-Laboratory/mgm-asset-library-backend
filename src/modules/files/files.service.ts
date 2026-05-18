@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AssetFile, AssetFileKind, AssetVersion, User } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { ErrorCode } from '../../common/errors/error-code';
@@ -46,7 +46,6 @@ const HANDLE_TTL_SECONDS = 24 * 60 * 60;
  */
 @Injectable()
 export class FilesService {
-  private readonly logger = new Logger(FilesService.name);
   private readonly editorMediaTtlSec = 90 * 24 * 60 * 60;
 
   constructor(

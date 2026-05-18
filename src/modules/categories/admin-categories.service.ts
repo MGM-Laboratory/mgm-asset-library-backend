@@ -81,7 +81,7 @@ export class AdminCategoriesService {
     }
     const mergedName =
       dto.name == null
-        ? existing.name
+        ? (existing.name as Prisma.InputJsonValue)
         : ({
             ...((existing.name as Record<string, string>) ?? {}),
             ...dto.name,

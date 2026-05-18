@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { Readable } from 'node:stream';
 import { Socket, connect } from 'node:net';
@@ -25,8 +24,6 @@ interface ClamdOptions {
  * terminates the stream and clamd replies with `stream: <verdict>`.
  */
 export class ClamdClient {
-  private readonly logger = new Logger(ClamdClient.name);
-
   constructor(
     private readonly s3: S3Service,
     private readonly opts: ClamdOptions,

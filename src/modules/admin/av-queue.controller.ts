@@ -48,7 +48,7 @@ export class AdminAvQueueController {
     const cursor = decodeCursor(query.cursor ?? null);
     const rows = await this.prisma.assetVersion.findMany({
       where: { avStatus: 'INFECTED' },
-      orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       take: limit + 1,
       ...(cursor ? { skip: 1, cursor: { id: cursor.id } } : {}),
       include: {
@@ -79,7 +79,7 @@ export class AdminAvQueueController {
             const av = meta.avResult as { status?: string; signature?: string } | undefined;
             return { id: f.id, relativePath: f.relativePath, signature: av?.signature };
           }),
-        scannedAt: v.updatedAt.toISOString(),
+        scannedAt: v.createdAt.toISOString(),
       })),
       pageInfo: {
         nextCursor:

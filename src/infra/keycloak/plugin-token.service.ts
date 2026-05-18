@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PluginDeviceToken, User } from '@prisma/client';
 import { createHmac, randomBytes } from 'node:crypto';
 import { AppConfigService } from '../../config/app-config.service';
@@ -19,7 +19,6 @@ export interface IssuedPluginToken {
  */
 @Injectable()
 export class PluginTokenService {
-  private readonly logger = new Logger(PluginTokenService.name);
   private readonly pepper: string;
   private readonly ttlDays: number;
 

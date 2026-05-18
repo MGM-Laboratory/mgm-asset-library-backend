@@ -46,7 +46,7 @@ async function bootstrapApi(env: ReturnType<typeof validateEnv>): Promise<void> 
     bodyLimit: 10 * 1024 * 1024,
     // Honour inbound X-Request-Id when SWAG / a sibling service supplied one;
     // otherwise Fastify mints a v4 UUID we surface to clients + Pino logs.
-    genReqId: (req) => {
+    genReqId: (req: import('http').IncomingMessage) => {
       const inbound = req.headers['x-request-id'];
       const value = Array.isArray(inbound) ? inbound[0] : inbound;
       return value && value.length <= 200

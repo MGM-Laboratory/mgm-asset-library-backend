@@ -33,7 +33,7 @@ export class ArchivePurgeWorker extends JobWorkerBase<ArchivePurgeJob> implement
     super(QUEUE.ARCHIVE_PURGE, config, sentry);
   }
 
-  async onModuleInit(): Promise<void> {
+  override async onModuleInit(): Promise<void> {
     super.onModuleInit();
     await this.scheduleDaily();
   }
@@ -51,7 +51,7 @@ export class ArchivePurgeWorker extends JobWorkerBase<ArchivePurgeJob> implement
     );
   }
 
-  async process(_job: Job<ArchivePurgeJob>): Promise<void> {
+  override async process(_job: Job<ArchivePurgeJob>): Promise<void> {
     const cutoff = new Date(Date.now() - this.config.get('ARCHIVE_PURGE_DAYS') * 86_400_000);
     const candidates = await this.prisma.asset.findMany({
       where: {

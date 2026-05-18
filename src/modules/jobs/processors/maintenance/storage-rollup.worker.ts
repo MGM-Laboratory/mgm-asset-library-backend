@@ -31,7 +31,7 @@ export class StorageRollupWorker extends JobWorkerBase<StorageRollupJob> impleme
     super(QUEUE.STORAGE_ROLLUP, config, sentry);
   }
 
-  async onModuleInit(): Promise<void> {
+  override async onModuleInit(): Promise<void> {
     super.onModuleInit();
     await this.producer
       .queue(QUEUE.STORAGE_ROLLUP)
@@ -42,7 +42,7 @@ export class StorageRollupWorker extends JobWorkerBase<StorageRollupJob> impleme
       );
   }
 
-  async process(_job: Job<StorageRollupJob>): Promise<void> {
+  override async process(_job: Job<StorageRollupJob>): Promise<void> {
     const date = new Date(
       Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()),
     );

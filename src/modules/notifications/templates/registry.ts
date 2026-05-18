@@ -19,4 +19,6 @@ export const NOTIFICATION_TEMPLATES: Record<NotificationType, string> = {
   [NotificationType.ANALYZER_FAILED]: 'analyzer-failed',
   [NotificationType.AV_INFECTED_WARNING]: 'av-infected-warning',
   [NotificationType.AV_INFECTED_ADMIN_ALERT]: 'av-infected-admin-alert',
+  [NotificationType.ADMIN_PROMOTED]: 'admin-promoted',
+  [NotificationType.ADMIN_DEMOTED]: 'admin-demoted',
 };

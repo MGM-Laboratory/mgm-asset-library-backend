@@ -13,7 +13,6 @@ import {
 } from '../../infra/meilisearch/meilisearch.service';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { S3Service } from '../../infra/s3/s3.service';
-import { AssetsService } from '../assets/assets.service';
 import { CategoriesService } from '../categories/categories.service';
 import { JobsProducer } from '../jobs/jobs.producer';
 
@@ -27,7 +26,6 @@ import { JobsProducer } from '../jobs/jobs.producer';
 export class AdminAssetsModerationService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly assets: AssetsService,
     private readonly s3: S3Service,
     private readonly meili: MeilisearchService,
     private readonly categories: CategoriesService,

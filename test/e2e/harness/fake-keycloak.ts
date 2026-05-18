@@ -1,3 +1,4 @@
+/// <reference lib="dom" />
 import { Test } from '@nestjs/testing';
 import { JWTPayload, SignJWT, exportJWK, generateKeyPair } from 'jose';
 import { KeycloakJwksProvider } from '../../../src/infra/keycloak/keycloak-jwks.provider';

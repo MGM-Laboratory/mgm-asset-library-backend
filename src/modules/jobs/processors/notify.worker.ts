@@ -92,7 +92,7 @@ export class NotifyWorker extends JobWorkerBase<NotifyJob> {
   }
 
   private async sendEmail(recipient: User, data: NotifyJob): Promise<void> {
-    const rendered = this.emails.render(data.type, recipient.locale, {
+    const rendered = await this.emails.render(data.type, recipient.locale, {
       ...data.payload,
       recipient: { id: recipient.id, displayName: recipient.displayName, email: recipient.email },
       links: this.buildLinks(data),

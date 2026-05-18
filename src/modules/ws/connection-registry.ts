@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import type WebSocket from 'ws';
 
 /**
@@ -8,7 +8,6 @@ import type WebSocket from 'ws';
  */
 @Injectable()
 export class ConnectionRegistry {
-  private readonly logger = new Logger(ConnectionRegistry.name);
   private readonly sockets = new Map<string, Set<WebSocket>>();
 
   add(userId: string, socket: WebSocket): void {

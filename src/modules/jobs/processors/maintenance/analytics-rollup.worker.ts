@@ -28,7 +28,7 @@ export class AnalyticsRollupWorker
     super(QUEUE.ANALYTICS_ROLLUP, config, sentry);
   }
 
-  async onModuleInit(): Promise<void> {
+  override async onModuleInit(): Promise<void> {
     super.onModuleInit();
     await this.producer
       .queue(QUEUE.ANALYTICS_ROLLUP)
@@ -39,7 +39,7 @@ export class AnalyticsRollupWorker
       );
   }
 
-  async process(_job: Job<AnalyticsRollupJob>): Promise<void> {
+  override async process(_job: Job<AnalyticsRollupJob>): Promise<void> {
     const now = new Date();
     const yesterdayUtc = new Date(
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1),

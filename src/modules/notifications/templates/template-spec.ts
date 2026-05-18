@@ -200,4 +200,22 @@ export const EMAIL_SPECS: Record<NotificationType, EmailSpec> = {
       href: '{{links.adminAssetUrl}}',
     },
   },
+  [NotificationType.ADMIN_PROMOTED]: {
+    subject: { en: 'You have been promoted to admin', id: 'Anda telah dipromosikan sebagai admin' },
+    eyebrow: { en: 'Role update', id: 'Pembaruan peran' },
+    title: { en: 'You are now an admin', id: 'Anda kini adalah admin' },
+    body: {
+      en: 'Your account has been granted admin privileges.',
+      id: 'Akun Anda telah diberikan hak akses admin.',
+    },
+  },
+  [NotificationType.ADMIN_DEMOTED]: {
+    subject: { en: 'Your admin role has been removed', id: 'Peran admin Anda telah dicabut' },
+    eyebrow: { en: 'Role update', id: 'Pembaruan peran' },
+    title: { en: 'Your admin role was removed', id: 'Peran admin Anda dihapus' },
+    body: {
+      en: 'Your admin privileges have been revoked.',
+      id: 'Hak akses admin Anda telah dicabut.',
+    },
+  },
 };

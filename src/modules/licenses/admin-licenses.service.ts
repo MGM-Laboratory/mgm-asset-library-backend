@@ -56,14 +56,14 @@ export class AdminLicensesService {
       throw new NotFoundDomainException(ErrorCode.LICENSE_NOT_FOUND, `License ${id} not found.`);
     const mergedDescription =
       dto.description == null
-        ? existing.description
+        ? (existing.description as Prisma.InputJsonValue)
         : ({
             ...((existing.description as Record<string, string>) ?? {}),
             ...dto.description,
           } as Prisma.InputJsonValue);
     const mergedFullText =
       dto.fullText == null
-        ? existing.fullText
+        ? (existing.fullText as Prisma.InputJsonValue)
         : ({
             ...((existing.fullText as Record<string, string>) ?? {}),
             ...dto.fullText,

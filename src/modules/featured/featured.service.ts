@@ -65,7 +65,7 @@ export class FeaturedService {
         isActive,
         customBannerKey: dto.customBannerKey,
         customTitle: dto.customTitle,
-        customShortDescription: (dto.customShortDescription ?? null) as Prisma.InputJsonValue,
+        customShortDescription: dto.customShortDescription ?? Prisma.JsonNull,
       },
       include: { asset: true },
     });
@@ -121,7 +121,7 @@ export class FeaturedService {
         customTitle: dto.customTitle ?? row.customTitle,
         customShortDescription:
           dto.customShortDescription === undefined
-            ? row.customShortDescription
+            ? (row.customShortDescription ?? Prisma.JsonNull)
             : (dto.customShortDescription as Prisma.InputJsonValue),
         isActive: dto.isActive ?? row.isActive,
         sortOrder: dto.sortOrder ?? row.sortOrder,

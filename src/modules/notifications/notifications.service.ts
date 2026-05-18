@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Notification, NotificationType, Prisma, User } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
@@ -16,8 +16,6 @@ export interface NotificationDto {
 
 @Injectable()
 export class NotificationsService {
-  private readonly logger = new Logger(NotificationsService.name);
-
   constructor(private readonly prisma: PrismaService) {}
 
   /** Used by the notify worker — writes a single inbox row and returns it. */

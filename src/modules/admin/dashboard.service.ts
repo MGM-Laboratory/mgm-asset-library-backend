@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { RedisService } from '../../infra/redis/redis.service';
-import { S3Service } from '../../infra/s3/s3.service';
 
 const CACHE_KEY = 'admin:dashboard';
 const CACHE_TTL_SECONDS = 30;
@@ -66,7 +65,6 @@ export class DashboardService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
-    private readonly s3: S3Service,
   ) {}
 
   async get(): Promise<DashboardResponseDto> {
