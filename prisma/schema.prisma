@@ -12,7 +12,7 @@
 generator client {
   provider = "prisma-client-js"
   // Keep the generated client lean for serverless-friendly builds.
-  previewFeatures = ["fullTextSearchPostgres"]
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
