@@ -13,11 +13,7 @@ import { PrismaService } from '../../infra/prisma/prisma.service';
 import { S3Service } from '../../infra/s3/s3.service';
 import { JobsProducer } from '../jobs/jobs.producer';
 import { CategoriesService } from './categories.service';
-import {
-  AdminCategoryDto,
-  CreateCategoryDto,
-  UpdateCategoryDto,
-} from './dto/admin-category.dto';
+import { AdminCategoryDto, CreateCategoryDto, UpdateCategoryDto } from './dto/admin-category.dto';
 
 const ICON_MAX_BYTES = 256 * 1024;
 
@@ -43,7 +39,10 @@ export class AdminCategoriesService {
   async create(admin: User, dto: CreateCategoryDto): Promise<AdminCategoryDto> {
     const existing = await this.prisma.category.findUnique({ where: { slug: dto.slug } });
     if (existing) {
-      throw new ConflictDomainException(ErrorCode.CATEGORY_IN_USE, `Category slug "${dto.slug}" already exists.`);
+      throw new ConflictDomainException(
+        ErrorCode.CATEGORY_IN_USE,
+        `Category slug "${dto.slug}" already exists.`,
+      );
     }
     const row = await this.prisma.category.create({
       data: {
@@ -74,13 +73,19 @@ export class AdminCategoriesService {
     if (dto.slug && dto.slug !== existing.slug) {
       const collision = await this.prisma.category.findUnique({ where: { slug: dto.slug } });
       if (collision) {
-        throw new ConflictDomainException(ErrorCode.CATEGORY_IN_USE, `Slug "${dto.slug}" is taken.`);
+        throw new ConflictDomainException(
+          ErrorCode.CATEGORY_IN_USE,
+          `Slug "${dto.slug}" is taken.`,
+        );
       }
     }
     const mergedName =
       dto.name == null
         ? existing.name
-        : ({ ...((existing.name as Record<string, string>) ?? {}), ...dto.name } as Prisma.InputJsonValue);
+        : ({
+            ...((existing.name as Record<string, string>) ?? {}),
+            ...dto.name,
+          } as Prisma.InputJsonValue);
     const row = await this.prisma.category.update({
       where: { id },
       data: {
@@ -115,7 +120,8 @@ export class AdminCategoriesService {
       );
     }
     const row = await this.prisma.category.findUnique({ where: { id } });
-    if (!row) throw new NotFoundDomainException(ErrorCode.CATEGORY_NOT_FOUND, `Category ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(ErrorCode.CATEGORY_NOT_FOUND, `Category ${id} not found.`);
     await this.prisma.category.delete({ where: { id } });
     await this.categories.invalidateCache();
     await this.audit.record({
@@ -143,7 +149,10 @@ export class AdminCategoriesService {
     });
   }
 
-  async initiateIconUpload(contentType: string, bytes: number): Promise<{ putUrl: string; key: string; expiresAt: string }> {
+  async initiateIconUpload(
+    contentType: string,
+    bytes: number,
+  ): Promise<{ putUrl: string; key: string; expiresAt: string }> {
     if (bytes > ICON_MAX_BYTES) {
       throw new BadRequestDomainException(
         ErrorCode.FILE_UPLOAD_INIT_FAILED,
@@ -155,7 +164,9 @@ export class AdminCategoriesService {
     return {
       putUrl: presigned.url,
       key,
-      expiresAt: new Date(Date.now() + this.config.get('S3_PRESIGN_EXPIRES_SEC') * 1000).toISOString(),
+      expiresAt: new Date(
+        Date.now() + this.config.get('S3_PRESIGN_EXPIRES_SEC') * 1000,
+      ).toISOString(),
     };
   }
 
@@ -166,11 +177,15 @@ export class AdminCategoriesService {
       take: 5000,
     });
     await Promise.all(
-      assets.map((a) => this.producer.enqueueSearchIndex({ reason: 'asset.update', assetId: a.id })),
+      assets.map((a) =>
+        this.producer.enqueueSearchIndex({ reason: 'asset.update', assetId: a.id }),
+      ),
     );
   }
 
-  private async toDto(row: Category & { iconKey?: string | null; _count: { assets: number } }): Promise<AdminCategoryDto> {
+  private async toDto(
+    row: Category & { iconKey?: string | null; _count: { assets: number } },
+  ): Promise<AdminCategoryDto> {
     return {
       id: row.id,
       slug: row.slug,

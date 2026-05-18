@@ -46,6 +46,7 @@ export function buildPage<T extends { id: string; createdAt: Date }>(
   const hasMore = rows.length > pageSize;
   const items = hasMore ? rows.slice(0, pageSize) : rows;
   const last = items[items.length - 1];
-  const nextCursor = hasMore && last ? encodeCursor({ createdAt: last.createdAt.toISOString(), id: last.id }) : null;
+  const nextCursor =
+    hasMore && last ? encodeCursor({ createdAt: last.createdAt.toISOString(), id: last.id }) : null;
   return { items, nextCursor, hasMore };
 }

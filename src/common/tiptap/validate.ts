@@ -118,7 +118,11 @@ interface WalkState {
 function walk(node: TipTapNode | TipTapDoc, path: string, state: WalkState): TipTapNode {
   const out: TipTapNode = { type: node.type };
   if (!state.allowlist.nodes.has(node.type)) {
-    state.violations.push({ path, code: 'node.disallowed', message: `Node type "${node.type}" is not allowed.` });
+    state.violations.push({
+      path,
+      code: 'node.disallowed',
+      message: `Node type "${node.type}" is not allowed.`,
+    });
     return out;
   }
   if (node.type === 'heading' && typeof node.attrs?.level === 'number') {
@@ -164,7 +168,10 @@ function walk(node: TipTapNode | TipTapDoc, path: string, state: WalkState): Tip
         cleanAttrs['rel'] = 'noopener nofollow';
         if (!cleanAttrs['target']) cleanAttrs['target'] = '_blank';
       }
-      safeMarks.push({ type: mark.type, attrs: Object.keys(cleanAttrs).length ? cleanAttrs : undefined });
+      safeMarks.push({
+        type: mark.type,
+        attrs: Object.keys(cleanAttrs).length ? cleanAttrs : undefined,
+      });
     }
     if (safeMarks.length) out.marks = safeMarks;
   }
@@ -203,7 +210,11 @@ export function validateTipTap(
   const state: WalkState = { violations: [], allowlist };
   const sanitized = walk(root, '$', state);
   if (state.violations.length > 0) {
-    throw new BadRequestDomainException(errorCode, 'TipTap document contains disallowed content.', state.violations);
+    throw new BadRequestDomainException(
+      errorCode,
+      'TipTap document contains disallowed content.',
+      state.violations,
+    );
   }
   return sanitized;
 }

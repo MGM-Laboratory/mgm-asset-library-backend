@@ -24,7 +24,10 @@ import { Locale } from '@prisma/client';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { IdempotencyKey } from '../../common/idempotency/idempotency-key.decorator';
 import { IdempotencyService } from '../../common/idempotency/idempotency.service';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
 import { OptionalAuthGuard } from '../../infra/keycloak/optional-auth.guard';
 import { AssetsListService } from './assets-list.service';
 import { AssetsService } from './assets.service';
@@ -132,7 +135,14 @@ export class AssetsController {
     }
     const created = await this.assets.create(dto, principal.user);
     if (idemKey) {
-      await this.idempotency.store(principal.user.id, route, idemKey, dto, HttpStatus.CREATED, created);
+      await this.idempotency.store(
+        principal.user.id,
+        route,
+        idemKey,
+        dto,
+        HttpStatus.CREATED,
+        created,
+      );
     }
     return created;
   }
@@ -162,7 +172,11 @@ export class AssetsController {
     @Param('id') id: string,
     @Body() dto: PublishAssetDto = {},
   ): Promise<{ warnings: Array<{ field: string; code: string; message: string }> }> {
-    const warnings = await this.assets.publish(id, principal.user, dto.confirmInfectedWarning === true);
+    const warnings = await this.assets.publish(
+      id,
+      principal.user,
+      dto.confirmInfectedWarning === true,
+    );
     return {
       warnings: warnings.map((w) => ({ field: w.field, code: w.code, message: w.message })),
     };
@@ -173,10 +187,7 @@ export class AssetsController {
   @ApiBearerAuth('keycloak')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Archive — hides from Discover/Search.' })
-  archive(
-    @AuthUser() principal: AuthenticatedRequestUser,
-    @Param('id') id: string,
-  ): Promise<void> {
+  archive(@AuthUser() principal: AuthenticatedRequestUser, @Param('id') id: string): Promise<void> {
     return this.assets.archive(id, principal.user);
   }
 
@@ -185,10 +196,7 @@ export class AssetsController {
   @ApiBearerAuth('keycloak')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Restore an archived asset within the 30-day window.' })
-  restore(
-    @AuthUser() principal: AuthenticatedRequestUser,
-    @Param('id') id: string,
-  ): Promise<void> {
+  restore(@AuthUser() principal: AuthenticatedRequestUser, @Param('id') id: string): Promise<void> {
     return this.assets.restore(id, principal.user);
   }
 
@@ -197,10 +205,7 @@ export class AssetsController {
   @ApiBearerAuth('keycloak')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Soft delete; physical purge happens after 30 days (Part 3).' })
-  remove(
-    @AuthUser() principal: AuthenticatedRequestUser,
-    @Param('id') id: string,
-  ): Promise<void> {
+  remove(@AuthUser() principal: AuthenticatedRequestUser, @Param('id') id: string): Promise<void> {
     return this.assets.softDelete(id, principal.user);
   }
 }

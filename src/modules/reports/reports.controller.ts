@@ -1,10 +1,29 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuditAction } from '../../common/audit/audit-action.decorator';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
 import {
   ActionReportDto,
   CreateReportDto,
@@ -69,7 +88,9 @@ export class ReportsController {
   @UseGuards(AdminGuard)
   @AuditAction({ action: 'report.action_request', subjectType: 'Report' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Action a report — archive / delete / force-delete the asset (atomically).' })
+  @ApiOperation({
+    summary: 'Action a report — archive / delete / force-delete the asset (atomically).',
+  })
   action(
     @AuthUser() principal: AuthenticatedRequestUser,
     @Param('id') id: string,

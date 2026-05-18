@@ -1,6 +1,9 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { FastifyRequest } from 'fastify';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
 
 /**
  * Composite guard for the `/admin/*` namespace: runs `KeycloakAuthGuard`

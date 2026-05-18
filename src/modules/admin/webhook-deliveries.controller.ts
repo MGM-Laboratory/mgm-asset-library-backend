@@ -3,7 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Model } from 'mongoose';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
 import { WebhookDelivery } from '../jobs/processors/webhook/webhook-delivery.schema';
 
 interface WebhookDeliveryDto {
@@ -42,12 +45,7 @@ export class WebhookDeliveriesController {
     if (status) where.status = status;
     if (type) where.event = type;
     const take = Math.min(Math.max(Number(limit ?? '50'), 1), 200);
-    const rows = await this.model
-      .find(where)
-      .sort({ createdAt: -1 })
-      .limit(take)
-      .lean()
-      .exec();
+    const rows = await this.model.find(where).sort({ createdAt: -1 }).limit(take).lean().exec();
     return rows.map((r) => ({
       deliveryId: r.deliveryId,
       event: r.event,

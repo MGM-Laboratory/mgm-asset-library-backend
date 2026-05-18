@@ -28,11 +28,9 @@ async function main(): Promise<void> {
   process.env.S3_BUCKET_EDITOR_MEDIA ??= 'e';
   process.env.MEILI_URL ??= 'http://localhost:7700';
 
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-    { logger: false },
-  );
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
+    logger: false,
+  });
 
   const doc = new DocumentBuilder()
     .setTitle('MGM Asset Library API')

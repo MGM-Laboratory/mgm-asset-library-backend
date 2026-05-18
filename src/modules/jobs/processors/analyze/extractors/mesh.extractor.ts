@@ -26,13 +26,14 @@ const MESH_PROBE_SCRIPT = join(process.cwd(), 'scripts', 'python', 'mesh_probe.p
  * file. The script prints a single JSON object on stdout — anything else is
  * treated as a failure.
  */
-export async function extractMesh(filePath: string, opts: { venvBin: string; timeoutMs: number }): Promise<MeshMeta | null> {
+export async function extractMesh(
+  filePath: string,
+  opts: { venvBin: string; timeoutMs: number },
+): Promise<MeshMeta | null> {
   try {
-    const result = await runSubprocess(
-      `${opts.venvBin}/python3`,
-      [MESH_PROBE_SCRIPT, filePath],
-      { timeoutMs: opts.timeoutMs },
-    );
+    const result = await runSubprocess(`${opts.venvBin}/python3`, [MESH_PROBE_SCRIPT, filePath], {
+      timeoutMs: opts.timeoutMs,
+    });
     if (result.exitCode !== 0) return null;
     return JSON.parse(result.stdout) as MeshMeta;
   } catch {
@@ -52,11 +53,9 @@ export async function extractBlendViaBlender(
   // JSON shape on stdout as the pyassimp wrapper.
   const script = join(process.cwd(), 'scripts', 'blender', 'blend_probe.py');
   try {
-    const result = await runSubprocess(
-      opts.blenderBin,
-      ['-b', '-P', script, '--', filePath],
-      { timeoutMs: opts.timeoutMs },
-    );
+    const result = await runSubprocess(opts.blenderBin, ['-b', '-P', script, '--', filePath], {
+      timeoutMs: opts.timeoutMs,
+    });
     if (result.exitCode !== 0) return null;
     // Blender prints license headers and its own logs — find the JSON line.
     const jsonLine = result.stdout.split('\n').find((line) => line.trim().startsWith('{'));

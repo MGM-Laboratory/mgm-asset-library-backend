@@ -23,12 +23,24 @@ describe('PluginTokenService.hash', () => {
   });
 
   it('changes when the pepper changes', () => {
-    const a = new PluginTokenService({} as never, makeConfig({ PLUGIN_TOKEN_PEPPER: 'AAA-AAA-AAA-AAA' }));
-    const b = new PluginTokenService({} as never, makeConfig({ PLUGIN_TOKEN_PEPPER: 'BBB-BBB-BBB-BBB' }));
+    const a = new PluginTokenService(
+      {} as never,
+      makeConfig({ PLUGIN_TOKEN_PEPPER: 'AAA-AAA-AAA-AAA' }),
+    );
+    const b = new PluginTokenService(
+      {} as never,
+      makeConfig({ PLUGIN_TOKEN_PEPPER: 'BBB-BBB-BBB-BBB' }),
+    );
     expect(a.hash('abc')).not.toBe(b.hash('abc'));
   });
 
   it('refuses to construct in production without a pepper', () => {
-    expect(() => new PluginTokenService({} as never, makeConfig({ NODE_ENV: 'production', PLUGIN_TOKEN_PEPPER: '' }))).toThrow();
+    expect(
+      () =>
+        new PluginTokenService(
+          {} as never,
+          makeConfig({ NODE_ENV: 'production', PLUGIN_TOKEN_PEPPER: '' }),
+        ),
+    ).toThrow();
   });
 });

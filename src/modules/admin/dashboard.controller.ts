@@ -11,7 +11,9 @@ export class AdminDashboardController {
   constructor(private readonly dashboard: DashboardService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Composite admin home payload: counts, storage, charts, top assets, recent audit.' })
+  @ApiOperation({
+    summary: 'Composite admin home payload: counts, storage, charts, top assets, recent audit.',
+  })
   @ApiOkResponse()
   get(): Promise<DashboardResponseDto> {
     return this.dashboard.get();

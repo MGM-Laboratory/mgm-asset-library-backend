@@ -39,7 +39,9 @@ export class WebhookWorker extends JobWorkerBase<WebhookDeliveryJob> implements 
     const retentionDays = this.config.get('WEBHOOK_LOG_RETENTION_DAYS');
     await this.deliveries.collection
       .createIndex({ createdAt: 1 }, { expireAfterSeconds: retentionDays * 86400 })
-      .catch((err) => this.logger.warn(`Could not set webhook_deliveries TTL: ${(err as Error).message}`));
+      .catch((err) =>
+        this.logger.warn(`Could not set webhook_deliveries TTL: ${(err as Error).message}`),
+      );
   }
 
   async process(job: Job<WebhookDeliveryJob>): Promise<void> {

@@ -35,7 +35,11 @@ export class PluginTokenGuard implements CanActivate {
     }
     const verified = await this.pluginTokens.verifyAndTouch(token);
     if (!verified) {
-      throw new DomainException(HttpStatus.UNAUTHORIZED, ErrorCode.AUTH_PLUGIN_TOKEN_INVALID, 'Plugin token is invalid, expired, or revoked.');
+      throw new DomainException(
+        HttpStatus.UNAUTHORIZED,
+        ErrorCode.AUTH_PLUGIN_TOKEN_INVALID,
+        'Plugin token is invalid, expired, or revoked.',
+      );
     }
     const role = await this.roleResolver.resolve(verified.user);
     (req as FastifyRequest & { user?: AuthenticatedRequestUser }).user = {

@@ -27,7 +27,10 @@ export class MetricsController {
     private readonly metrics: MetricsService,
     config: AppConfigService,
   ) {
-    this.cidrs = config.get('METRICS_ALLOW_CIDRS').map(parseCidr).filter((c): c is ParsedCidr => !!c);
+    this.cidrs = config
+      .get('METRICS_ALLOW_CIDRS')
+      .map(parseCidr)
+      .filter((c): c is ParsedCidr => !!c);
   }
 
   @Public()

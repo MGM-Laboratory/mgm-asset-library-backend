@@ -1,7 +1,10 @@
 import { Controller, ForbiddenException, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
 import { UserPublicProfileDto, UserSearchResultDto } from './dto/user-public.dto';
 import { UsersService } from './users.service';
 

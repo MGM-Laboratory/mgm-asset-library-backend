@@ -12,7 +12,11 @@ export class AdminStorageController {
 
   @Get('users')
   @ApiOperation({ summary: 'Per-user storage usage (latest snapshot, sorted by bytes desc).' })
-  @ApiQuery({ name: 'date', required: false, description: 'ISO date; defaults to the most recent snapshot.' })
+  @ApiQuery({
+    name: 'date',
+    required: false,
+    description: 'ISO date; defaults to the most recent snapshot.',
+  })
   @ApiQuery({ name: 'limit', required: false })
   @ApiOkResponse()
   async users(@Query('date') date?: string, @Query('limit') limit?: string) {
@@ -83,8 +87,14 @@ export class AdminStorageController {
     }
     const latest =
       kind === 'user'
-        ? await this.prisma.storageUserDaily.findFirst({ orderBy: { date: 'desc' }, select: { date: true } })
-        : await this.prisma.storageAssetDaily.findFirst({ orderBy: { date: 'desc' }, select: { date: true } });
+        ? await this.prisma.storageUserDaily.findFirst({
+            orderBy: { date: 'desc' },
+            select: { date: true },
+          })
+        : await this.prisma.storageAssetDaily.findFirst({
+            orderBy: { date: 'desc' },
+            select: { date: true },
+          });
     return latest?.date ?? null;
   }
 }

@@ -1,5 +1,22 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuditAction } from '../../common/audit/audit-action.decorator';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AdminGuard } from '../../common/guards/admin.guard';
@@ -29,7 +46,11 @@ export class AdminFeaturedController {
   }
 
   @Post()
-  @AuditAction({ action: 'featured.create_request', subjectType: 'FeaturedSlot', subjectParam: 'body.assetId' })
+  @AuditAction({
+    action: 'featured.create_request',
+    subjectType: 'FeaturedSlot',
+    subjectParam: 'body.assetId',
+  })
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a featured slot. Caps active at 5.' })
   @ApiCreatedResponse({ type: AdminFeaturedSlotDto })
@@ -57,15 +78,16 @@ export class AdminFeaturedController {
   @AuditAction({ action: 'featured.delete_request', subjectType: 'FeaturedSlot' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Hard delete the slot. Asset is not affected.' })
-  remove(
-    @AuthUser() principal: AuthenticatedRequestUser,
-    @Param('id') id: string,
-  ): Promise<void> {
+  remove(@AuthUser() principal: AuthenticatedRequestUser, @Param('id') id: string): Promise<void> {
     return this.featured.remove(id, principal.user);
   }
 
   @Post('reorder')
-  @AuditAction({ action: 'featured.reorder_request', subjectType: 'FeaturedSlot', subjectParam: 'body.orderedIds.0' })
+  @AuditAction({
+    action: 'featured.reorder_request',
+    subjectType: 'FeaturedSlot',
+    subjectParam: 'body.orderedIds.0',
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Replace the sortOrder sequence in one shot.' })
   reorder(
@@ -79,7 +101,9 @@ export class AdminFeaturedController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Presigned PUT URL for a custom banner.' })
   @ApiOkResponse({ type: FeaturedBannerInitiateResponseDto })
-  initiateBanner(@Body() dto: FeaturedBannerInitiateDto): Promise<FeaturedBannerInitiateResponseDto> {
+  initiateBanner(
+    @Body() dto: FeaturedBannerInitiateDto,
+  ): Promise<FeaturedBannerInitiateResponseDto> {
     return this.featured.initiateBannerUpload(dto.contentType, dto.bytes);
   }
 }

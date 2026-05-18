@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AssetFile, AssetFileKind, AssetVersion, Prisma, User } from '@prisma/client';
+import { AssetFile, AssetFileKind, AssetVersion, User } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { ErrorCode } from '../../common/errors/error-code';
 import {
@@ -65,7 +65,11 @@ export class FilesService {
       where: { id: versionId },
       include: { asset: true },
     });
-    if (!version) throw new NotFoundDomainException(ErrorCode.VERSION_NOT_FOUND, `Version ${versionId} not found.`);
+    if (!version)
+      throw new NotFoundDomainException(
+        ErrorCode.VERSION_NOT_FOUND,
+        `Version ${versionId} not found.`,
+      );
     this.assets.assertCanEdit(version.asset, requester);
     return version;
   }
@@ -79,12 +83,21 @@ export class FilesService {
   }
 
   private async saveHandle(uploadId: string, handle: UploadHandle): Promise<void> {
-    await this.redis.client.set(this.handleKey(uploadId), JSON.stringify(handle), 'EX', HANDLE_TTL_SECONDS);
+    await this.redis.client.set(
+      this.handleKey(uploadId),
+      JSON.stringify(handle),
+      'EX',
+      HANDLE_TTL_SECONDS,
+    );
   }
 
   private async loadHandle(uploadId: string): Promise<UploadHandle> {
     const raw = await this.redis.client.get(this.handleKey(uploadId));
-    if (!raw) throw new NotFoundDomainException(ErrorCode.FILE_UPLOAD_NOT_FOUND, `Upload ${uploadId} not found.`);
+    if (!raw)
+      throw new NotFoundDomainException(
+        ErrorCode.FILE_UPLOAD_NOT_FOUND,
+        `Upload ${uploadId} not found.`,
+      );
     return JSON.parse(raw) as UploadHandle;
   }
 
@@ -98,10 +111,16 @@ export class FilesService {
 
   // ─── Single-shot uploads ────────────────────────────────────────────────
 
-  async initiateUpload(dto: InitiateUploadDto, requester: User): Promise<InitiateUploadResponseDto> {
+  async initiateUpload(
+    dto: InitiateUploadDto,
+    requester: User,
+  ): Promise<InitiateUploadResponseDto> {
     const version = await this.getVersionOrThrow(dto.versionId, requester);
     if (version.assetId !== dto.assetId) {
-      throw new BadRequestDomainException(ErrorCode.FILE_UPLOAD_INIT_FAILED, 'assetId/versionId mismatch.');
+      throw new BadRequestDomainException(
+        ErrorCode.FILE_UPLOAD_INIT_FAILED,
+        'assetId/versionId mismatch.',
+      );
     }
     const safePath = this.normalizeRelativePath(dto.relativePath);
     const key = `${version.s3Prefix}${safePath}`;
@@ -139,7 +158,10 @@ export class FilesService {
   async completeUpload(uploadId: string, requester: User): Promise<void> {
     const handle = await this.loadHandle(uploadId);
     if (!handle.fileId || handle.multipart) {
-      throw new BadRequestDomainException(ErrorCode.FILE_UPLOAD_INIT_FAILED, 'Wrong completion endpoint for this upload.');
+      throw new BadRequestDomainException(
+        ErrorCode.FILE_UPLOAD_INIT_FAILED,
+        'Wrong completion endpoint for this upload.',
+      );
     }
     if (handle.versionId) await this.getVersionOrThrow(handle.versionId, requester);
 
@@ -158,10 +180,16 @@ export class FilesService {
 
   // ─── Multipart uploads ──────────────────────────────────────────────────
 
-  async initiateMultipart(dto: InitiateMultipartDto, requester: User): Promise<InitiateMultipartResponseDto> {
+  async initiateMultipart(
+    dto: InitiateMultipartDto,
+    requester: User,
+  ): Promise<InitiateMultipartResponseDto> {
     const version = await this.getVersionOrThrow(dto.versionId, requester);
     if (version.assetId !== dto.assetId) {
-      throw new BadRequestDomainException(ErrorCode.FILE_UPLOAD_INIT_FAILED, 'assetId/versionId mismatch.');
+      throw new BadRequestDomainException(
+        ErrorCode.FILE_UPLOAD_INIT_FAILED,
+        'assetId/versionId mismatch.',
+      );
     }
     const safePath = this.normalizeRelativePath(dto.relativePath);
     const key = `${version.s3Prefix}${safePath}`;
@@ -200,10 +228,17 @@ export class FilesService {
     };
   }
 
-  async signMultipartParts(uploadId: string, partNumbers: number[], requester: User): Promise<Array<{ partNumber: number; url: string }>> {
+  async signMultipartParts(
+    uploadId: string,
+    partNumbers: number[],
+    requester: User,
+  ): Promise<Array<{ partNumber: number; url: string }>> {
     const handle = await this.loadHandle(uploadId);
     if (!handle.multipart || !handle.s3UploadId) {
-      throw new BadRequestDomainException(ErrorCode.FILE_UPLOAD_INIT_FAILED, 'Not a multipart upload.');
+      throw new BadRequestDomainException(
+        ErrorCode.FILE_UPLOAD_INIT_FAILED,
+        'Not a multipart upload.',
+      );
     }
     if (handle.versionId) await this.getVersionOrThrow(handle.versionId, requester);
     return this.s3.presignParts('assets', handle.key, handle.s3UploadId, partNumbers);
@@ -212,7 +247,10 @@ export class FilesService {
   async completeMultipart(dto: CompleteMultipartDto, requester: User): Promise<void> {
     const handle = await this.loadHandle(dto.uploadId);
     if (!handle.multipart || !handle.s3UploadId || !handle.fileId) {
-      throw new BadRequestDomainException(ErrorCode.FILE_UPLOAD_INIT_FAILED, 'Not a multipart upload.');
+      throw new BadRequestDomainException(
+        ErrorCode.FILE_UPLOAD_INIT_FAILED,
+        'Not a multipart upload.',
+      );
     }
     if (handle.versionId) await this.getVersionOrThrow(handle.versionId, requester);
     this.validateParts(dto.parts);
@@ -244,9 +282,16 @@ export class FilesService {
 
   // ─── Thumbnails ─────────────────────────────────────────────────────────
 
-  async initiateThumbnail(dto: InitiateThumbnailDto, requester: User): Promise<InitiateThumbnailResponseDto> {
+  async initiateThumbnail(
+    dto: InitiateThumbnailDto,
+    requester: User,
+  ): Promise<InitiateThumbnailResponseDto> {
     const asset = await this.prisma.asset.findUnique({ where: { id: dto.assetId } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${dto.assetId} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(
+        ErrorCode.ASSET_NOT_FOUND,
+        `Asset ${dto.assetId} not found.`,
+      );
     this.assets.assertCanEdit(asset, requester);
     const key = `thumbs/${dto.assetId}/${randomUUID()}`;
     const presigned = await this.s3.presignPut('thumbs', key, dto.contentType);
@@ -255,10 +300,14 @@ export class FilesService {
 
   async completeThumbnail(assetId: string, key: string, requester: User): Promise<void> {
     const asset = await this.prisma.asset.findUnique({ where: { id: assetId } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
     this.assets.assertCanEdit(asset, requester);
     if (!key.startsWith(`thumbs/${assetId}/`)) {
-      throw new ForbiddenDomainException(ErrorCode.AUTH_FORBIDDEN, 'Thumbnail key is not in this asset\'s prefix.');
+      throw new ForbiddenDomainException(
+        ErrorCode.AUTH_FORBIDDEN,
+        "Thumbnail key is not in this asset's prefix.",
+      );
     }
     await this.prisma.asset.update({ where: { id: assetId }, data: { thumbnailKey: key } });
     await this.jobs.enqueueThumbProcess({ assetId, thumbnailKey: key });
@@ -266,7 +315,10 @@ export class FilesService {
 
   // ─── Editor media (TipTap embeds) ───────────────────────────────────────
 
-  async initiateEditorMedia(dto: InitiateEditorMediaDto, requester: User): Promise<InitiateEditorMediaResponseDto> {
+  async initiateEditorMedia(
+    dto: InitiateEditorMediaDto,
+    requester: User,
+  ): Promise<InitiateEditorMediaResponseDto> {
     const key = `editor/${requester.id}/${randomUUID()}`;
     const [presigned, viewUrl] = await Promise.all([
       this.s3.presignPut('editor', key, dto.contentType),
@@ -310,15 +362,24 @@ export class FilesService {
 
   private validateParts(parts: CompletedPartDto[]): void {
     if (parts.length === 0) {
-      throw new BadRequestDomainException(ErrorCode.FILE_UPLOAD_INIT_FAILED, 'Provide at least one part.');
+      throw new BadRequestDomainException(
+        ErrorCode.FILE_UPLOAD_INIT_FAILED,
+        'Provide at least one part.',
+      );
     }
     const seen = new Set<number>();
     for (const p of parts) {
       if (p.partNumber < 1) {
-        throw new BadRequestDomainException(ErrorCode.FILE_UPLOAD_INIT_FAILED, 'Part numbers start at 1.');
+        throw new BadRequestDomainException(
+          ErrorCode.FILE_UPLOAD_INIT_FAILED,
+          'Part numbers start at 1.',
+        );
       }
       if (seen.has(p.partNumber)) {
-        throw new BadRequestDomainException(ErrorCode.FILE_UPLOAD_INIT_FAILED, `Duplicate part ${p.partNumber}.`);
+        throw new BadRequestDomainException(
+          ErrorCode.FILE_UPLOAD_INIT_FAILED,
+          `Duplicate part ${p.partNumber}.`,
+        );
       }
       seen.add(p.partNumber);
     }
@@ -331,10 +392,16 @@ export class FilesService {
   private normalizeRelativePath(raw: string): string {
     const stripped = raw.replace(/^\/+/, '').trim();
     if (!stripped) {
-      throw new BadRequestDomainException(ErrorCode.FILE_UPLOAD_INIT_FAILED, 'relativePath is empty.');
+      throw new BadRequestDomainException(
+        ErrorCode.FILE_UPLOAD_INIT_FAILED,
+        'relativePath is empty.',
+      );
     }
     if (stripped.split('/').includes('..')) {
-      throw new BadRequestDomainException(ErrorCode.FILE_UPLOAD_INIT_FAILED, 'relativePath cannot contain "..".');
+      throw new BadRequestDomainException(
+        ErrorCode.FILE_UPLOAD_INIT_FAILED,
+        'relativePath cannot contain "..".',
+      );
     }
     return stripped;
   }

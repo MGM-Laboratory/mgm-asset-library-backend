@@ -87,7 +87,14 @@ async function bootstrapApi(env: ReturnType<typeof validateEnv>): Promise<void> 
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: ['authorization', 'content-type', 'idempotency-key', 'x-request-id'],
-    exposedHeaders: ['x-request-id', 'retry-after', 'x-total-draft', 'x-total-published', 'x-total-archived', 'x-total-deleted'],
+    exposedHeaders: [
+      'x-request-id',
+      'retry-after',
+      'x-total-draft',
+      'x-total-published',
+      'x-total-archived',
+      'x-total-deleted',
+    ],
   });
 
   app.useGlobalPipes(

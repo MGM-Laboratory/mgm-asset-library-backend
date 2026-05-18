@@ -7,16 +7,17 @@ import { z } from 'zod';
  * surface configuration mistakes immediately instead of at first traffic.
  */
 
-const booleanFromString = z
-  .union([z.boolean(), z.string()])
-  .transform((value) => {
-    if (typeof value === 'boolean') return value;
-    return ['1', 'true', 'TRUE', 'True', 'yes', 'on'].includes(value);
-  });
+const booleanFromString = z.union([z.boolean(), z.string()]).transform((value) => {
+  if (typeof value === 'boolean') return value;
+  return ['1', 'true', 'TRUE', 'True', 'yes', 'on'].includes(value);
+});
 
-const csv = z
-  .string()
-  .transform((value) => value.split(',').map((s) => s.trim()).filter(Boolean));
+const csv = z.string().transform((value) =>
+  value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
 
 const portNumber = z.coerce.number().int().min(1).max(65535);
 
@@ -26,9 +27,7 @@ export const envSchema = z
     NODE_ENV: z.enum(['development', 'staging', 'production']).default('development'),
     PROCESS_ROLE: z.enum(['api', 'worker']).default('api'),
     PORT: portNumber.default(4000),
-    LOG_LEVEL: z
-      .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal'])
-      .default('info'),
+    LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
     TRUST_PROXY: booleanFromString.default(true),
     CORS_ORIGINS: csv.default('http://localhost:3000'),
     PUBLIC_BASE_URL: z.string().url(),

@@ -34,7 +34,9 @@ describe('IdempotencyService', () => {
   it('raises a conflict when the body differs', async () => {
     const { svc } = build();
     await svc.store('user-1', 'POST /assets', 'k1', { a: 1 }, 201, { id: 'cln_asset' });
-    await expect(svc.lookup('user-1', 'POST /assets', 'k1', { a: 2 })).rejects.toBeInstanceOf(ConflictDomainException);
+    await expect(svc.lookup('user-1', 'POST /assets', 'k1', { a: 2 })).rejects.toBeInstanceOf(
+      ConflictDomainException,
+    );
   });
 
   it('keys cache per user — separate users get separate slots', async () => {

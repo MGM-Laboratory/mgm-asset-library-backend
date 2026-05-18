@@ -56,7 +56,14 @@ export class AnalyzeVersionWorker extends JobWorkerBase<AnalyzeVersionJob> {
         });
       });
     } catch (err) {
-      await this.handleFailure(versionId, version.asset.ownerId, version.asset.title, version.asset.id, version.asset.slug, err as Error);
+      await this.handleFailure(
+        versionId,
+        version.asset.ownerId,
+        version.asset.title,
+        version.asset.id,
+        version.asset.slug,
+        err as Error,
+      );
       throw err;
     }
 
@@ -83,21 +90,21 @@ export class AnalyzeVersionWorker extends JobWorkerBase<AnalyzeVersionJob> {
       if (convertible.includes(file.kind)) {
         const hasDerivedGlb = version.files.some(
           (f) =>
-            f.kind === AssetFileKind.GLB &&
-            f.relativePath.endsWith(`${file.relativePath}.glb`),
+            f.kind === AssetFileKind.GLB && f.relativePath.endsWith(`${file.relativePath}.glb`),
         );
         if (!hasDerivedGlb) {
           await this.producer.enqueueGltfConvert({
             versionId,
             fileId: file.id,
             sourceKey: file.s3Key,
-            sourceKind: file.kind === AssetFileKind.FBX
-              ? 'FBX'
-              : file.kind === AssetFileKind.OBJ
-                ? 'OBJ'
-                : file.kind === AssetFileKind.BLEND
-                  ? 'BLEND'
-                  : 'GLTF',
+            sourceKind:
+              file.kind === AssetFileKind.FBX
+                ? 'FBX'
+                : file.kind === AssetFileKind.OBJ
+                  ? 'OBJ'
+                  : file.kind === AssetFileKind.BLEND
+                    ? 'BLEND'
+                    : 'GLTF',
           });
         }
       }
@@ -114,10 +121,12 @@ export class AnalyzeVersionWorker extends JobWorkerBase<AnalyzeVersionJob> {
     assetSlug: string,
     err: Error,
   ): Promise<void> {
-    await this.prisma.assetVersion.update({
-      where: { id: versionId },
-      data: { analysisStatus: AnalysisStatus.FAILED },
-    }).catch(() => undefined);
+    await this.prisma.assetVersion
+      .update({
+        where: { id: versionId },
+        data: { analysisStatus: AnalysisStatus.FAILED },
+      })
+      .catch(() => undefined);
     await this.producer.enqueueNotify({
       recipientUserId: ownerId,
       type: NotificationType.ANALYZER_FAILED,

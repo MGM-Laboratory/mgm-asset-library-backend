@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthenticatedRequestUser } from '../../infra/keycloak/keycloak-auth.guard';
@@ -19,18 +31,21 @@ export class LibraryController {
   constructor(private readonly library: LibraryService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List the current user\'s library.' })
+  @ApiOperation({ summary: "List the current user's library." })
   @ApiOkResponse()
   list(
     @AuthUser() principal: AuthenticatedRequestUser,
     @Query() query: ListLibraryQueryDto,
-  ): Promise<{ items: LibraryItemDto[]; pageInfo: { nextCursor: string | null; hasMore: boolean } }> {
+  ): Promise<{
+    items: LibraryItemDto[];
+    pageInfo: { nextCursor: string | null; hasMore: boolean };
+  }> {
     return this.library.list(principal.user, query, query.locale ?? principal.user.locale);
   }
 
   @Post('items')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Add an asset to the current user\'s library (idempotent).' })
+  @ApiOperation({ summary: "Add an asset to the current user's library (idempotent)." })
   add(
     @AuthUser() principal: AuthenticatedRequestUser,
     @Body() dto: AddLibraryItemDto,
@@ -40,7 +55,7 @@ export class LibraryController {
 
   @Delete('items/:assetId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Remove an asset from the current user\'s library.' })
+  @ApiOperation({ summary: "Remove an asset from the current user's library." })
   remove(
     @AuthUser() principal: AuthenticatedRequestUser,
     @Param('assetId') assetId: string,

@@ -50,7 +50,10 @@ export class AdminAuditController {
       pageInfo: {
         nextCursor:
           hasMore && slice.length
-            ? encodeCursor({ id: slice[slice.length - 1].id, createdAt: slice[slice.length - 1].createdAt.toISOString() })
+            ? encodeCursor({
+                id: slice[slice.length - 1].id,
+                createdAt: slice[slice.length - 1].createdAt.toISOString(),
+              })
             : null,
         hasMore,
       },
@@ -62,11 +65,24 @@ export class AdminAuditController {
   @ApiOkResponse({ type: AuditEntryDto })
   async detail(@Param('id') id: string): Promise<AuditEntryDto> {
     const row = await this.prisma.auditLog.findUnique({ where: { id }, include: { actor: true } });
-    if (!row) throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Audit entry ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(
+        ErrorCode.REQUEST_NOT_FOUND,
+        `Audit entry ${id} not found.`,
+      );
     return this.toDto(row);
   }
 
-  private toDto(row: { id: string; action: string; subjectType: string; subjectId: string; actorId: string | null; metadata: unknown; createdAt: Date; actor?: { displayName: string; email: string } | null }): AuditEntryDto {
+  private toDto(row: {
+    id: string;
+    action: string;
+    subjectType: string;
+    subjectId: string;
+    actorId: string | null;
+    metadata: unknown;
+    createdAt: Date;
+    actor?: { displayName: string; email: string } | null;
+  }): AuditEntryDto {
     return {
       id: row.id,
       action: row.action,

@@ -29,9 +29,7 @@ export class ConfirmationGuard implements CanActivate {
       context.getClass(),
     ]);
     if (!required) return true;
-    const req = context
-      .switchToHttp()
-      .getRequest<FastifyRequest & { body?: ConfirmationBody }>();
+    const req = context.switchToHttp().getRequest<FastifyRequest & { body?: ConfirmationBody }>();
     const body = (req.body ?? {}) as ConfirmationBody;
     if (body.confirm !== CONFIRMATION_PHRASE) {
       throw new BadRequestDomainException(

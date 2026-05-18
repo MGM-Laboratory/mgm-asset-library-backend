@@ -19,7 +19,8 @@ export class CategoriesService {
 
   async findByIdOrThrow(id: string): Promise<Category> {
     const row = await this.prisma.category.findUnique({ where: { id } });
-    if (!row) throw new NotFoundDomainException(ErrorCode.CATEGORY_NOT_FOUND, `Category ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(ErrorCode.CATEGORY_NOT_FOUND, `Category ${id} not found.`);
     return row;
   }
 
@@ -57,6 +58,9 @@ export class CategoriesService {
 
   /** Drops the cached listings — call after an asset's category/publish state changes. */
   async invalidateCache(): Promise<void> {
-    await Promise.all([this.redis.client.del(CACHE_KEY('en')), this.redis.client.del(CACHE_KEY('id'))]);
+    await Promise.all([
+      this.redis.client.del(CACHE_KEY('en')),
+      this.redis.client.del(CACHE_KEY('id')),
+    ]);
   }
 }

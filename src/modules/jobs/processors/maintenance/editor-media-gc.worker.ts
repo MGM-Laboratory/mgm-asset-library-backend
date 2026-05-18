@@ -32,11 +32,13 @@ export class EditorMediaGcWorker extends JobWorkerBase<EditorMediaGcJob> impleme
 
   async onModuleInit(): Promise<void> {
     super.onModuleInit();
-    await this.producer.queue(QUEUE.EDITOR_MEDIA_GC).add(
-      'cron',
-      { triggeredAt: new Date().toISOString() },
-      { jobId: 'editor-media-gc-cron', repeat: { pattern: '30 4 * * *', tz: 'UTC' } },
-    );
+    await this.producer
+      .queue(QUEUE.EDITOR_MEDIA_GC)
+      .add(
+        'cron',
+        { triggeredAt: new Date().toISOString() },
+        { jobId: 'editor-media-gc-cron', repeat: { pattern: '30 4 * * *', tz: 'UTC' } },
+      );
   }
 
   async process(_job: Job<EditorMediaGcJob>): Promise<void> {
@@ -60,7 +62,9 @@ export class EditorMediaGcWorker extends JobWorkerBase<EditorMediaGcJob> impleme
         await this.prisma.editorMediaUpload.delete({ where: { id: orphan.id } });
         removed += 1;
       } catch (err) {
-        this.logger.warn(`editor-media-gc: failed to delete ${orphan.key}: ${(err as Error).message}`);
+        this.logger.warn(
+          `editor-media-gc: failed to delete ${orphan.key}: ${(err as Error).message}`,
+        );
       }
     }
     this.logger.log(`editor-media-gc: removed ${removed} orphan(s)`);
@@ -83,7 +87,11 @@ export class EditorMediaGcWorker extends JobWorkerBase<EditorMediaGcJob> impleme
   }
 }
 
-function walkTipTap(node: Prisma.JsonValue, collect: (key: string) => void, editorBucket: string): void {
+function walkTipTap(
+  node: Prisma.JsonValue,
+  collect: (key: string) => void,
+  editorBucket: string,
+): void {
   if (!node) return;
   if (Array.isArray(node)) {
     for (const child of node) walkTipTap(child, collect, editorBucket);

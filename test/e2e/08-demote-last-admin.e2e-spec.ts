@@ -29,13 +29,20 @@ describe('E2E [14] last-admin demotion guard', () => {
 
   it('refuses to demote the bootstrap admin via the bootstrap-protection branch', async () => {
     // Onboard both users.
-    await supertest(app.getHttpServer()).get('/auth/me').set('Authorization', `Bearer ${bootstrapToken}`);
-    await supertest(app.getHttpServer()).get('/auth/me').set('Authorization', `Bearer ${secondAdminToken}`);
+    await supertest(app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', `Bearer ${bootstrapToken}`);
+    await supertest(app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', `Bearer ${secondAdminToken}`);
 
     const { PrismaService } = await import('../../src/infra/prisma/prisma.service');
     const prisma = app.get(PrismaService);
     const bootstrap = await prisma.user.findUniqueOrThrow({ where: { email: 'admin@labmgm.org' } });
-    await prisma.user.update({ where: { email: 'second-admin@labmgm.org' }, data: { isAdmin: true } });
+    await prisma.user.update({
+      where: { email: 'second-admin@labmgm.org' },
+      data: { isAdmin: true },
+    });
 
     const res = await supertest(app.getHttpServer())
       .post(`/admin/users/${bootstrap.id}/demote`)

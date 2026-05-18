@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuditAction } from '../../common/audit/audit-action.decorator';
 import { AuditService } from '../../common/audit/audit.service';
@@ -53,7 +63,11 @@ export class AdminAvQueueController {
         versionId: v.id,
         semver: v.semver,
         asset: { id: v.asset.id, slug: v.asset.slug, title: v.asset.title, status: v.asset.status },
-        owner: { id: v.asset.owner.id, displayName: v.asset.owner.displayName, email: v.asset.owner.email },
+        owner: {
+          id: v.asset.owner.id,
+          displayName: v.asset.owner.displayName,
+          email: v.asset.owner.email,
+        },
         infectedFiles: v.files
           .filter((f) => {
             const meta = (f.meta as Record<string, unknown> | null) ?? {};
@@ -70,7 +84,10 @@ export class AdminAvQueueController {
       pageInfo: {
         nextCursor:
           hasMore && slice.length
-            ? encodeCursor({ id: slice[slice.length - 1].id, createdAt: slice[slice.length - 1].createdAt.toISOString() })
+            ? encodeCursor({
+                id: slice[slice.length - 1].id,
+                createdAt: slice[slice.length - 1].createdAt.toISOString(),
+              })
             : null,
         hasMore,
       },
@@ -78,7 +95,11 @@ export class AdminAvQueueController {
   }
 
   @Post(':versionId/quarantine')
-  @AuditAction({ action: 'av.quarantine_request', subjectType: 'AssetVersion', subjectParam: 'params.versionId' })
+  @AuditAction({
+    action: 'av.quarantine_request',
+    subjectType: 'AssetVersion',
+    subjectParam: 'params.versionId',
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Archive the parent asset with reason = "AV quarantine".' })
   async quarantine(
@@ -90,7 +111,11 @@ export class AdminAvQueueController {
       where: { id: versionId },
       select: { assetId: true },
     });
-    if (!version) throw new NotFoundDomainException(ErrorCode.VERSION_NOT_FOUND, `Version ${versionId} not found.`);
+    if (!version)
+      throw new NotFoundDomainException(
+        ErrorCode.VERSION_NOT_FOUND,
+        `Version ${versionId} not found.`,
+      );
     await this.moderation.archive(version.assetId, principal.user, 'AV quarantine');
   }
 
@@ -103,8 +128,15 @@ export class AdminAvQueueController {
     @Body() dto: AvActionBodyDto,
   ): Promise<void> {
     const version = await this.prisma.assetVersion.findUnique({ where: { id: versionId } });
-    if (!version) throw new NotFoundDomainException(ErrorCode.VERSION_NOT_FOUND, `Version ${versionId} not found.`);
-    await this.prisma.assetVersion.update({ where: { id: versionId }, data: { avStatus: 'CLEAN' } });
+    if (!version)
+      throw new NotFoundDomainException(
+        ErrorCode.VERSION_NOT_FOUND,
+        `Version ${versionId} not found.`,
+      );
+    await this.prisma.assetVersion.update({
+      where: { id: versionId },
+      data: { avStatus: 'CLEAN' },
+    });
     await this.audit.record({
       actorId: principal.user.id,
       action: 'av.acknowledge',
@@ -125,9 +157,16 @@ export class AdminAvQueueController {
       where: { id: versionId },
       include: { files: true },
     });
-    if (!version) throw new NotFoundDomainException(ErrorCode.VERSION_NOT_FOUND, `Version ${versionId} not found.`);
+    if (!version)
+      throw new NotFoundDomainException(
+        ErrorCode.VERSION_NOT_FOUND,
+        `Version ${versionId} not found.`,
+      );
     if (version.files.length === 0) return;
-    await this.prisma.assetVersion.update({ where: { id: versionId }, data: { avStatus: 'PENDING' } });
+    await this.prisma.assetVersion.update({
+      where: { id: versionId },
+      data: { avStatus: 'PENDING' },
+    });
     await Promise.all(
       version.files.map((f) => this.producer.enqueueAvScanFile({ versionId, fileId: f.id })),
     );

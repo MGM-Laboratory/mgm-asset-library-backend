@@ -5,7 +5,10 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { FastifyAdapter as BullFastifyAdapter } from '@bull-board/fastify';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
 import { AppConfigService } from '../../config/app-config.service';
 import { JobsProducer } from './jobs.producer';
 
@@ -24,7 +27,10 @@ export class QueueDashboardController {
   private readonly logger = new Logger(QueueDashboardController.name);
   private readonly adapter: BullFastifyAdapter | null;
 
-  constructor(private readonly producer: JobsProducer, private readonly config: AppConfigService) {
+  constructor(
+    private readonly producer: JobsProducer,
+    private readonly config: AppConfigService,
+  ) {
     if (!config.get('FEATURE_QUEUE_DASHBOARD')) {
       this.adapter = null;
       return;
@@ -56,8 +62,10 @@ export class QueueDashboardController {
     }
     // Hand the request off to the bull-board plugin's router.
     const router = this.adapter.getRouter();
-    await (router as unknown as {
-      lookup: (req: FastifyRequest['raw'], res: FastifyReply['raw']) => void;
-    }).lookup(req.raw, res.raw);
+    await (
+      router as unknown as {
+        lookup: (req: FastifyRequest['raw'], res: FastifyReply['raw']) => void;
+      }
+    ).lookup(req.raw, res.raw);
   }
 }

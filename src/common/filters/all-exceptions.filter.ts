@@ -1,4 +1,11 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AppConfigService } from '../../config/app-config.service';
 import { SentryService } from '../../infra/sentry/sentry.service';
@@ -95,7 +102,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
   }
 
-  private normalizeHttp(response: string | object): { detail?: string; fields?: ProblemFieldDto[] } {
+  private normalizeHttp(response: string | object): {
+    detail?: string;
+    fields?: ProblemFieldDto[];
+  } {
     if (typeof response === 'string') return { detail: response };
     const { message, fields } = response as {
       message?: string | string[];

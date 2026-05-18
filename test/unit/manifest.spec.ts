@@ -29,10 +29,7 @@ describe('manifest builder', () => {
   });
 
   it('sorts directories before files at each level', () => {
-    const tree = buildManifest([
-      makeFile('README.md'),
-      makeFile('Assets/Hero.fbx'),
-    ]);
+    const tree = buildManifest([makeFile('README.md'), makeFile('Assets/Hero.fbx')]);
     const order = (tree.children ?? []).map((c) => c.kind);
     expect(order).toEqual(['dir', 'file']);
   });

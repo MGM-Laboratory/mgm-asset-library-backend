@@ -1,6 +1,6 @@
 import { ConnectionRegistry } from '../../src/modules/ws/connection-registry';
 
-const fakeSocket = (): import('ws') => ({ readyState: 1 } as unknown as import('ws'));
+const fakeSocket = (): import('ws') => ({ readyState: 1 }) as unknown as import('ws');
 
 describe('ConnectionRegistry', () => {
   it('adds + lists sockets per user', () => {

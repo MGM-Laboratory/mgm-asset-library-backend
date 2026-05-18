@@ -86,19 +86,29 @@ export class DashboardService {
   }
 
   private async loadCounts(): Promise<DashboardCounts> {
-    const [users, published, draft, archived, downloadsLast30d, pendingReports, pendingRequests, infectedVersions] =
-      await Promise.all([
-        this.prisma.user.count({ where: { deletedAt: null } }),
-        this.prisma.asset.count({ where: { status: 'PUBLISHED' } }),
-        this.prisma.asset.count({ where: { status: 'DRAFT' } }),
-        this.prisma.asset.count({ where: { status: 'ARCHIVED' } }),
-        this.prisma.download.count({
-          where: { createdAt: { gte: new Date(Date.now() - 30 * 86_400_000) } },
-        }),
-        this.prisma.report.count({ where: { status: { in: ['OPEN', 'REVIEWING'] } } }),
-        this.prisma.assetRequest.count({ where: { status: { in: ['SENT', 'IN_REVIEW', 'PENDING'] } } }),
-        this.prisma.assetVersion.count({ where: { avStatus: 'INFECTED' } }),
-      ]);
+    const [
+      users,
+      published,
+      draft,
+      archived,
+      downloadsLast30d,
+      pendingReports,
+      pendingRequests,
+      infectedVersions,
+    ] = await Promise.all([
+      this.prisma.user.count({ where: { deletedAt: null } }),
+      this.prisma.asset.count({ where: { status: 'PUBLISHED' } }),
+      this.prisma.asset.count({ where: { status: 'DRAFT' } }),
+      this.prisma.asset.count({ where: { status: 'ARCHIVED' } }),
+      this.prisma.download.count({
+        where: { createdAt: { gte: new Date(Date.now() - 30 * 86_400_000) } },
+      }),
+      this.prisma.report.count({ where: { status: { in: ['OPEN', 'REVIEWING'] } } }),
+      this.prisma.assetRequest.count({
+        where: { status: { in: ['SENT', 'IN_REVIEW', 'PENDING'] } },
+      }),
+      this.prisma.assetVersion.count({ where: { avStatus: 'INFECTED' } }),
+    ]);
     return {
       users,
       assetsPublished: published,
@@ -182,7 +192,9 @@ export class DashboardService {
 
   private async loadTopAssets(): Promise<TopAssetRow[]> {
     const since = new Date(Date.now() - 7 * 86_400_000);
-    const rows = await this.prisma.$queryRaw<Array<{ assetId: string; downloads: bigint }>>(Prisma.sql`
+    const rows = await this.prisma.$queryRaw<
+      Array<{ assetId: string; downloads: bigint }>
+    >(Prisma.sql`
       SELECT "assetId", COUNT(*)::bigint AS downloads
       FROM downloads
       WHERE "createdAt" >= ${since}

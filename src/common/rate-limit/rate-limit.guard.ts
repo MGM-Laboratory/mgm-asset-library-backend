@@ -28,7 +28,9 @@ export class RateLimitGuard implements CanActivate {
     ]);
     if (!config) return true;
 
-    const req = context.switchToHttp().getRequest<FastifyRequest & { user?: AuthenticatedRequestUser }>();
+    const req = context
+      .switchToHttp()
+      .getRequest<FastifyRequest & { user?: AuthenticatedRequestUser }>();
     const principal = req.user?.user;
     const identifier = this.identifierFor(config, req, principal?.id);
     if (!identifier) return true;
@@ -58,7 +60,11 @@ export class RateLimitGuard implements CanActivate {
     return true;
   }
 
-  private identifierFor(config: RateLimitConfig, req: FastifyRequest, userId: string | undefined): string | null {
+  private identifierFor(
+    config: RateLimitConfig,
+    req: FastifyRequest,
+    userId: string | undefined,
+  ): string | null {
     switch (config.scope) {
       case 'user':
         return userId ?? null;

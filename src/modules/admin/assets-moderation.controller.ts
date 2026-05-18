@@ -57,7 +57,11 @@ export class AdminAssetsController {
   ) {
     // Force the admin lens: include every status, no owner check.
     query.includeUnpublished = true;
-    const result = await this.list.listFromPostgres(query, principal.user, query.locale ?? principal.user.locale);
+    const result = await this.list.listFromPostgres(
+      query,
+      principal.user,
+      query.locale ?? principal.user.locale,
+    );
     const counts = await this.moderation.statusCounts();
     void res.header('X-Total-Draft', String(counts.DRAFT));
     void res.header('X-Total-Published', String(counts.PUBLISHED));
@@ -105,10 +109,7 @@ export class AdminAssetsController {
   @AuditAction({ action: 'asset.admin_restore_request', subjectType: 'Asset' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Restore an archived or soft-deleted asset.' })
-  restore(
-    @AuthUser() principal: AuthenticatedRequestUser,
-    @Param('id') id: string,
-  ): Promise<void> {
+  restore(@AuthUser() principal: AuthenticatedRequestUser, @Param('id') id: string): Promise<void> {
     return this.moderation.restore(id, principal.user);
   }
 

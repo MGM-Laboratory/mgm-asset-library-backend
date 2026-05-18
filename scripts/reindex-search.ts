@@ -10,7 +10,10 @@ import { validateEnv } from '../src/config/env.schema';
 
 async function main(): Promise<void> {
   const env = validateEnv(process.env);
-  const client = new MeiliSearch({ host: env.MEILI_URL, apiKey: env.MEILI_MASTER_KEY || undefined });
+  const client = new MeiliSearch({
+    host: env.MEILI_URL,
+    apiKey: env.MEILI_MASTER_KEY || undefined,
+  });
 
   // eslint-disable-next-line no-console
   console.log('[reindex] deleting existing indexes (if present)…');

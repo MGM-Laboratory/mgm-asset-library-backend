@@ -2,16 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { License, Prisma, User } from '@prisma/client';
 import { AuditService } from '../../common/audit/audit.service';
 import { ErrorCode } from '../../common/errors/error-code';
-import {
-  ConflictDomainException,
-  NotFoundDomainException,
-} from '../../common/errors/problem.dto';
+import { ConflictDomainException, NotFoundDomainException } from '../../common/errors/problem.dto';
 import { PrismaService } from '../../infra/prisma/prisma.service';
-import {
-  AdminLicenseDto,
-  CreateLicenseDto,
-  UpdateLicenseDto,
-} from './dto/admin-license.dto';
+import { AdminLicenseDto, CreateLicenseDto, UpdateLicenseDto } from './dto/admin-license.dto';
 
 @Injectable()
 export class AdminLicensesService {
@@ -31,7 +24,10 @@ export class AdminLicensesService {
   async create(admin: User, dto: CreateLicenseDto): Promise<AdminLicenseDto> {
     const collision = await this.prisma.license.findUnique({ where: { slug: dto.slug } });
     if (collision) {
-      throw new ConflictDomainException(ErrorCode.LICENSE_IN_USE, `Slug "${dto.slug}" is already taken.`);
+      throw new ConflictDomainException(
+        ErrorCode.LICENSE_IN_USE,
+        `Slug "${dto.slug}" is already taken.`,
+      );
     }
     const row = await this.prisma.license.create({
       data: {
@@ -56,15 +52,22 @@ export class AdminLicensesService {
 
   async update(id: string, admin: User, dto: UpdateLicenseDto): Promise<AdminLicenseDto> {
     const existing = await this.prisma.license.findUnique({ where: { id } });
-    if (!existing) throw new NotFoundDomainException(ErrorCode.LICENSE_NOT_FOUND, `License ${id} not found.`);
+    if (!existing)
+      throw new NotFoundDomainException(ErrorCode.LICENSE_NOT_FOUND, `License ${id} not found.`);
     const mergedDescription =
       dto.description == null
         ? existing.description
-        : ({ ...((existing.description as Record<string, string>) ?? {}), ...dto.description } as Prisma.InputJsonValue);
+        : ({
+            ...((existing.description as Record<string, string>) ?? {}),
+            ...dto.description,
+          } as Prisma.InputJsonValue);
     const mergedFullText =
       dto.fullText == null
         ? existing.fullText
-        : ({ ...((existing.fullText as Record<string, string>) ?? {}), ...dto.fullText } as Prisma.InputJsonValue);
+        : ({
+            ...((existing.fullText as Record<string, string>) ?? {}),
+            ...dto.fullText,
+          } as Prisma.InputJsonValue);
     const row = await this.prisma.license.update({
       where: { id },
       data: {
@@ -95,7 +98,8 @@ export class AdminLicensesService {
       );
     }
     const row = await this.prisma.license.findUnique({ where: { id } });
-    if (!row) throw new NotFoundDomainException(ErrorCode.LICENSE_NOT_FOUND, `License ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(ErrorCode.LICENSE_NOT_FOUND, `License ${id} not found.`);
     await this.prisma.license.delete({ where: { id } });
     await this.audit.record({
       actorId: admin.id,

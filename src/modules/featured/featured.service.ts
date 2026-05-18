@@ -3,10 +3,7 @@ import { FeaturedSlot, NotificationType, Prisma, User } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { AuditService } from '../../common/audit/audit.service';
 import { ErrorCode } from '../../common/errors/error-code';
-import {
-  ConflictDomainException,
-  NotFoundDomainException,
-} from '../../common/errors/problem.dto';
+import { ConflictDomainException, NotFoundDomainException } from '../../common/errors/problem.dto';
 import { AppConfigService } from '../../config/app-config.service';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { S3Service } from '../../infra/s3/s3.service';
@@ -42,7 +39,11 @@ export class FeaturedService {
 
   async create(admin: User, dto: CreateFeaturedSlotDto): Promise<AdminFeaturedSlotDto> {
     const asset = await this.prisma.asset.findUnique({ where: { id: dto.assetId } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${dto.assetId} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(
+        ErrorCode.ASSET_NOT_FOUND,
+        `Asset ${dto.assetId} not found.`,
+      );
 
     const isActive = dto.isActive ?? true;
     if (isActive) {
@@ -55,7 +56,8 @@ export class FeaturedService {
       }
     }
     const nextSortOrder =
-      ((await this.prisma.featuredSlot.aggregate({ _max: { sortOrder: true } }))._max.sortOrder ?? -1) + 1;
+      ((await this.prisma.featuredSlot.aggregate({ _max: { sortOrder: true } }))._max.sortOrder ??
+        -1) + 1;
     const row = await this.prisma.featuredSlot.create({
       data: {
         assetId: asset.id,
@@ -92,8 +94,15 @@ export class FeaturedService {
   }
 
   async update(id: string, admin: User, dto: UpdateFeaturedSlotDto): Promise<AdminFeaturedSlotDto> {
-    const row = await this.prisma.featuredSlot.findUnique({ where: { id }, include: { asset: true } });
-    if (!row) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Featured slot ${id} not found.`);
+    const row = await this.prisma.featuredSlot.findUnique({
+      where: { id },
+      include: { asset: true },
+    });
+    if (!row)
+      throw new NotFoundDomainException(
+        ErrorCode.ASSET_NOT_FOUND,
+        `Featured slot ${id} not found.`,
+      );
 
     if (dto.isActive === true && !row.isActive) {
       const activeCount = await this.prisma.featuredSlot.count({ where: { isActive: true } });
@@ -132,7 +141,11 @@ export class FeaturedService {
 
   async remove(id: string, admin: User): Promise<void> {
     const row = await this.prisma.featuredSlot.findUnique({ where: { id } });
-    if (!row) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Featured slot ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(
+        ErrorCode.ASSET_NOT_FOUND,
+        `Featured slot ${id} not found.`,
+      );
     await this.prisma.featuredSlot.delete({ where: { id } });
     await this.discover.invalidate();
     await this.audit.record({
@@ -186,26 +199,36 @@ export class FeaturedService {
     });
   }
 
-  async initiateBannerUpload(contentType: string, _bytes: number): Promise<FeaturedBannerInitiateResponseDto> {
+  async initiateBannerUpload(
+    contentType: string,
+    _bytes: number,
+  ): Promise<FeaturedBannerInitiateResponseDto> {
     const key = `featured-banners/${randomUUID()}`;
     const presigned = await this.s3.presignPut('thumbs', key, contentType);
     return {
       putUrl: presigned.url,
       key,
-      expiresAt: new Date(Date.now() + this.config.get('S3_PRESIGN_EXPIRES_SEC') * 1000).toISOString(),
+      expiresAt: new Date(
+        Date.now() + this.config.get('S3_PRESIGN_EXPIRES_SEC') * 1000,
+      ).toISOString(),
     };
   }
 
-  private async toDto(row: FeaturedSlot & { asset: { id: string; slug: string; title: string } }): Promise<AdminFeaturedSlotDto> {
+  private async toDto(
+    row: FeaturedSlot & { asset: { id: string; slug: string; title: string } },
+  ): Promise<AdminFeaturedSlotDto> {
     return {
       id: row.id,
       assetId: row.asset.id,
       assetTitle: row.asset.title,
       assetSlug: row.asset.slug,
       customBannerKey: row.customBannerKey ?? undefined,
-      customBannerUrl: row.customBannerKey ? await this.s3.presignGet('thumbs', row.customBannerKey) : undefined,
+      customBannerUrl: row.customBannerKey
+        ? await this.s3.presignGet('thumbs', row.customBannerKey)
+        : undefined,
       customTitle: row.customTitle ?? undefined,
-      customShortDescription: (row.customShortDescription as Record<string, string> | null) ?? undefined,
+      customShortDescription:
+        (row.customShortDescription as Record<string, string> | null) ?? undefined,
       sortOrder: row.sortOrder,
       isActive: row.isActive,
       createdAt: row.createdAt.toISOString(),

@@ -60,7 +60,9 @@ export class ArchivePurgeWorker extends JobWorkerBase<ArchivePurgeJob> implement
       },
       select: { id: true, slug: true, thumbnailKey: true, status: true },
     });
-    this.logger.log(`archive-purge: ${candidates.length} asset(s) older than ${cutoff.toISOString()}`);
+    this.logger.log(
+      `archive-purge: ${candidates.length} asset(s) older than ${cutoff.toISOString()}`,
+    );
 
     for (const asset of candidates) {
       try {
@@ -72,7 +74,12 @@ export class ArchivePurgeWorker extends JobWorkerBase<ArchivePurgeJob> implement
     }
   }
 
-  private async purgeOne(asset: { id: string; slug: string; thumbnailKey: string | null; status: string }): Promise<void> {
+  private async purgeOne(asset: {
+    id: string;
+    slug: string;
+    thumbnailKey: string | null;
+    status: string;
+  }): Promise<void> {
     await this.deleteS3Prefix('assets', `assets/${asset.id}/`);
     await this.deleteS3Prefix('thumbs', `thumbs/${asset.id}/`);
     if (asset.thumbnailKey && !asset.thumbnailKey.startsWith(`thumbs/${asset.id}/`)) {

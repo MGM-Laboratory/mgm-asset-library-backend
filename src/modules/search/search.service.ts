@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Locale } from '@prisma/client';
 import { resolveLocalized, LocalizedJson } from '../../common/i18n/locale-resolver';
-import { MEILI_INDEX_ASSETS, MEILI_INDEX_TAGS, MeilisearchService } from '../../infra/meilisearch/meilisearch.service';
+import {
+  MEILI_INDEX_ASSETS,
+  MEILI_INDEX_TAGS,
+  MeilisearchService,
+} from '../../infra/meilisearch/meilisearch.service';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { S3Service } from '../../infra/s3/s3.service';
 import { TagDto } from '../tags/dto/tag.dto';
@@ -55,8 +59,11 @@ export class SearchService {
         id: h.id,
         slug: h.slug,
         title: h.title,
-        shortDescription: locale === 'id' ? h.shortDescription_id ?? '' : h.shortDescription_en ?? '',
-        thumbnailUrl: h.thumbnailKey ? await this.s3.presignGet('thumbs', h.thumbnailKey) : undefined,
+        shortDescription:
+          locale === 'id' ? (h.shortDescription_id ?? '') : (h.shortDescription_en ?? ''),
+        thumbnailUrl: h.thumbnailKey
+          ? await this.s3.presignGet('thumbs', h.thumbnailKey)
+          : undefined,
         engine: h.engine,
         categoryName: (locale === 'id' ? h.categoryName_id : h.categoryName_en) ?? '',
         ownerName: h.ownerDisplayName,
@@ -73,7 +80,12 @@ export class SearchService {
   async searchTags(q: string, limit: number): Promise<TagDto[]> {
     if (!q.trim()) return [];
     const index = this.meili.client.index(MEILI_INDEX_TAGS);
-    const result = await index.search<{ id: string; slug: string; displayName: string; usageCount: number }>(q, {
+    const result = await index.search<{
+      id: string;
+      slug: string;
+      displayName: string;
+      usageCount: number;
+    }>(q, {
       limit: Math.min(Math.max(limit, 1), 20),
     });
     return result.hits.map((h) => ({
@@ -124,7 +136,9 @@ export class SearchService {
       categoryName_id: resolveLocalized(asset.category.name as LocalizedJson, 'id') ?? undefined,
       licenseId: asset.licenseId,
       tags: asset.tags.map((t) => t.tag.slug),
-      renderPipelines: Array.from(new Set(latest?.compatibility.flatMap((c) => c.renderPipelines) ?? [])),
+      renderPipelines: Array.from(
+        new Set(latest?.compatibility.flatMap((c) => c.renderPipelines) ?? []),
+      ),
       targets: Array.from(new Set(latest?.compatibility.flatMap((c) => c.targets) ?? [])),
       fileKinds: Array.from(new Set(latest?.files.map((f) => f.kind) ?? [])),
       ownerDisplayName: asset.owner.displayName,
@@ -141,11 +155,15 @@ export class SearchService {
     const clauses: string[] = [];
     if (query.engine) clauses.push(`engine = "${query.engine}"`);
     if (query.licenseSlug) clauses.push(`licenseSlug = "${query.licenseSlug}"`);
-    if (query.categoryIds?.length) clauses.push(`categoryId IN [${query.categoryIds.map((c) => `"${c}"`).join(',')}]`);
+    if (query.categoryIds?.length)
+      clauses.push(`categoryId IN [${query.categoryIds.map((c) => `"${c}"`).join(',')}]`);
     if (query.tags?.length) clauses.push(`tags IN [${query.tags.map((t) => `"${t}"`).join(',')}]`);
-    if (query.fileKinds?.length) clauses.push(`fileKinds IN [${query.fileKinds.map((k) => `"${k}"`).join(',')}]`);
-    if (query.renderPipelines?.length) clauses.push(`renderPipelines IN [${query.renderPipelines.map((p) => `"${p}"`).join(',')}]`);
-    if (query.targets?.length) clauses.push(`targets IN [${query.targets.map((t) => `"${t}"`).join(',')}]`);
+    if (query.fileKinds?.length)
+      clauses.push(`fileKinds IN [${query.fileKinds.map((k) => `"${k}"`).join(',')}]`);
+    if (query.renderPipelines?.length)
+      clauses.push(`renderPipelines IN [${query.renderPipelines.map((p) => `"${p}"`).join(',')}]`);
+    if (query.targets?.length)
+      clauses.push(`targets IN [${query.targets.map((t) => `"${t}"`).join(',')}]`);
     return clauses;
   }
 }

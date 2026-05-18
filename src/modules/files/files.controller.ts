@@ -102,7 +102,9 @@ export class FilesController {
 
   @Post('thumbnails/complete')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Wire a freshly uploaded thumbnail key to the asset, queue resize variants.' })
+  @ApiOperation({
+    summary: 'Wire a freshly uploaded thumbnail key to the asset, queue resize variants.',
+  })
   completeThumb(
     @AuthUser() principal: AuthenticatedRequestUser,
     @Body() dto: CompleteThumbnailDto,
@@ -112,7 +114,9 @@ export class FilesController {
 
   @Post('editor-media/initiate')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Get a presigned PUT URL for a TipTap embed; also returns a 90-day GET URL.' })
+  @ApiOperation({
+    summary: 'Get a presigned PUT URL for a TipTap embed; also returns a 90-day GET URL.',
+  })
   @ApiOkResponse({ type: InitiateEditorMediaResponseDto })
   initiateEditorMedia(
     @AuthUser() principal: AuthenticatedRequestUser,

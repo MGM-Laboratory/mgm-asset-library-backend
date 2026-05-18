@@ -38,7 +38,11 @@ export class VersionsService {
       where: { id: versionId },
       include: { asset: true, files: true },
     });
-    if (!version) throw new NotFoundDomainException(ErrorCode.VERSION_NOT_FOUND, `Version ${versionId} not found.`);
+    if (!version)
+      throw new NotFoundDomainException(
+        ErrorCode.VERSION_NOT_FOUND,
+        `Version ${versionId} not found.`,
+      );
     this.assets.assertCanEdit(version.asset, requester);
     if (version.files.length === 0) return;
 
@@ -75,7 +79,8 @@ export class VersionsService {
 
   async list(assetId: string, requester: User | null): Promise<VersionSummaryDto[]> {
     const asset = await this.prisma.asset.findUnique({ where: { id: assetId } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
     const isOwnerOrAdmin = !!requester && (requester.id === asset.ownerId || requester.isAdmin);
     const rows = await this.prisma.assetVersion.findMany({
       where: {
@@ -91,19 +96,21 @@ export class VersionsService {
 
   async create(assetId: string, dto: CreateVersionDto, requester: User): Promise<{ id: string }> {
     const asset = await this.prisma.asset.findUnique({ where: { id: assetId } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
     this.assets.assertCanEdit(asset, requester);
 
     const duplicate = await this.prisma.assetVersion.findUnique({
       where: { assetId_semver: { assetId, semver: dto.semver } },
     });
     if (duplicate) {
-      throw new ConflictDomainException(ErrorCode.VERSION_DUPLICATE, `Version ${dto.semver} already exists.`);
+      throw new ConflictDomainException(
+        ErrorCode.VERSION_DUPLICATE,
+        `Version ${dto.semver} already exists.`,
+      );
     }
 
-    const releaseNotes = dto.releaseNotes
-      ? this.validateReleaseNotes(dto.releaseNotes)
-      : {};
+    const releaseNotes = dto.releaseNotes ? this.validateReleaseNotes(dto.releaseNotes) : {};
 
     const created = await this.prisma.assetVersion.create({
       data: {
@@ -122,7 +129,11 @@ export class VersionsService {
       where: { id: versionId },
       include: { asset: true },
     });
-    if (!version) throw new NotFoundDomainException(ErrorCode.VERSION_NOT_FOUND, `Version ${versionId} not found.`);
+    if (!version)
+      throw new NotFoundDomainException(
+        ErrorCode.VERSION_NOT_FOUND,
+        `Version ${versionId} not found.`,
+      );
     this.assets.assertCanEdit(version.asset, requester);
 
     if (dto.releaseNotes) {
@@ -139,7 +150,11 @@ export class VersionsService {
       where: { id: versionId },
       include: { asset: true, _count: { select: { files: true } } },
     });
-    if (!version) throw new NotFoundDomainException(ErrorCode.VERSION_NOT_FOUND, `Version ${versionId} not found.`);
+    if (!version)
+      throw new NotFoundDomainException(
+        ErrorCode.VERSION_NOT_FOUND,
+        `Version ${versionId} not found.`,
+      );
     this.assets.assertCanEdit(version.asset, requester);
 
     if (version._count.files === 0) {
@@ -169,12 +184,20 @@ export class VersionsService {
     await this.jobs.enqueueSearchIndex({ reason: 'asset.update', assetId: version.assetId });
   }
 
-  async setCompatibility(versionId: string, rows: CompatibilityRowDto[], requester: User): Promise<void> {
+  async setCompatibility(
+    versionId: string,
+    rows: CompatibilityRowDto[],
+    requester: User,
+  ): Promise<void> {
     const version = await this.prisma.assetVersion.findUnique({
       where: { id: versionId },
       include: { asset: true },
     });
-    if (!version) throw new NotFoundDomainException(ErrorCode.VERSION_NOT_FOUND, `Version ${versionId} not found.`);
+    if (!version)
+      throw new NotFoundDomainException(
+        ErrorCode.VERSION_NOT_FOUND,
+        `Version ${versionId} not found.`,
+      );
     this.assets.assertCanEdit(version.asset, requester);
 
     await this.prisma.$transaction([

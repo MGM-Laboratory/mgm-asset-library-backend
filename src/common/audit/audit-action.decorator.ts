@@ -25,5 +25,4 @@ export interface AuditActionConfig {
  *   @AuditAction({ action: 'featured.create', subjectType: 'FeaturedSlot' })
  *   create(...)
  */
-export const AuditAction = (config: AuditActionConfig) =>
-  SetMetadata(AUDIT_ACTION_KEY, config);
+export const AuditAction = (config: AuditActionConfig) => SetMetadata(AUDIT_ACTION_KEY, config);

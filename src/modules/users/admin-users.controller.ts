@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuditAction } from '../../common/audit/audit-action.decorator';
 import { RequireConfirmation } from '../../common/confirmation/require-confirmation.decorator';
@@ -39,7 +49,9 @@ export class AdminUsersController {
   @RequireConfirmation()
   @AuditAction({ action: 'user.demote_request', subjectType: 'User' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Demote an admin. Refuses if it would leave zero admins or target is bootstrap.' })
+  @ApiOperation({
+    summary: 'Demote an admin. Refuses if it would leave zero admins or target is bootstrap.',
+  })
   demote(
     @AuthUser() principal: AuthenticatedRequestUser,
     @Param('id') id: string,

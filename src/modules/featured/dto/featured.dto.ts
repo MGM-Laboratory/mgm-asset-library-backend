@@ -16,7 +16,9 @@ export class CreateFeaturedSlotDto {
   @IsString()
   assetId!: string;
 
-  @ApiPropertyOptional({ description: 'S3 key for a custom banner (use the initiate upload endpoint).' })
+  @ApiPropertyOptional({
+    description: 'S3 key for a custom banner (use the initiate upload endpoint).',
+  })
   @IsOptional()
   @IsString()
   customBannerKey?: string;

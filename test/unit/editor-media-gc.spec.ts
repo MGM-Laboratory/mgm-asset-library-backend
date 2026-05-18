@@ -64,7 +64,11 @@ describe('TipTap walker contract', () => {
         {
           type: 'paragraph',
           content: [
-            { type: 'text', text: 'see', marks: [{ type: 'link', attrs: { href: 'https://x.test/a' } }] },
+            {
+              type: 'text',
+              text: 'see',
+              marks: [{ type: 'link', attrs: { href: 'https://x.test/a' } }],
+            },
           ],
         },
         { type: 'image', attrs: { src: 'https://x.test/b.png' } },
@@ -73,7 +77,10 @@ describe('TipTap walker contract', () => {
     const seen: string[] = [];
     const walk = (node: Prisma.JsonValue): void => {
       if (!node) return;
-      if (Array.isArray(node)) { for (const n of node) walk(n); return; }
+      if (Array.isArray(node)) {
+        for (const n of node) walk(n);
+        return;
+      }
       if (typeof node !== 'object') return;
       const obj = node as Record<string, Prisma.JsonValue>;
       const attrs = obj.attrs as Record<string, unknown> | undefined;

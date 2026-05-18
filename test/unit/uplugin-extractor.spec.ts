@@ -1,7 +1,10 @@
 import { writeFile, mkdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { extractUPlugin, extractUProject } from '../../src/modules/jobs/processors/analyze/extractors/unreal.extractor';
+import {
+  extractUPlugin,
+  extractUProject,
+} from '../../src/modules/jobs/processors/analyze/extractors/unreal.extractor';
 
 describe('Unreal extractors', () => {
   let dir: string;
@@ -15,13 +18,19 @@ describe('Unreal extractors', () => {
 
   it('reads .uplugin JSON', async () => {
     const path = join(dir, 'a.uplugin');
-    await writeFile(path, JSON.stringify({
-      FriendlyName: 'My Plugin',
-      VersionName: '1.0.2',
-      EngineVersion: '5.4',
-      Modules: [{ Name: 'Runtime' }, { Name: 'Editor' }],
-      Plugins: [{ Name: 'OnlineSubsystem', Enabled: true }, { Name: 'Legacy', Enabled: false }],
-    }));
+    await writeFile(
+      path,
+      JSON.stringify({
+        FriendlyName: 'My Plugin',
+        VersionName: '1.0.2',
+        EngineVersion: '5.4',
+        Modules: [{ Name: 'Runtime' }, { Name: 'Editor' }],
+        Plugins: [
+          { Name: 'OnlineSubsystem', Enabled: true },
+          { Name: 'Legacy', Enabled: false },
+        ],
+      }),
+    );
     const meta = await extractUPlugin(path);
     expect(meta).toMatchObject({
       friendlyName: 'My Plugin',
@@ -36,11 +45,14 @@ describe('Unreal extractors', () => {
 
   it('reads .uproject JSON', async () => {
     const path = join(dir, 'a.uproject');
-    await writeFile(path, JSON.stringify({
-      EngineAssociation: '5.4',
-      Plugins: [{ Name: 'X', Enabled: true }],
-      Modules: [{ Name: 'Main' }],
-    }));
+    await writeFile(
+      path,
+      JSON.stringify({
+        EngineAssociation: '5.4',
+        Plugins: [{ Name: 'X', Enabled: true }],
+        Modules: [{ Name: 'Main' }],
+      }),
+    );
     const meta = await extractUProject(path);
     expect(meta).toMatchObject({ engineVersion: '5.4', plugins: [{ name: 'X', enabled: true }] });
   });

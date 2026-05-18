@@ -23,7 +23,10 @@ export class PluginTokenService {
   private readonly pepper: string;
   private readonly ttlDays: number;
 
-  constructor(private readonly prisma: PrismaService, config: AppConfigService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    config: AppConfigService,
+  ) {
     this.pepper = config.get('PLUGIN_TOKEN_PEPPER') ?? '';
     this.ttlDays = config.get('PLUGIN_TOKEN_TTL_DAYS');
     if (!this.pepper && config.isProduction) {

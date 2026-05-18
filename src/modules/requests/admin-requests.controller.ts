@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuditAction } from '../../common/audit/audit-action.decorator';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
@@ -21,10 +31,7 @@ export class AdminRequestsController {
   @Get()
   @ApiOperation({ summary: 'List requests across every requester.' })
   @ApiOkResponse()
-  list(
-    @AuthUser() principal: AuthenticatedRequestUser,
-    @Query() query: ListAssetRequestsQueryDto,
-  ) {
+  list(@AuthUser() principal: AuthenticatedRequestUser, @Query() query: ListAssetRequestsQueryDto) {
     return this.requests.list(query, principal.user);
   }
 

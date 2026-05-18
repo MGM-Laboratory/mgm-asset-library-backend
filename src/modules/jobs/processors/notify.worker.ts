@@ -69,14 +69,16 @@ export class NotifyWorker extends JobWorkerBase<NotifyJob> {
 
     const webhookPromise = drop.has('webhook')
       ? Promise.resolve()
-      : this.jobs.enqueueWebhook({
-          event: data.type,
-          recipient: { id: recipient.id, email: recipient.email },
-          actor: data.actor,
-          payload: data.payload,
-        }).catch((err) =>
-          this.sentry.captureException(err, { channel: 'webhook', userId: recipient.id }),
-        );
+      : this.jobs
+          .enqueueWebhook({
+            event: data.type,
+            recipient: { id: recipient.id, email: recipient.email },
+            actor: data.actor,
+            payload: data.payload,
+          })
+          .catch((err) =>
+            this.sentry.captureException(err, { channel: 'webhook', userId: recipient.id }),
+          );
 
     await Promise.all([inAppPromise, wsPromise, emailPromise, webhookPromise]);
   }

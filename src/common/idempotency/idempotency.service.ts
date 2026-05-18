@@ -29,11 +29,18 @@ export class IdempotencyService {
   }
 
   private hashBody(body: unknown): string {
-    return createHash('sha256').update(JSON.stringify(body ?? null)).digest('hex');
+    return createHash('sha256')
+      .update(JSON.stringify(body ?? null))
+      .digest('hex');
   }
 
   /** Returns a cached response if this `(user, route, key)` already ran. */
-  async lookup(userId: string, route: string, key: string, body: unknown): Promise<IdempotencyRecord | null> {
+  async lookup(
+    userId: string,
+    route: string,
+    key: string,
+    body: unknown,
+  ): Promise<IdempotencyRecord | null> {
     const raw = await this.redis.client.get(this.key(userId, route, key));
     if (!raw) return null;
     const record = JSON.parse(raw) as IdempotencyRecord;
@@ -46,7 +53,14 @@ export class IdempotencyService {
     return record;
   }
 
-  async store(userId: string, route: string, key: string, body: unknown, status: number, response: unknown): Promise<void> {
+  async store(
+    userId: string,
+    route: string,
+    key: string,
+    body: unknown,
+    status: number,
+    response: unknown,
+  ): Promise<void> {
     const record: IdempotencyRecord = {
       bodyHash: this.hashBody(body),
       status,

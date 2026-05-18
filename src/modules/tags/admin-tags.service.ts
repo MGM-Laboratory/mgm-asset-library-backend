@@ -2,20 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { AuditService } from '../../common/audit/audit.service';
 import { ErrorCode } from '../../common/errors/error-code';
-import {
-  ConflictDomainException,
-  NotFoundDomainException,
-} from '../../common/errors/problem.dto';
+import { ConflictDomainException, NotFoundDomainException } from '../../common/errors/problem.dto';
 import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
 import { resolvePageSize } from '../../common/pagination/list-query.dto';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { JobsProducer } from '../jobs/jobs.producer';
-import {
-  AdminTagDto,
-  ListTagsQueryDto,
-  MergeTagsDto,
-  UpdateTagDto,
-} from './dto/admin-tag.dto';
+import { AdminTagDto, ListTagsQueryDto, MergeTagsDto, UpdateTagDto } from './dto/admin-tag.dto';
 
 @Injectable()
 export class AdminTagsService {
@@ -59,7 +51,10 @@ export class AdminTagsService {
       pageInfo: {
         nextCursor:
           hasMore && slice.length
-            ? encodeCursor({ id: slice[slice.length - 1].id, createdAt: slice[slice.length - 1].createdAt.toISOString() })
+            ? encodeCursor({
+                id: slice[slice.length - 1].id,
+                createdAt: slice[slice.length - 1].createdAt.toISOString(),
+              })
             : null,
         hasMore,
       },
@@ -71,15 +66,25 @@ export class AdminTagsService {
       throw new ConflictDomainException(ErrorCode.TAG_IN_USE, 'Cannot merge a tag into itself.');
     }
     const target = await this.prisma.tag.findUnique({ where: { id: dto.intoTagId } });
-    if (!target) throw new NotFoundDomainException(ErrorCode.TAG_IN_USE, `Target tag ${dto.intoTagId} not found.`);
+    if (!target)
+      throw new NotFoundDomainException(
+        ErrorCode.TAG_IN_USE,
+        `Target tag ${dto.intoTagId} not found.`,
+      );
     const sources = await this.prisma.tag.findMany({ where: { id: { in: dto.fromTagIds } } });
     if (sources.length !== dto.fromTagIds.length) {
-      throw new NotFoundDomainException(ErrorCode.TAG_IN_USE, 'One or more source tags were not found.');
+      throw new NotFoundDomainException(
+        ErrorCode.TAG_IN_USE,
+        'One or more source tags were not found.',
+      );
     }
     const touchedAssets = new Set<string>();
     await this.prisma.$transaction(async (tx) => {
       for (const src of sources) {
-        const rows = await tx.assetTag.findMany({ where: { tagId: src.id }, select: { assetId: true } });
+        const rows = await tx.assetTag.findMany({
+          where: { tagId: src.id },
+          select: { assetId: true },
+        });
         for (const r of rows) touchedAssets.add(r.assetId);
         // Move every AssetTag from src → target, dedupe if already tagged.
         await tx.$executeRaw(Prisma.sql`
@@ -112,7 +117,10 @@ export class AdminTagsService {
     if (dto.slug && dto.slug !== row.slug) {
       const collision = await this.prisma.tag.findUnique({ where: { slug: dto.slug } });
       if (collision) {
-        throw new ConflictDomainException(ErrorCode.TAG_IN_USE, `Slug "${dto.slug}" is already in use.`);
+        throw new ConflictDomainException(
+          ErrorCode.TAG_IN_USE,
+          `Slug "${dto.slug}" is already in use.`,
+        );
       }
     }
     const updated = await this.prisma.tag.update({
@@ -124,9 +132,14 @@ export class AdminTagsService {
       include: { usage: true },
     });
     // Tag rename → ripple every asset using it through the search indexer.
-    const assets = await this.prisma.assetTag.findMany({ where: { tagId: id }, select: { assetId: true } });
+    const assets = await this.prisma.assetTag.findMany({
+      where: { tagId: id },
+      select: { assetId: true },
+    });
     await Promise.all(
-      assets.map((a) => this.producer.enqueueSearchIndex({ reason: 'asset.update', assetId: a.assetId })),
+      assets.map((a) =>
+        this.producer.enqueueSearchIndex({ reason: 'asset.update', assetId: a.assetId }),
+      ),
     );
     await this.audit.record({
       actorId: admin.id,
@@ -158,7 +171,13 @@ export class AdminTagsService {
     });
   }
 
-  private toDto(row: { id: string; slug: string; displayName: string; createdAt: Date; usage?: { usageCount: number } | null }): AdminTagDto {
+  private toDto(row: {
+    id: string;
+    slug: string;
+    displayName: string;
+    createdAt: Date;
+    usage?: { usageCount: number } | null;
+  }): AdminTagDto {
     return {
       id: row.id,
       slug: row.slug,

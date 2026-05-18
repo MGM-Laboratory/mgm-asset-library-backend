@@ -65,7 +65,7 @@ export class GltfConvertWorker extends JobWorkerBase<GltfConvertJob> {
       await mkdir(scratch.dir, { recursive: true });
       await this.runBlenderConvert(scratch.filePath, outGlbRaw, sourceKind, timeoutMs);
       await this.runGltfpack(outGlbRaw, outGlbPacked, timeoutMs);
-      const finalPath = await this.exists(outGlbPacked) ? outGlbPacked : outGlbRaw;
+      const finalPath = (await this.exists(outGlbPacked)) ? outGlbPacked : outGlbRaw;
       const derivedKey = this.derivedKeyFor(version.s3Prefix, file.relativePath);
       const body = await readFile(finalPath);
       await this.s3.client.send(
@@ -101,15 +101,18 @@ export class GltfConvertWorker extends JobWorkerBase<GltfConvertJob> {
     }
   }
 
-  private async runBlenderConvert(input: string, output: string, kind: GltfConvertJob['sourceKind'], timeoutMs: number): Promise<void> {
+  private async runBlenderConvert(
+    input: string,
+    output: string,
+    kind: GltfConvertJob['sourceKind'],
+    timeoutMs: number,
+  ): Promise<void> {
     const script = join(process.cwd(), 'scripts', 'blender', 'fbx_to_glb.py');
     if (kind === 'GLTF') {
       // Skip Blender for separate-file glTF — gltf-pipeline handles bundling.
-      await runSubprocess(
-        this.config.get('GLTF_PIPELINE_BIN'),
-        ['-i', input, '-o', output, '-b'],
-        { timeoutMs },
-      );
+      await runSubprocess(this.config.get('GLTF_PIPELINE_BIN'), ['-i', input, '-o', output, '-b'], {
+        timeoutMs,
+      });
       return;
     }
     const res = await runSubprocess(

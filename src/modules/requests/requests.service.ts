@@ -50,7 +50,11 @@ export class RequestsService {
           type: NotificationType.REQUEST_CREATED,
           payload: {
             requestId: created.id,
-            requester: { id: requester.id, displayName: requester.displayName, email: requester.email },
+            requester: {
+              id: requester.id,
+              displayName: requester.displayName,
+              email: requester.email,
+            },
             assetLink: dto.assetLink,
             assetType: dto.assetType,
             intendedUse: dto.intendedUse,
@@ -84,9 +88,13 @@ export class RequestsService {
     return {
       items: itemsRaw.map((r) => this.toDto(r)),
       pageInfo: {
-        nextCursor: hasMore && itemsRaw.length
-          ? encodeCursor({ id: itemsRaw[itemsRaw.length - 1].id, createdAt: itemsRaw[itemsRaw.length - 1].createdAt.toISOString() })
-          : null,
+        nextCursor:
+          hasMore && itemsRaw.length
+            ? encodeCursor({
+                id: itemsRaw[itemsRaw.length - 1].id,
+                createdAt: itemsRaw[itemsRaw.length - 1].createdAt.toISOString(),
+              })
+            : null,
         hasMore,
       },
     };
@@ -97,7 +105,8 @@ export class RequestsService {
       where: { id },
       include: { requester: true },
     });
-    if (!row) throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Request ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Request ${id} not found.`);
     if (!requester.isAdmin && row.requesterId !== requester.id) {
       throw new ForbiddenDomainException(ErrorCode.AUTH_FORBIDDEN, 'You do not own this request.');
     }
@@ -109,8 +118,15 @@ export class RequestsService {
    * a non-empty `adminComment`; every transition fires REQUEST_STATUS_CHANGED
    * to the requester and writes an audit row.
    */
-  async adminUpdate(id: string, admin: User, dto: AdminUpdateAssetRequestDto): Promise<AssetRequestDto> {
-    if (dto.status === AssetRequestStatus.REJECTED && (!dto.adminComment || dto.adminComment.trim().length === 0)) {
+  async adminUpdate(
+    id: string,
+    admin: User,
+    dto: AdminUpdateAssetRequestDto,
+  ): Promise<AssetRequestDto> {
+    if (
+      dto.status === AssetRequestStatus.REJECTED &&
+      (!dto.adminComment || dto.adminComment.trim().length === 0)
+    ) {
       throw new BadRequestDomainException(
         ErrorCode.REQUEST_NOT_FOUND,
         'Rejecting requires a non-empty adminComment so the requester understands why.',
@@ -120,7 +136,8 @@ export class RequestsService {
       where: { id },
       include: { requester: true },
     });
-    if (!row) throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Request ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Request ${id} not found.`);
 
     const updated = await this.prisma.assetRequest.update({
       where: { id },

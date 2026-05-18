@@ -33,15 +33,19 @@ export class StorageRollupWorker extends JobWorkerBase<StorageRollupJob> impleme
 
   async onModuleInit(): Promise<void> {
     super.onModuleInit();
-    await this.producer.queue(QUEUE.STORAGE_ROLLUP).add(
-      'cron',
-      { triggeredAt: new Date().toISOString() },
-      { jobId: 'storage-rollup-cron', repeat: { pattern: '30 1 * * *', tz: 'UTC' } },
-    );
+    await this.producer
+      .queue(QUEUE.STORAGE_ROLLUP)
+      .add(
+        'cron',
+        { triggeredAt: new Date().toISOString() },
+        { jobId: 'storage-rollup-cron', repeat: { pattern: '30 1 * * *', tz: 'UTC' } },
+      );
   }
 
   async process(_job: Job<StorageRollupJob>): Promise<void> {
-    const date = new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()));
+    const date = new Date(
+      Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()),
+    );
 
     // Map every asset id to its owner so the per-user rollup is one pass.
     const owners = new Map<string, string>();
@@ -75,7 +79,11 @@ export class StorageRollupWorker extends JobWorkerBase<StorageRollupJob> impleme
             perAsset.set(assetId, (perAsset.get(assetId) ?? 0n) + bytes);
             const ownerId = owners.get(assetId);
             if (ownerId) {
-              const entry = perUser.get(ownerId) ?? { bytes: 0n, assetCount: 0, ids: new Set<string>() };
+              const entry = perUser.get(ownerId) ?? {
+                bytes: 0n,
+                assetCount: 0,
+                ids: new Set<string>(),
+              };
               entry.bytes += bytes;
               entry.ids.add(assetId);
               entry.assetCount = entry.ids.size;

@@ -54,7 +54,10 @@ interface AssetDocument {
  * removed from Meilisearch.
  */
 @Injectable()
-export class SearchIndexBatchWorker extends JobWorkerBase<SearchIndexBatchJob> implements OnModuleInit {
+export class SearchIndexBatchWorker
+  extends JobWorkerBase<SearchIndexBatchJob>
+  implements OnModuleInit
+{
   constructor(
     config: AppConfigService,
     sentry: SentryService,
@@ -149,7 +152,9 @@ export class SearchIndexBatchWorker extends JobWorkerBase<SearchIndexBatchJob> i
     return asset.translations.map((t) => ({
       id: `${asset.id}:${t.locale}`,
       locale: t.locale,
-      categoryName: this.pickJsonLocalized(asset.category.name as Prisma.JsonValue, t.locale) ?? asset.category.slug,
+      categoryName:
+        this.pickJsonLocalized(asset.category.name as Prisma.JsonValue, t.locale) ??
+        asset.category.slug,
       shortDescription: t.shortDescription,
       ...baseDoc,
     }));

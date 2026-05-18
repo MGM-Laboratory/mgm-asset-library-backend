@@ -27,12 +27,21 @@ interface ClamdOptions {
 export class ClamdClient {
   private readonly logger = new Logger(ClamdClient.name);
 
-  constructor(private readonly s3: S3Service, private readonly opts: ClamdOptions) {}
+  constructor(
+    private readonly s3: S3Service,
+    private readonly opts: ClamdOptions,
+  ) {}
 
-  async scanS3Object(bucketRole: 'assets' | 'thumbs' | 'editor', key: string): Promise<ClamdResult> {
+  async scanS3Object(
+    bucketRole: 'assets' | 'thumbs' | 'editor',
+    key: string,
+  ): Promise<ClamdResult> {
     const head = await this.s3.headObject(bucketRole, key);
     if (head && head.bytes > this.opts.maxStreamBytes) {
-      return { status: 'ERROR', message: `file too large for INSTREAM (${head.bytes} > ${this.opts.maxStreamBytes})` };
+      return {
+        status: 'ERROR',
+        message: `file too large for INSTREAM (${head.bytes} > ${this.opts.maxStreamBytes})`,
+      };
     }
     const out = await this.s3.client.send(
       new GetObjectCommand({ Bucket: this.s3.bucketFor(bucketRole), Key: key }),

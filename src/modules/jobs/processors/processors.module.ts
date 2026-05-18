@@ -1,13 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  AnalysisReport,
-  AnalysisReportSchema,
-} from './analyze/analysis-report.schema';
-import {
-  WebhookDelivery,
-  WebhookDeliverySchema,
-} from './webhook/webhook-delivery.schema';
+import { AnalysisReport, AnalysisReportSchema } from './analyze/analysis-report.schema';
+import { WebhookDelivery, WebhookDeliverySchema } from './webhook/webhook-delivery.schema';
 import { AnalyzeService } from './analyze/analyze.service';
 import { AnalyzeWorker } from './analyze/analyze.worker';
 import { AnalyzeVersionWorker } from './analyze/analyze-version.worker';

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { NotificationType, Prisma, Report, ReportStatus, User } from '@prisma/client';
+import { NotificationType, Prisma, Report, User } from '@prisma/client';
 import { AuditService } from '../../common/audit/audit.service';
 import { ErrorCode } from '../../common/errors/error-code';
 import {
@@ -33,7 +33,11 @@ export class ReportsService {
 
   async create(dto: CreateReportDto, reporter: User): Promise<{ id: string }> {
     const asset = await this.prisma.asset.findUnique({ where: { id: dto.assetId } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${dto.assetId} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(
+        ErrorCode.ASSET_NOT_FOUND,
+        `Asset ${dto.assetId} not found.`,
+      );
     const row = await this.prisma.report.create({
       data: {
         assetId: dto.assetId,
@@ -101,9 +105,13 @@ export class ReportsService {
     return {
       items: slice.map((r) => this.toDto(r)),
       pageInfo: {
-        nextCursor: hasMore && slice.length
-          ? encodeCursor({ id: slice[slice.length - 1].id, createdAt: slice[slice.length - 1].createdAt.toISOString() })
-          : null,
+        nextCursor:
+          hasMore && slice.length
+            ? encodeCursor({
+                id: slice[slice.length - 1].id,
+                createdAt: slice[slice.length - 1].createdAt.toISOString(),
+              })
+            : null,
         hasMore,
       },
     };
@@ -114,15 +122,20 @@ export class ReportsService {
       where: { id },
       include: { reporter: true, asset: true },
     });
-    if (!row) throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Report ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Report ${id} not found.`);
     return this.toDto(row);
   }
 
   async startReview(id: string, admin: User): Promise<void> {
     const row = await this.prisma.report.findUnique({ where: { id } });
-    if (!row) throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Report ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Report ${id} not found.`);
     if (row.status !== 'OPEN') {
-      throw new BadRequestDomainException(ErrorCode.ASSET_ARCHIVE_BLOCKED, `Report is in ${row.status}, not OPEN.`);
+      throw new BadRequestDomainException(
+        ErrorCode.ASSET_ARCHIVE_BLOCKED,
+        `Report is in ${row.status}, not OPEN.`,
+      );
     }
     await this.prisma.report.update({ where: { id }, data: { status: 'REVIEWING' } });
     await this.audit.record({
@@ -135,7 +148,8 @@ export class ReportsService {
 
   async action(id: string, admin: User, dto: ActionReportDto): Promise<void> {
     const row = await this.prisma.report.findUnique({ where: { id }, include: { asset: true } });
-    if (!row) throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Report ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Report ${id} not found.`);
 
     if (dto.action === 'FORCE_DELETE_ASSET') {
       if (dto.confirm !== CONFIRMATION_PHRASE || !dto.confirmedAt) {
@@ -170,7 +184,8 @@ export class ReportsService {
 
   async dismiss(id: string, admin: User, dto: DismissReportDto): Promise<void> {
     const row = await this.prisma.report.findUnique({ where: { id } });
-    if (!row) throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Report ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(ErrorCode.REQUEST_NOT_FOUND, `Report ${id} not found.`);
     await this.prisma.report.update({
       where: { id },
       data: { status: 'DISMISSED', adminNotes: dto.adminNotes, resolvedAt: new Date() },
@@ -204,7 +219,9 @@ export class ReportsService {
     }
   }
 
-  private toDto(row: Report & { asset: { id: string; slug: string; title: string }; reporter: User }): ReportDto {
+  private toDto(
+    row: Report & { asset: { id: string; slug: string; title: string }; reporter: User },
+  ): ReportDto {
     return {
       id: row.id,
       category: row.category,

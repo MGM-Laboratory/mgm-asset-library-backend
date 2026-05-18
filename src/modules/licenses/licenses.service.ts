@@ -12,7 +12,8 @@ export class LicensesService {
 
   async findByIdOrThrow(id: string): Promise<License> {
     const row = await this.prisma.license.findUnique({ where: { id } });
-    if (!row) throw new NotFoundDomainException(ErrorCode.LICENSE_NOT_FOUND, `License ${id} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(ErrorCode.LICENSE_NOT_FOUND, `License ${id} not found.`);
     return row;
   }
 

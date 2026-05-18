@@ -32,7 +32,11 @@ describe('E2E [08] featured slot active cap', () => {
     const license = await prisma.license.findFirstOrThrow();
     const owner = await prisma.user.upsert({
       where: { keycloakSub: 'kc-feat-owner' },
-      create: { keycloakSub: 'kc-feat-owner', email: 'feat-owner@labmgm.org', displayName: 'Owner' },
+      create: {
+        keycloakSub: 'kc-feat-owner',
+        email: 'feat-owner@labmgm.org',
+        displayName: 'Owner',
+      },
       update: {},
     });
     const assetIds: string[] = [];
@@ -52,7 +56,9 @@ describe('E2E [08] featured slot active cap', () => {
       assetIds.push(a.id);
     }
     // Need to make this admin actually admin in DB (bootstrap on first /auth/me).
-    await supertest(app.getHttpServer()).get('/auth/me').set('Authorization', `Bearer ${adminToken}`);
+    await supertest(app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', `Bearer ${adminToken}`);
 
     for (let i = 0; i < 5; i++) {
       await supertest(app.getHttpServer())

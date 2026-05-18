@@ -55,7 +55,9 @@ describe('TipTap validators', () => {
       expect(() =>
         validateLiteTipTap({
           type: 'doc',
-          content: [{ type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'No' }] }],
+          content: [
+            { type: 'heading', attrs: { level: 1 }, content: [{ type: 'text', text: 'No' }] },
+          ],
         }),
       ).toThrow(/disallowed/i);
     });
@@ -77,7 +79,9 @@ describe('TipTap validators', () => {
       expect(() =>
         validateFullTipTap({
           type: 'doc',
-          content: [{ type: 'heading', attrs: { level: 5 }, content: [{ type: 'text', text: 'h5' }] }],
+          content: [
+            { type: 'heading', attrs: { level: 5 }, content: [{ type: 'text', text: 'h5' }] },
+          ],
         }),
       ).toThrow(/level/i);
     });
@@ -92,7 +96,10 @@ describe('TipTap validators', () => {
               {
                 type: 'tableRow',
                 content: [
-                  { type: 'tableHeader', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'A' }] }] },
+                  {
+                    type: 'tableHeader',
+                    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'A' }] }],
+                  },
                 ],
               },
             ],

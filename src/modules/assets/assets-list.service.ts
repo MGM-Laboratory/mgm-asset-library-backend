@@ -37,15 +37,20 @@ export class AssetsListService {
     private readonly mapper: AssetMapperService,
   ) {}
 
-  async listFromPostgres(query: ListAssetsQueryDto, requester: User | null, locale: Locale): Promise<AssetListResult> {
+  async listFromPostgres(
+    query: ListAssetsQueryDto,
+    requester: User | null,
+    locale: Locale,
+  ): Promise<AssetListResult> {
     const limit = resolvePageSize(query.limit);
     const cursor = decodeCursor(query.cursor ?? null);
 
-    const statuses: AssetStatus[] = query.includeUnpublished && requester?.isAdmin
-      ? ['DRAFT', 'PUBLISHED', 'ARCHIVED']
-      : query.ownerId && requester && (requester.id === query.ownerId || requester.isAdmin)
-      ? ['DRAFT', 'PUBLISHED', 'ARCHIVED']
-      : ['PUBLISHED'];
+    const statuses: AssetStatus[] =
+      query.includeUnpublished && requester?.isAdmin
+        ? ['DRAFT', 'PUBLISHED', 'ARCHIVED']
+        : query.ownerId && requester && (requester.id === query.ownerId || requester.isAdmin)
+          ? ['DRAFT', 'PUBLISHED', 'ARCHIVED']
+          : ['PUBLISHED'];
 
     const where = this.assets.buildWhere({
       engine: query.engine,
@@ -66,14 +71,17 @@ export class AssetsListService {
       orderBy,
       include: LIST_INCLUDE,
       take: limit + 1,
-      ...(cursor
-        ? { skip: 1, cursor: { id: cursor.id } }
-        : {}),
+      ...(cursor ? { skip: 1, cursor: { id: cursor.id } } : {}),
     });
     const hasMore = rows.length > limit;
-    const items = await Promise.all(rows.slice(0, limit).map((r) => this.mapper.toSummary(r, locale)));
+    const items = await Promise.all(
+      rows.slice(0, limit).map((r) => this.mapper.toSummary(r, locale)),
+    );
     const last = rows[items.length - 1];
-    const nextCursor = hasMore && last ? encodeCursor({ id: last.id, createdAt: last.createdAt.toISOString() }) : null;
+    const nextCursor =
+      hasMore && last
+        ? encodeCursor({ id: last.id, createdAt: last.createdAt.toISOString() })
+        : null;
     return { items, pageInfo: { nextCursor, hasMore } };
   }
 
@@ -97,7 +105,11 @@ export class AssetsListService {
   private buildOrderBy(sort: AssetSort): Prisma.AssetOrderByWithRelationInput[] {
     switch (sort) {
       case 'newest':
-        return [{ publishedAt: { sort: 'desc', nulls: 'last' } }, { createdAt: 'desc' }, { id: 'desc' }];
+        return [
+          { publishedAt: { sort: 'desc', nulls: 'last' } },
+          { createdAt: 'desc' },
+          { id: 'desc' },
+        ];
       case 'mostDownloaded':
         return [{ downloads: { _count: 'desc' } }, { id: 'desc' }];
       case 'mostSaved':

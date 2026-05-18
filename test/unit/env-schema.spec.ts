@@ -31,9 +31,9 @@ describe('config/env.schema', () => {
   });
 
   it('requires PLUGIN_TOKEN_PEPPER in production', () => {
-    expect(() =>
-      validateEnv({ ...baseEnv, NODE_ENV: 'production' }),
-    ).toThrow(/PLUGIN_TOKEN_PEPPER/);
+    expect(() => validateEnv({ ...baseEnv, NODE_ENV: 'production' })).toThrow(
+      /PLUGIN_TOKEN_PEPPER/,
+    );
   });
 
   it('rejects malformed URLs with a helpful message', () => {
