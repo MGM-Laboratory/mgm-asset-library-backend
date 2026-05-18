@@ -15,7 +15,7 @@ jobs:
 
   build-image-worker:
     name: Build & Push Worker Image
-    uses: ././github/workflows/image-worker.yml
+    uses: ./.github/workflows/image-worker.yml
     needs: ci
     with:
       tag: worker-latest
@@ -23,7 +23,7 @@ jobs:
 
   build-image-api:
     name: Build & Push API Image
-    uses: ././github/workflows/image-api.yml
+    uses: ./.github/workflows/image-api.yml
     needs: ci
     with:
       tag: api-latest
