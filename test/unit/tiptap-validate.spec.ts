@@ -83,7 +83,7 @@ describe('TipTap validators', () => {
             { type: 'heading', attrs: { level: 5 }, content: [{ type: 'text', text: 'h5' }] },
           ],
         }),
-      ).toThrow(/level/i);
+      ).toThrow(/disallowed/i);
     });
 
     it('allows images, tables, and embeds', () => {
