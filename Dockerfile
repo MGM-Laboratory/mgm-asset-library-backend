@@ -32,6 +32,8 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates curl dumb-init \
  && rm -rf /var/lib/apt/lists/*
 
+RUN npm -g install prisma
+
 ENV NODE_ENV=production
 ENV PORT=4000
 
