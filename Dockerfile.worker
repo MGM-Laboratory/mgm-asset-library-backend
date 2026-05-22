@@ -45,7 +45,6 @@ ENV PYANALYZE_VENV=/opt/mgm-py
 
 # Node-based glTF tooling.
 RUN npm -g install gltf-pipeline
-RUN npm -g install prisma
 
 # gltfpack (Linux x64 binary from meshoptimizer releases).
 RUN curl -fsSL https://github.com/zeux/meshoptimizer/releases/download/v0.21/gltfpack-ubuntu.zip -o /tmp/gltfpack.zip \
