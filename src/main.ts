@@ -6,6 +6,7 @@ import multipart from '@fastify/multipart';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { WsAdapter } from '@nestjs/platform-ws';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger as PinoLogger } from 'nestjs-pino';
 import 'reflect-metadata';
@@ -57,6 +58,7 @@ async function bootstrapApi(env: ReturnType<typeof validateEnv>): Promise<void> 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, {
     bufferLogs: true,
   });
+  app.useWebSocketAdapter(new WsAdapter(app));
   app.useLogger(app.get(PinoLogger));
   // Helmet defaults are tight; CSP is scoped narrowly because Swagger UI on
   // /docs needs inline scripts + styles to run.
