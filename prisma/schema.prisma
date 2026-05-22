@@ -10,9 +10,12 @@
 // =============================================================================
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   // Keep the generated client lean for serverless-friendly builds.
   previewFeatures = ["fullTextSearch"]
+  // Bundle engines for both the CI runner (OpenSSL 1.1.x) and the
+  // Debian bookworm runtime containers (OpenSSL 3.0.x).
+  binaryTargets   = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
