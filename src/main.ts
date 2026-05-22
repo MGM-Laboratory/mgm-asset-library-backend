@@ -147,7 +147,12 @@ async function bootstrapWorker(env: ReturnType<typeof validateEnv>): Promise<voi
 }
 
 bootstrap().catch((err) => {
+  // process.stderr in Docker is an async pipe — calling process.exit(1)
+  // immediately after console.error() drops the write before it flushes.
+  // Use the write callback to guarantee the message lands before exit.
   // eslint-disable-next-line no-console
-  console.error('Fatal bootstrap error:', err);
-  process.exit(1);
+  process.stderr.write(
+    `Fatal bootstrap error: ${err instanceof Error ? err.stack : String(err)}\n`,
+    () => process.exit(1),
+  );
 });
