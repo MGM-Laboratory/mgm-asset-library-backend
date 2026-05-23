@@ -55,9 +55,7 @@ async function bootstrapApi(env: ReturnType<typeof validateEnv>): Promise<void> 
         : `req_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
     },
   });
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, {
-    bufferLogs: true,
-  });
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter);
   app.useWebSocketAdapter(new WsAdapter(app));
   app.useLogger(app.get(PinoLogger));
   // Helmet defaults are tight; CSP is scoped narrowly because Swagger UI on
@@ -149,12 +147,12 @@ async function bootstrapWorker(env: ReturnType<typeof validateEnv>): Promise<voi
 }
 
 bootstrap().catch((err) => {
-  // process.stderr in Docker is an async pipe — calling process.exit(1)
-  // immediately after console.error() drops the write before it flushes.
-  // Use the write callback to guarantee the message lands before exit.
-  // eslint-disable-next-line no-console
-  process.stderr.write(
+  // fs.writeSync(2, ...) is a synchronous write to stderr (fd 2) — unlike
+  // process.stderr.write() it cannot be interrupted by process.exit().
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('fs').writeSync(
+    2,
     `Fatal bootstrap error: ${err instanceof Error ? err.stack : String(err)}\n`,
-    () => process.exit(1),
   );
+  process.exit(1);
 });
