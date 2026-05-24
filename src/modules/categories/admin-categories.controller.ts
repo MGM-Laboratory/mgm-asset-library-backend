@@ -1,5 +1,22 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuditAction } from '../../common/audit/audit-action.decorator';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AdminGuard } from '../../common/guards/admin.guard';
@@ -28,7 +45,11 @@ export class AdminCategoriesController {
   }
 
   @Post()
-  @AuditAction({ action: 'category.create_request', subjectType: 'Category', subjectParam: 'body.slug' })
+  @AuditAction({
+    action: 'category.create_request',
+    subjectType: 'Category',
+    subjectParam: 'body.slug',
+  })
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a new category.' })
   @ApiCreatedResponse({ type: AdminCategoryDto })
@@ -56,15 +77,16 @@ export class AdminCategoriesController {
   @AuditAction({ action: 'category.delete_request', subjectType: 'Category' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a category. Rejected if any asset references it.' })
-  remove(
-    @AuthUser() principal: AuthenticatedRequestUser,
-    @Param('id') id: string,
-  ): Promise<void> {
+  remove(@AuthUser() principal: AuthenticatedRequestUser, @Param('id') id: string): Promise<void> {
     return this.admin.remove(id, principal.user);
   }
 
   @Post('reorder')
-  @AuditAction({ action: 'category.reorder_request', subjectType: 'Category', subjectParam: 'body.orderedIds.0' })
+  @AuditAction({
+    action: 'category.reorder_request',
+    subjectType: 'Category',
+    subjectParam: 'body.orderedIds.0',
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Replace the sortOrder sequence.' })
   reorder(

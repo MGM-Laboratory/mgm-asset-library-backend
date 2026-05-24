@@ -1,8 +1,29 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
 import { OptionalAuthGuard } from '../../infra/keycloak/optional-auth.guard';
 import { CommentsService } from './comments.service';
 import {
@@ -62,10 +83,7 @@ export class CommentsController {
   @ApiBearerAuth('keycloak')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Admin-only soft delete.' })
-  remove(
-    @AuthUser() principal: AuthenticatedRequestUser,
-    @Param('id') id: string,
-  ): Promise<void> {
+  remove(@AuthUser() principal: AuthenticatedRequestUser, @Param('id') id: string): Promise<void> {
     return this.comments.adminDelete(id, principal.user);
   }
 

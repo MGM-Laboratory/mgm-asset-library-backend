@@ -73,9 +73,12 @@ export class DiscoverService {
 
     const featured: DiscoverFeaturedDto[] = await Promise.all(
       featuredRows.map(async (slot) => {
-        const assetTranslation = slot.asset.translations.find((t) => t.locale === locale)
-          ?? slot.asset.translations[0];
-        const customShort = resolveLocalized<string>(slot.customShortDescription as LocalizedJson | null, locale);
+        const assetTranslation =
+          slot.asset.translations.find((t) => t.locale === locale) ?? slot.asset.translations[0];
+        const customShort = resolveLocalized<string>(
+          slot.customShortDescription as LocalizedJson | null,
+          locale,
+        );
         const bannerKey = slot.customBannerKey ?? slot.asset.thumbnailKey;
         const bannerRole = slot.customBannerKey ? 'thumbs' : 'thumbs';
         return {
@@ -113,6 +116,9 @@ export class DiscoverService {
   }
 
   async invalidate(): Promise<void> {
-    await Promise.all([this.redis.client.del(CACHE_KEY('en')), this.redis.client.del(CACHE_KEY('id'))]);
+    await Promise.all([
+      this.redis.client.del(CACHE_KEY('en')),
+      this.redis.client.del(CACHE_KEY('id')),
+    ]);
   }
 }

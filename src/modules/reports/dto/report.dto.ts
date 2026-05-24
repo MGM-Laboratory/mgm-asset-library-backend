@@ -44,7 +44,9 @@ export class ActionReportDto {
   @IsIn(['NOTHING', 'ARCHIVE_ASSET', 'DELETE_ASSET', 'FORCE_DELETE_ASSET'])
   action!: ReportActionKind;
 
-  @ApiPropertyOptional({ description: 'Required when action=FORCE_DELETE_ASSET — value: "I understand".' })
+  @ApiPropertyOptional({
+    description: 'Required when action=FORCE_DELETE_ASSET — value: "I understand".',
+  })
   @IsOptional()
   @IsString()
   confirm?: string;

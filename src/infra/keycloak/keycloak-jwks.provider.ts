@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { createRemoteJWKSet, JWTPayload, jwtVerify, JWTVerifyGetKey } from 'jose';
 import { AppConfigService } from '../../config/app-config.service';
 
@@ -22,7 +22,6 @@ export interface KeycloakClaims extends JWTPayload {
  */
 @Injectable()
 export class KeycloakJwksProvider {
-  private readonly logger = new Logger(KeycloakJwksProvider.name);
   private readonly issuer: string;
   private readonly audience: string;
   private readonly algorithms: string[];

@@ -4,8 +4,8 @@ import { EmailRendererService } from '../../src/modules/notifications/email-rend
 describe('EmailRendererService', () => {
   const renderer = new EmailRendererService();
 
-  it('renders a known event in English', () => {
-    const result = renderer.render(NotificationType.COMMENT_CREATED, 'en', {
+  it('renders a known event in English', async () => {
+    const result = await renderer.render(NotificationType.COMMENT_CREATED, 'en', {
       author: { displayName: 'Ada' },
       assetTitle: 'Crazy Swords',
       commentExcerpt: 'Nice asset!',
@@ -17,8 +17,8 @@ describe('EmailRendererService', () => {
     expect(result.text).toContain('Nice asset!');
   });
 
-  it('falls back to English when an Indonesian field is missing', () => {
-    const result = renderer.render(NotificationType.FEATURED_FEATURED, 'id', {
+  it('falls back to English when an Indonesian field is missing', async () => {
+    const result = await renderer.render(NotificationType.FEATURED_FEATURED, 'id', {
       assetTitle: 'Sword Pack',
       links: { discoverUrl: 'https://asset.labmgm.org/discover' },
     });
@@ -27,8 +27,8 @@ describe('EmailRendererService', () => {
     expect(result.html).toContain('Sword Pack');
   });
 
-  it('supports nested `{{a.b.c}}` paths', () => {
-    const result = renderer.render(NotificationType.COMMENT_REPLY, 'en', {
+  it('supports nested `{{a.b.c}}` paths', async () => {
+    const result = await renderer.render(NotificationType.COMMENT_REPLY, 'en', {
       author: { displayName: 'Linus' },
       assetTitle: 'X',
       commentExcerpt: 'reply',

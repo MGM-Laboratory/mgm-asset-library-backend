@@ -20,6 +20,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
+    if (process.env.OPENAPI_EXPORT === '1') return;
     await this.client.connect();
     this.logger.log('Connected to Redis.');
   }

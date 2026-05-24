@@ -11,16 +11,38 @@ const HIDDEN_MODES = ['true', 'false', 'all'] as const;
 
 const asArray = ({ value }: { value: unknown }): string[] | undefined => {
   if (value == null || value === '') return undefined;
-  return Array.isArray(value) ? value.map(String) : String(value).split(',').map((s) => s.trim()).filter(Boolean);
+  return Array.isArray(value)
+    ? value.map(String)
+    : String(value)
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
 };
 
 export class ListLibraryQueryDto extends ListQueryDto {
   @ApiPropertyOptional() @IsOptional() @IsString() q?: string;
-  @ApiPropertyOptional({ type: [String] }) @IsOptional() @Transform(asArray) @IsArray() categoryIds?: string[];
-  @ApiPropertyOptional({ type: [String] }) @IsOptional() @Transform(asArray) @IsArray() tags?: string[];
-  @ApiPropertyOptional({ enum: AssetEngine }) @IsOptional() @IsEnum(AssetEngine) engine?: AssetEngine;
-  @ApiPropertyOptional({ enum: HIDDEN_MODES }) @IsOptional() @IsIn(HIDDEN_MODES as unknown as string[]) hidden?: 'true' | 'false' | 'all';
-  @ApiPropertyOptional({ enum: LIBRARY_SORTS }) @IsOptional() @IsIn(LIBRARY_SORTS as unknown as string[]) sort?: LibrarySort;
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @Transform(asArray)
+  @IsArray()
+  categoryIds?: string[];
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @Transform(asArray)
+  @IsArray()
+  tags?: string[];
+  @ApiPropertyOptional({ enum: AssetEngine })
+  @IsOptional()
+  @IsEnum(AssetEngine)
+  engine?: AssetEngine;
+  @ApiPropertyOptional({ enum: HIDDEN_MODES })
+  @IsOptional()
+  @IsIn(HIDDEN_MODES as unknown as string[])
+  hidden?: 'true' | 'false' | 'all';
+  @ApiPropertyOptional({ enum: LIBRARY_SORTS })
+  @IsOptional()
+  @IsIn(LIBRARY_SORTS as unknown as string[])
+  sort?: LibrarySort;
 }
 
 export class LibraryItemDto {

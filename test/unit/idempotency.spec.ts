@@ -1,5 +1,6 @@
 import { IdempotencyService } from '../../src/common/idempotency/idempotency.service';
 import { ConflictDomainException } from '../../src/common/errors/problem.dto';
+import { RedisService } from '../../src/infra/redis/redis.service';
 
 class FakeRedisClient {
   private store = new Map<string, string>();
@@ -15,7 +16,7 @@ class FakeRedisClient {
 describe('IdempotencyService', () => {
   function build() {
     const client = new FakeRedisClient();
-    const svc = new IdempotencyService({ client } as unknown as { client: FakeRedisClient });
+    const svc = new IdempotencyService({ client } as unknown as RedisService);
     return { svc, client };
   }
 
@@ -34,7 +35,9 @@ describe('IdempotencyService', () => {
   it('raises a conflict when the body differs', async () => {
     const { svc } = build();
     await svc.store('user-1', 'POST /assets', 'k1', { a: 1 }, 201, { id: 'cln_asset' });
-    await expect(svc.lookup('user-1', 'POST /assets', 'k1', { a: 2 })).rejects.toBeInstanceOf(ConflictDomainException);
+    await expect(svc.lookup('user-1', 'POST /assets', 'k1', { a: 2 })).rejects.toBeInstanceOf(
+      ConflictDomainException,
+    );
   });
 
   it('keys cache per user — separate users get separate slots', async () => {

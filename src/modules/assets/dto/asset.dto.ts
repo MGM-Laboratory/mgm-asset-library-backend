@@ -196,9 +196,12 @@ export class AssetVersionPayloadDto {
   @ApiProperty() avStatus!: string;
   @ApiProperty() bytesTotal!: string;
   @ApiProperty() fileCount!: number;
-  @ApiProperty({ type: AssetVersionFileTreeNodeDto, isArray: true }) files!: AssetVersionFileTreeNodeDto[];
-  @ApiProperty({ type: AssetVersionCompatibilityDto, isArray: true }) compatibility!: AssetVersionCompatibilityDto[];
-  @ApiProperty({ type: AssetVersionDependencyDto, isArray: true }) dependencies!: AssetVersionDependencyDto[];
+  @ApiProperty({ type: AssetVersionFileTreeNodeDto, isArray: true })
+  files!: AssetVersionFileTreeNodeDto[];
+  @ApiProperty({ type: AssetVersionCompatibilityDto, isArray: true })
+  compatibility!: AssetVersionCompatibilityDto[];
+  @ApiProperty({ type: AssetVersionDependencyDto, isArray: true })
+  dependencies!: AssetVersionDependencyDto[];
   @ApiProperty() requiresEmptyProject!: boolean;
 }
 

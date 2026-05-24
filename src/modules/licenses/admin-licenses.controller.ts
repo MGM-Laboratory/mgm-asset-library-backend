@@ -1,15 +1,28 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuditAction } from '../../common/audit/audit-action.decorator';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AdminGuard } from '../../common/guards/admin.guard';
 import { AuthenticatedRequestUser } from '../../infra/keycloak/keycloak-auth.guard';
 import { AdminLicensesService } from './admin-licenses.service';
-import {
-  AdminLicenseDto,
-  CreateLicenseDto,
-  UpdateLicenseDto,
-} from './dto/admin-license.dto';
+import { AdminLicenseDto, CreateLicenseDto, UpdateLicenseDto } from './dto/admin-license.dto';
 
 @ApiTags('Admin')
 @ApiBearerAuth('keycloak')
@@ -26,7 +39,11 @@ export class AdminLicensesController {
   }
 
   @Post()
-  @AuditAction({ action: 'license.create_request', subjectType: 'License', subjectParam: 'body.slug' })
+  @AuditAction({
+    action: 'license.create_request',
+    subjectType: 'License',
+    subjectParam: 'body.slug',
+  })
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ type: AdminLicenseDto })
   create(
@@ -51,10 +68,7 @@ export class AdminLicensesController {
   @Delete(':id')
   @AuditAction({ action: 'license.delete_request', subjectType: 'License' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(
-    @AuthUser() principal: AuthenticatedRequestUser,
-    @Param('id') id: string,
-  ): Promise<void> {
+  remove(@AuthUser() principal: AuthenticatedRequestUser, @Param('id') id: string): Promise<void> {
     return this.admin.remove(id, principal.user);
   }
 }

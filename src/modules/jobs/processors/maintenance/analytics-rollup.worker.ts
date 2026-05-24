@@ -15,7 +15,10 @@ import { JobWorkerBase } from '../../worker-base';
  * DOWNLOAD_RAW_RETENTION_DAYS.
  */
 @Injectable()
-export class AnalyticsRollupWorker extends JobWorkerBase<AnalyticsRollupJob> implements OnModuleInit {
+export class AnalyticsRollupWorker
+  extends JobWorkerBase<AnalyticsRollupJob>
+  implements OnModuleInit
+{
   constructor(
     config: AppConfigService,
     sentry: SentryService,
@@ -25,23 +28,29 @@ export class AnalyticsRollupWorker extends JobWorkerBase<AnalyticsRollupJob> imp
     super(QUEUE.ANALYTICS_ROLLUP, config, sentry);
   }
 
-  async onModuleInit(): Promise<void> {
+  override async onModuleInit(): Promise<void> {
     super.onModuleInit();
-    await this.producer.queue(QUEUE.ANALYTICS_ROLLUP).add(
-      'cron',
-      { triggeredAt: new Date().toISOString() },
-      { jobId: 'analytics-rollup-cron', repeat: { pattern: '0 2 * * *', tz: 'UTC' } },
-    );
+    await this.producer
+      .queue(QUEUE.ANALYTICS_ROLLUP)
+      .add(
+        'cron',
+        { triggeredAt: new Date().toISOString() },
+        { jobId: 'analytics-rollup-cron', repeat: { pattern: '0 2 * * *', tz: 'UTC' } },
+      );
   }
 
-  async process(_job: Job<AnalyticsRollupJob>): Promise<void> {
+  override async process(_job: Job<AnalyticsRollupJob>): Promise<void> {
     const now = new Date();
-    const yesterdayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+    const yesterdayUtc = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1),
+    );
     const todayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
     // Per-(asset, date) aggregate — raw SQL because Prisma's groupBy can't
     // produce nested JSON aggregates.
-    const dailyRows = await this.prisma.$queryRaw<DailyRow[]>(Prisma.sql`
+    const dailyRows = await this.prisma
+      .$queryRaw<DailyRow[]>(
+        Prisma.sql`
       SELECT "assetId",
              COUNT(*)::int AS count,
              COUNT(DISTINCT "userId")::int AS "uniqueUsers",
@@ -56,7 +65,9 @@ export class AnalyticsRollupWorker extends JobWorkerBase<AnalyticsRollupJob> imp
         WHERE "createdAt" >= ${yesterdayUtc} AND "createdAt" < ${todayUtc}
       ) sub
       GROUP BY "assetId"
-    `).catch(() => [] as DailyRow[]);
+    `,
+      )
+      .catch(() => [] as DailyRow[]);
 
     for (const row of dailyRows) {
       await this.prisma.downloadDaily.upsert({
@@ -96,7 +107,9 @@ export class AnalyticsRollupWorker extends JobWorkerBase<AnalyticsRollupJob> imp
     }
 
     // Trim raw downloads past retention.
-    const cutoff = new Date(Date.now() - this.config.get('DOWNLOAD_RAW_RETENTION_DAYS') * 86_400_000);
+    const cutoff = new Date(
+      Date.now() - this.config.get('DOWNLOAD_RAW_RETENTION_DAYS') * 86_400_000,
+    );
     const trimmed = await this.prisma.download.deleteMany({ where: { createdAt: { lt: cutoff } } });
     this.logger.log(
       `analytics-rollup: ${dailyRows.length} daily rows, ${totals.length} stats refreshed, ${trimmed.count} raw rows trimmed`,

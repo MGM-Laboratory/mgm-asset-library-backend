@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as Sentry from '@sentry/node';
 
 export interface SentryBootstrapOptions {
@@ -26,8 +26,6 @@ export function initSentry(opts: SentryBootstrapOptions): void {
 
 @Injectable()
 export class SentryService {
-  private readonly logger = new Logger(SentryService.name);
-
   get isInitialized(): boolean {
     return initialized;
   }

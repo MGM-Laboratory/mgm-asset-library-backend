@@ -14,6 +14,8 @@ export class UserPublicProfileDto {
   @ApiProperty({ type: AvatarDto }) avatar!: AvatarDto;
   @ApiProperty() joinedAt!: string;
   @ApiProperty() publishedAssetCount!: number;
-  @ApiPropertyOptional({ description: 'Only present when the requester is the user themselves or an admin.' })
+  @ApiPropertyOptional({
+    description: 'Only present when the requester is the user themselves or an admin.',
+  })
   email?: string;
 }

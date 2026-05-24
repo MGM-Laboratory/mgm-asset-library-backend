@@ -21,7 +21,10 @@ export interface UnityPackageMeta {
  *   - if we find anything under `ProjectSettings/` flip `hasProjectSettings`;
  *   - sniff for URP/HDRP/SRP/BuiltIn asmdefs to fill `renderPipelineHints`.
  */
-export async function extractUnityPackage(filePath: string, maxBytes = 50_000_000): Promise<UnityPackageMeta> {
+export async function extractUnityPackage(
+  filePath: string,
+  maxBytes = 50_000_000,
+): Promise<UnityPackageMeta> {
   const meta: UnityPackageMeta = {
     contents: [],
     renderPipelineHints: [],
@@ -58,10 +61,12 @@ export async function extractUnityPackage(filePath: string, maxBytes = 50_000_00
           if (trimmed) {
             meta.contents.push(trimmed);
             if (trimmed.startsWith('ProjectSettings/')) meta.hasProjectSettings = true;
-            if (/URP|UniversalRP|Universal Render Pipeline/i.test(trimmed)) meta.renderPipelineHints.push('URP');
+            if (/URP|UniversalRP|Universal Render Pipeline/i.test(trimmed))
+              meta.renderPipelineHints.push('URP');
             if (/HDRP|HighDefinition/i.test(trimmed)) meta.renderPipelineHints.push('HDRP');
             if (/Built[-_ ]?in/i.test(trimmed)) meta.renderPipelineHints.push('BUILT_IN');
-            if (/Shader Graph|ScriptableRenderPipeline/i.test(trimmed)) meta.renderPipelineHints.push('SRP');
+            if (/Shader Graph|ScriptableRenderPipeline/i.test(trimmed))
+              meta.renderPipelineHints.push('SRP');
           }
         } else if (isProjectVersion) {
           const m = text.match(/m_EditorVersion:\s*([\w.]+)/);
@@ -70,7 +75,10 @@ export async function extractUnityPackage(filePath: string, maxBytes = 50_000_00
           try {
             const parsed = JSON.parse(text) as { dependencies?: Record<string, string> };
             if (parsed.dependencies) {
-              meta.dependencies = Object.entries(parsed.dependencies).map(([name, version]) => ({ name, version }));
+              meta.dependencies = Object.entries(parsed.dependencies).map(([name, version]) => ({
+                name,
+                version,
+              }));
             }
           } catch {
             // malformed manifest — ignore

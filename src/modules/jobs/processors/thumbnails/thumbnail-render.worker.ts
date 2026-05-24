@@ -49,7 +49,13 @@ export class ThumbnailRenderWorker extends JobWorkerBase<ThumbnailRenderJob> {
     }
 
     const timeoutMs = this.config.get('GLTF_CONVERT_TIMEOUT_SEC') * 1000;
-    const scratch = await openScratch(this.s3, 'assets', glbKey, job.id ?? `job-${Date.now()}`, this.config.get('WORKER_SCRATCH_DIR'));
+    const scratch = await openScratch(
+      this.s3,
+      'assets',
+      glbKey,
+      job.id ?? `job-${Date.now()}`,
+      this.config.get('WORKER_SCRATCH_DIR'),
+    );
     const pngPath = join(scratch.dir, 'render.png');
     const renderScript = join(process.cwd(), 'scripts', 'blender', 'render_glb_preview.py');
     try {
@@ -62,8 +68,14 @@ export class ThumbnailRenderWorker extends JobWorkerBase<ThumbnailRenderJob> {
         throw new Error(`Blender render exit ${res.exitCode}: ${res.stderr.slice(-512)}`);
       }
       const png = await readFile(pngPath);
-      const webp1x = await sharp(png).resize(1280, 720, { fit: 'cover' }).webp({ quality: 86 }).toBuffer();
-      const webp2x = await sharp(png).resize(2560, 1440, { fit: 'cover' }).webp({ quality: 86 }).toBuffer();
+      const webp1x = await sharp(png)
+        .resize(1280, 720, { fit: 'cover' })
+        .webp({ quality: 86 })
+        .toBuffer();
+      const webp2x = await sharp(png)
+        .resize(2560, 1440, { fit: 'cover' })
+        .webp({ quality: 86 })
+        .toBuffer();
       const baseKey = `${version.s3Prefix}__derived__/thumbnails/auto`;
       await this.s3.client.send(
         new PutObjectCommand({
@@ -92,7 +104,9 @@ export class ThumbnailRenderWorker extends JobWorkerBase<ThumbnailRenderJob> {
   }
 
   /** Returns the S3 key of the largest derived GLB across the version. */
-  private pickLargestGlb(files: Array<{ s3Key: string; meta: unknown; bytes: bigint }>): string | null {
+  private pickLargestGlb(
+    files: Array<{ s3Key: string; meta: unknown; bytes: bigint }>,
+  ): string | null {
     let bestKey: string | null = null;
     let bestVerts = -1;
     let bestBytes = -1n;

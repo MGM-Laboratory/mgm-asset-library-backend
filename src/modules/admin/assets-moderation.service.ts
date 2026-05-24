@@ -7,10 +7,12 @@ import {
   BadRequestDomainException,
   NotFoundDomainException,
 } from '../../common/errors/problem.dto';
-import { MEILI_INDEX_ASSETS, MeilisearchService } from '../../infra/meilisearch/meilisearch.service';
+import {
+  MEILI_INDEX_ASSETS,
+  MeilisearchService,
+} from '../../infra/meilisearch/meilisearch.service';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { S3Service } from '../../infra/s3/s3.service';
-import { AssetsService } from '../assets/assets.service';
 import { CategoriesService } from '../categories/categories.service';
 import { JobsProducer } from '../jobs/jobs.producer';
 
@@ -24,7 +26,6 @@ import { JobsProducer } from '../jobs/jobs.producer';
 export class AdminAssetsModerationService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly assets: AssetsService,
     private readonly s3: S3Service,
     private readonly meili: MeilisearchService,
     private readonly categories: CategoriesService,
@@ -34,13 +35,17 @@ export class AdminAssetsModerationService {
 
   private async findOrThrow(id: string): Promise<Asset> {
     const asset = await this.prisma.asset.findUnique({ where: { id } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${id} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${id} not found.`);
     return asset;
   }
 
   async archive(id: string, admin: User, reason: string): Promise<void> {
     if (!reason || reason.trim().length === 0) {
-      throw new BadRequestDomainException(ErrorCode.ASSET_ARCHIVE_BLOCKED, 'A reason is required when an admin archives.');
+      throw new BadRequestDomainException(
+        ErrorCode.ASSET_ARCHIVE_BLOCKED,
+        'A reason is required when an admin archives.',
+      );
     }
     const asset = await this.findOrThrow(id);
     await this.prisma.asset.update({
@@ -61,7 +66,10 @@ export class AdminAssetsModerationService {
   async restore(id: string, admin: User): Promise<void> {
     const asset = await this.findOrThrow(id);
     if (asset.status !== 'ARCHIVED' && asset.status !== 'DELETED') {
-      throw new BadRequestDomainException(ErrorCode.ASSET_ARCHIVE_BLOCKED, 'Asset is not archived.');
+      throw new BadRequestDomainException(
+        ErrorCode.ASSET_ARCHIVE_BLOCKED,
+        'Asset is not archived.',
+      );
     }
     await this.prisma.asset.update({
       where: { id },
@@ -80,7 +88,10 @@ export class AdminAssetsModerationService {
 
   async softDelete(id: string, admin: User, reason: string): Promise<void> {
     if (!reason || reason.trim().length === 0) {
-      throw new BadRequestDomainException(ErrorCode.ASSET_ARCHIVE_BLOCKED, 'A reason is required when an admin soft-deletes.');
+      throw new BadRequestDomainException(
+        ErrorCode.ASSET_ARCHIVE_BLOCKED,
+        'A reason is required when an admin soft-deletes.',
+      );
     }
     const asset = await this.findOrThrow(id);
     await this.prisma.asset.update({

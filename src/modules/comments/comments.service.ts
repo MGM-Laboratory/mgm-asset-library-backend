@@ -30,9 +30,10 @@ export class CommentsService {
 
   async list(assetId: string, query: ListCommentsQueryDto): Promise<CommentListResponseDto> {
     const cursor = decodeCursor(query.cursor ?? null);
-    const kindFilter: Prisma.CommentWhereInput = query.kind && query.kind !== 'ALL'
-      ? { kind: query.kind === 'ISSUE' ? 'ISSUE' : 'COMMENT' }
-      : {};
+    const kindFilter: Prisma.CommentWhereInput =
+      query.kind && query.kind !== 'ALL'
+        ? { kind: query.kind === 'ISSUE' ? 'ISSUE' : 'COMMENT' }
+        : {};
 
     // Top-level rows first (parent IS NULL); then we hydrate the whole subtree
     // with one query and stitch in memory. Capped at depth 5 by service-side
@@ -53,11 +54,14 @@ export class CommentsService {
     const topIds = new Set(topRowsClipped.map((c) => c.id));
     const subtreeRows = await this.fetchSubtree(topRowsClipped.map((c) => c.id));
 
-    const items: CommentNodeDto[] = topRowsClipped.map((top) => this.toTree(top.id, [top, ...subtreeRows], topIds));
+    const items: CommentNodeDto[] = topRowsClipped.map((top) =>
+      this.toTree(top.id, [top, ...subtreeRows], topIds),
+    );
     const last = topRowsClipped[topRowsClipped.length - 1];
-    const nextCursor = hasMore && last
-      ? encodeCursor({ id: last.id, createdAt: last.createdAt.toISOString() })
-      : null;
+    const nextCursor =
+      hasMore && last
+        ? encodeCursor({ id: last.id, createdAt: last.createdAt.toISOString() })
+        : null;
     return { items, pageInfo: { nextCursor, hasMore } };
   }
 
@@ -89,7 +93,11 @@ export class CommentsService {
     return rows;
   }
 
-  private toTree(rootId: string, allRows: Array<CommentRow | (CommentRow & { author?: User })>, topIds: Set<string>): CommentNodeDto {
+  private toTree(
+    rootId: string,
+    allRows: Array<CommentRow | (CommentRow & { author?: User })>,
+    topIds: Set<string>,
+  ): CommentNodeDto {
     const byParent = new Map<string | null, CommentRow[]>();
     for (const row of allRows) {
       const key = row.parentId;
@@ -123,21 +131,23 @@ export class CommentsService {
 
   async create(assetId: string, dto: CreateCommentDto, author: User): Promise<{ id: string }> {
     const asset = await this.prisma.asset.findUnique({ where: { id: assetId } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
 
     const body = validateLiteTipTap(dto.body) as unknown as Prisma.InputJsonValue;
 
     let depth = 0;
-    let parentKind: CommentKind | null = null;
     if (dto.parentId) {
       const parent = await this.prisma.comment.findUnique({ where: { id: dto.parentId } });
       if (!parent || parent.assetId !== assetId) {
         throw new NotFoundDomainException(ErrorCode.COMMENT_NOT_FOUND, 'Parent comment not found.');
       }
       depth = parent.depth + 1;
-      parentKind = parent.kind;
       if (depth >= MAX_DEPTH) {
-        throw new BadRequestDomainException(ErrorCode.COMMENT_DEPTH_EXCEEDED, `Replies nest at most ${MAX_DEPTH} levels deep.`);
+        throw new BadRequestDomainException(
+          ErrorCode.COMMENT_DEPTH_EXCEEDED,
+          `Replies nest at most ${MAX_DEPTH} levels deep.`,
+        );
       }
     }
     // Only top-level rows may be kind=ISSUE; replies inside an issue thread
@@ -176,7 +186,10 @@ export class CommentsService {
     } else if (asset.ownerId !== author.id) {
       await this.jobs.enqueueNotify({
         recipientUserId: asset.ownerId,
-        type: effectiveKind === 'ISSUE' ? NotificationType.ISSUE_CREATED : NotificationType.COMMENT_CREATED,
+        type:
+          effectiveKind === 'ISSUE'
+            ? NotificationType.ISSUE_CREATED
+            : NotificationType.COMMENT_CREATED,
         payload,
         actor: { id: author.id, displayName: author.displayName, email: author.email },
       });
@@ -215,9 +228,16 @@ export class CommentsService {
 
   async edit(commentId: string, body: object, editor: User): Promise<void> {
     const row = await this.prisma.comment.findUnique({ where: { id: commentId } });
-    if (!row || row.deletedAt) throw new NotFoundDomainException(ErrorCode.COMMENT_NOT_FOUND, `Comment ${commentId} not found.`);
+    if (!row || row.deletedAt)
+      throw new NotFoundDomainException(
+        ErrorCode.COMMENT_NOT_FOUND,
+        `Comment ${commentId} not found.`,
+      );
     if (row.authorId !== editor.id) {
-      throw new ForbiddenDomainException(ErrorCode.AUTH_FORBIDDEN, 'You can only edit your own comments.');
+      throw new ForbiddenDomainException(
+        ErrorCode.AUTH_FORBIDDEN,
+        'You can only edit your own comments.',
+      );
     }
     const sanitized = validateLiteTipTap(body) as unknown as Prisma.InputJsonValue;
     await this.prisma.comment.update({
@@ -227,9 +247,14 @@ export class CommentsService {
   }
 
   async adminDelete(commentId: string, admin: User): Promise<void> {
-    if (!admin.isAdmin) throw new ForbiddenDomainException(ErrorCode.AUTH_FORBIDDEN, 'Admins only.');
+    if (!admin.isAdmin)
+      throw new ForbiddenDomainException(ErrorCode.AUTH_FORBIDDEN, 'Admins only.');
     const row = await this.prisma.comment.findUnique({ where: { id: commentId } });
-    if (!row) throw new NotFoundDomainException(ErrorCode.COMMENT_NOT_FOUND, `Comment ${commentId} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(
+        ErrorCode.COMMENT_NOT_FOUND,
+        `Comment ${commentId} not found.`,
+      );
     await this.prisma.comment.update({
       where: { id: commentId },
       data: { deletedAt: new Date() },
@@ -241,12 +266,22 @@ export class CommentsService {
       where: { id: commentId },
       include: { asset: { select: { ownerId: true } } },
     });
-    if (!row) throw new NotFoundDomainException(ErrorCode.COMMENT_NOT_FOUND, `Comment ${commentId} not found.`);
+    if (!row)
+      throw new NotFoundDomainException(
+        ErrorCode.COMMENT_NOT_FOUND,
+        `Comment ${commentId} not found.`,
+      );
     if (row.kind !== 'ISSUE' || row.parentId !== null) {
-      throw new BadRequestDomainException(ErrorCode.COMMENT_NOT_FOUND, 'Only top-level issues have a status.');
+      throw new BadRequestDomainException(
+        ErrorCode.COMMENT_NOT_FOUND,
+        'Only top-level issues have a status.',
+      );
     }
     if (!requester.isAdmin && row.asset.ownerId !== requester.id) {
-      throw new ForbiddenDomainException(ErrorCode.AUTH_FORBIDDEN, 'Only the asset owner or an admin can change issue status.');
+      throw new ForbiddenDomainException(
+        ErrorCode.AUTH_FORBIDDEN,
+        'Only the asset owner or an admin can change issue status.',
+      );
     }
     await this.prisma.comment.update({ where: { id: commentId }, data: { status } });
     if (row.authorId !== requester.id) {
@@ -263,7 +298,11 @@ export class CommentsService {
           assetTitle: asset?.title ?? '',
           commentId,
           newStatus: status,
-          changedBy: { id: requester.id, displayName: requester.displayName, email: requester.email },
+          changedBy: {
+            id: requester.id,
+            displayName: requester.displayName,
+            email: requester.email,
+          },
         },
         actor: { id: requester.id, displayName: requester.displayName, email: requester.email },
       });

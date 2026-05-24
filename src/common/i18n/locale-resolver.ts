@@ -12,7 +12,10 @@ export type LocalizedJson<T = string> = Partial<Record<Locale, T>>;
  *      the order they were serialized — Postgres preserves insertion order for
  *      json columns).
  */
-export function resolveLocalized<T>(value: LocalizedJson<T> | null | undefined, locale: Locale): T | null {
+export function resolveLocalized<T>(
+  value: LocalizedJson<T> | null | undefined,
+  locale: Locale,
+): T | null {
   if (!value) return null;
   if (value[locale] != null) return value[locale] as T;
   for (const key of Object.keys(value) as Locale[]) {

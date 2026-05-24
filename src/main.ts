@@ -6,6 +6,7 @@ import multipart from '@fastify/multipart';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { WsAdapter } from '@nestjs/platform-ws';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger as PinoLogger } from 'nestjs-pino';
 import 'reflect-metadata';
@@ -46,7 +47,7 @@ async function bootstrapApi(env: ReturnType<typeof validateEnv>): Promise<void> 
     bodyLimit: 10 * 1024 * 1024,
     // Honour inbound X-Request-Id when SWAG / a sibling service supplied one;
     // otherwise Fastify mints a v4 UUID we surface to clients + Pino logs.
-    genReqId: (req) => {
+    genReqId: (req: import('http').IncomingMessage) => {
       const inbound = req.headers['x-request-id'];
       const value = Array.isArray(inbound) ? inbound[0] : inbound;
       return value && value.length <= 200
@@ -54,9 +55,8 @@ async function bootstrapApi(env: ReturnType<typeof validateEnv>): Promise<void> 
         : `req_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
     },
   });
-  const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, {
-    bufferLogs: true,
-  });
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter);
+  app.useWebSocketAdapter(new WsAdapter(app));
   app.useLogger(app.get(PinoLogger));
   // Helmet defaults are tight; CSP is scoped narrowly because Swagger UI on
   // /docs needs inline scripts + styles to run.
@@ -87,7 +87,14 @@ async function bootstrapApi(env: ReturnType<typeof validateEnv>): Promise<void> 
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: ['authorization', 'content-type', 'idempotency-key', 'x-request-id'],
-    exposedHeaders: ['x-request-id', 'retry-after', 'x-total-draft', 'x-total-published', 'x-total-archived', 'x-total-deleted'],
+    exposedHeaders: [
+      'x-request-id',
+      'retry-after',
+      'x-total-draft',
+      'x-total-published',
+      'x-total-archived',
+      'x-total-deleted',
+    ],
   });
 
   app.useGlobalPipes(
@@ -140,7 +147,12 @@ async function bootstrapWorker(env: ReturnType<typeof validateEnv>): Promise<voi
 }
 
 bootstrap().catch((err) => {
-  // eslint-disable-next-line no-console
-  console.error('Fatal bootstrap error:', err);
+  // fs.writeSync(2, ...) is a synchronous write to stderr (fd 2) — unlike
+  // process.stderr.write() it cannot be interrupted by process.exit().
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('fs').writeSync(
+    2,
+    `Fatal bootstrap error: ${err instanceof Error ? err.stack : String(err)}\n`,
+  );
   process.exit(1);
 });

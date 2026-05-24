@@ -1,9 +1,23 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
 import { AuthService } from './auth.service';
 import {
   MeResponseDto,
@@ -33,7 +47,7 @@ export class AuthController {
   @Patch('me/locale')
   @UseGuards(KeycloakAuthGuard)
   @ApiBearerAuth('keycloak')
-  @ApiOperation({ summary: 'Persist the user\'s preferred locale.' })
+  @ApiOperation({ summary: "Persist the user's preferred locale." })
   @ApiOkResponse({ type: MeResponseDto })
   async updateLocale(
     @AuthUser() principal: AuthenticatedRequestUser,
@@ -53,7 +67,9 @@ export class AuthController {
   @RateLimit({ windowSec: 60, max: 20, scope: 'ip', name: 'auth.plugin_exchange' })
   @Post('plugin/exchange')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Exchange a Keycloak access token for a long-lived plugin device token.' })
+  @ApiOperation({
+    summary: 'Exchange a Keycloak access token for a long-lived plugin device token.',
+  })
   @ApiOkResponse({ type: PluginExchangeResponseDto })
   async exchangePlugin(@Body() body: PluginExchangeDto): Promise<PluginExchangeResponseDto> {
     const issued = await this.auth.exchangePluginToken(body.keycloakAccessToken, body.deviceLabel);

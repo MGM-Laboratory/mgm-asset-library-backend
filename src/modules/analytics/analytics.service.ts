@@ -83,15 +83,24 @@ export class AnalyticsService {
       GROUP BY date ORDER BY date ASC
     `);
     return {
-      totals: { downloads: totalDownloads, saves: totalSaves, downloads7d: last7, downloads30d: last30 },
+      totals: {
+        downloads: totalDownloads,
+        saves: totalSaves,
+        downloads7d: last7,
+        downloads30d: last30,
+      },
       topAssets,
-      daily90d: daily.map((r) => ({ date: r.date.toISOString().slice(0, 10), count: Number(r.count) })),
+      daily90d: daily.map((r) => ({
+        date: r.date.toISOString().slice(0, 10),
+        count: Number(r.count),
+      })),
     };
   }
 
   async assetDetail(user: User, assetId: string): Promise<AssetAnalyticsDetail> {
     const asset = await this.prisma.asset.findUnique({ where: { id: assetId } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
     if (asset.ownerId !== user.id && !user.isAdmin) {
       throw new ForbiddenDomainException(ErrorCode.AUTH_FORBIDDEN, 'You do not own this asset.');
     }
@@ -104,15 +113,21 @@ export class AnalyticsService {
     const byCountry: Record<string, number> = {};
     const bySource: Record<string, number> = {};
     for (const row of daily) {
-      for (const [country, count] of Object.entries((row.byCountry as Record<string, number>) ?? {})) {
+      for (const [country, count] of Object.entries(
+        (row.byCountry as Record<string, number>) ?? {},
+      )) {
         byCountry[country] = (byCountry[country] ?? 0) + count;
       }
-      for (const [source, count] of Object.entries((row.bySource as Record<string, number>) ?? {})) {
+      for (const [source, count] of Object.entries(
+        (row.bySource as Record<string, number>) ?? {},
+      )) {
         bySource[source] = (bySource[source] ?? 0) + count;
       }
     }
 
-    const byVersionRaw = await this.prisma.$queryRaw<Array<{ versionId: string; semver: string; downloads: bigint }>>(Prisma.sql`
+    const byVersionRaw = await this.prisma.$queryRaw<
+      Array<{ versionId: string; semver: string; downloads: bigint }>
+    >(Prisma.sql`
       SELECT av.id AS "versionId", av.semver, COUNT(d.id)::bigint AS downloads
       FROM asset_versions av
       LEFT JOIN downloads d ON d."versionId" = av.id
@@ -120,7 +135,9 @@ export class AnalyticsService {
       GROUP BY av.id, av.semver
       ORDER BY downloads DESC
     `);
-    const byFileRaw = await this.prisma.$queryRaw<Array<{ fileId: string; relativePath: string; downloads: bigint }>>(Prisma.sql`
+    const byFileRaw = await this.prisma.$queryRaw<
+      Array<{ fileId: string; relativePath: string; downloads: bigint }>
+    >(Prisma.sql`
       SELECT af.id AS "fileId", af."relativePath", COUNT(d.id)::bigint AS downloads
       FROM asset_files af
       JOIN asset_versions av ON av.id = af."versionId"
@@ -136,8 +153,16 @@ export class AnalyticsService {
       daily: daily.map((d) => ({ date: d.date.toISOString().slice(0, 10), count: d.count })),
       byCountry,
       bySource,
-      byVersion: byVersionRaw.map((r) => ({ versionId: r.versionId, semver: r.semver, downloads: Number(r.downloads) })),
-      byFile: byFileRaw.map((r) => ({ fileId: r.fileId, relativePath: r.relativePath, downloads: Number(r.downloads) })),
+      byVersion: byVersionRaw.map((r) => ({
+        versionId: r.versionId,
+        semver: r.semver,
+        downloads: Number(r.downloads),
+      })),
+      byFile: byFileRaw.map((r) => ({
+        fileId: r.fileId,
+        relativePath: r.relativePath,
+        downloads: Number(r.downloads),
+      })),
     };
   }
 
@@ -148,13 +173,17 @@ export class AnalyticsService {
       WHERE "createdAt" >= ${from} AND "createdAt" < ${to}
       GROUP BY date ORDER BY date ASC
     `);
-    const totalsRow = await this.prisma.$queryRaw<Array<{ downloads: bigint; publishes: bigint; newUsers: bigint }>>(Prisma.sql`
+    const totalsRow = await this.prisma.$queryRaw<
+      Array<{ downloads: bigint; publishes: bigint; newUsers: bigint }>
+    >(Prisma.sql`
       SELECT
         (SELECT COUNT(*) FROM downloads WHERE "createdAt" >= ${from} AND "createdAt" < ${to})::bigint AS downloads,
         (SELECT COUNT(*) FROM assets WHERE "publishedAt" IS NOT NULL AND "publishedAt" >= ${from} AND "publishedAt" < ${to})::bigint AS publishes,
         (SELECT COUNT(*) FROM users WHERE "createdAt" >= ${from} AND "createdAt" < ${to})::bigint AS "newUsers"
     `);
-    const sourceRows = await this.prisma.$queryRaw<Array<{ source: string; count: bigint }>>(Prisma.sql`
+    const sourceRows = await this.prisma.$queryRaw<
+      Array<{ source: string; count: bigint }>
+    >(Prisma.sql`
       SELECT source, COUNT(*)::bigint AS count
       FROM downloads
       WHERE "createdAt" >= ${from} AND "createdAt" < ${to}
@@ -162,7 +191,10 @@ export class AnalyticsService {
     `);
     const totals = totalsRow[0] ?? { downloads: 0n, publishes: 0n, newUsers: 0n };
     return {
-      daily: dailyRows.map((r) => ({ date: r.date.toISOString().slice(0, 10), count: Number(r.count) })),
+      daily: dailyRows.map((r) => ({
+        date: r.date.toISOString().slice(0, 10),
+        count: Number(r.count),
+      })),
       totals: {
         downloads: Number(totals.downloads),
         publishes: Number(totals.publishes),

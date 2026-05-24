@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Notification, NotificationType, Prisma, User } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
@@ -16,8 +16,6 @@ export interface NotificationDto {
 
 @Injectable()
 export class NotificationsService {
-  private readonly logger = new Logger(NotificationsService.name);
-
   constructor(private readonly prisma: PrismaService) {}
 
   /** Used by the notify worker — writes a single inbox row and returns it. */
@@ -61,7 +59,10 @@ export class NotificationsService {
       pageInfo: {
         nextCursor:
           hasMore && slice.length
-            ? encodeCursor({ id: slice[slice.length - 1].id, createdAt: slice[slice.length - 1].createdAt.toISOString() })
+            ? encodeCursor({
+                id: slice[slice.length - 1].id,
+                createdAt: slice[slice.length - 1].createdAt.toISOString(),
+              })
             : null,
         hasMore,
       },
@@ -75,7 +76,10 @@ export class NotificationsService {
   async markRead(user: User, id: string): Promise<NotificationDto> {
     const row = await this.prisma.notification.findUnique({ where: { id } });
     if (!row || row.userId !== user.id) {
-      throw new NotFoundDomainException(ErrorCode.IDEMPOTENCY_KEY_REUSED, `Notification ${id} not found.`);
+      throw new NotFoundDomainException(
+        ErrorCode.IDEMPOTENCY_KEY_REUSED,
+        `Notification ${id} not found.`,
+      );
     }
     if (row.readAt) return this.toDto(row);
     const updated = await this.prisma.notification.update({
@@ -93,7 +97,10 @@ export class NotificationsService {
     return result.count;
   }
 
-  newWsEnvelope(type: string, payload: unknown): { type: string; id: string; ts: number; payload: unknown } {
+  newWsEnvelope(
+    type: string,
+    payload: unknown,
+  ): { type: string; id: string; ts: number; payload: unknown } {
     return { type, id: randomUUID(), ts: Date.now(), payload };
   }
 

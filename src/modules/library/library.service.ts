@@ -33,7 +33,10 @@ export class LibraryService {
     user: User,
     query: ListLibraryQueryDto,
     locale: Locale,
-  ): Promise<{ items: LibraryItemDto[]; pageInfo: { nextCursor: string | null; hasMore: boolean } }> {
+  ): Promise<{
+    items: LibraryItemDto[];
+    pageInfo: { nextCursor: string | null; hasMore: boolean };
+  }> {
     const limit = resolvePageSize(query.limit);
     const cursor = decodeCursor(query.cursor ?? null);
 
@@ -51,7 +54,10 @@ export class LibraryService {
       };
     }
     if (query.categoryIds?.length) {
-      where.asset = { ...(where.asset as Prisma.AssetWhereInput), categoryId: { in: query.categoryIds } };
+      where.asset = {
+        ...(where.asset as Prisma.AssetWhereInput),
+        categoryId: { in: query.categoryIds },
+      };
     }
     if (query.tags?.length) {
       where.asset = {
@@ -67,8 +73,8 @@ export class LibraryService {
       query.sort === 'alphabetical'
         ? [{ asset: { title: 'asc' } }, { id: 'desc' }]
         : query.sort === 'recentlyUpdated'
-        ? [{ asset: { updatedAt: 'desc' } }, { id: 'desc' }]
-        : [{ addedAt: 'desc' }, { id: 'desc' }];
+          ? [{ asset: { updatedAt: 'desc' } }, { id: 'desc' }]
+          : [{ addedAt: 'desc' }, { id: 'desc' }];
 
     const rows = await this.prisma.libraryItem.findMany({
       where,
@@ -87,15 +93,15 @@ export class LibraryService {
       })),
     );
     const last = itemsRaw[itemsRaw.length - 1];
-    const nextCursor = hasMore && last
-      ? encodeCursor({ id: last.id, createdAt: last.addedAt.toISOString() })
-      : null;
+    const nextCursor =
+      hasMore && last ? encodeCursor({ id: last.id, createdAt: last.addedAt.toISOString() }) : null;
     return { items, pageInfo: { nextCursor, hasMore } };
   }
 
   async add(user: User, assetId: string): Promise<void> {
     const asset = await this.prisma.asset.findUnique({ where: { id: assetId } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
     await this.prisma.libraryItem.upsert({
       where: { userId_assetId: { userId: user.id, assetId } },
       create: { userId: user.id, assetId },

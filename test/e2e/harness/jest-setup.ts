@@ -5,12 +5,14 @@
 process.env.NODE_ENV ??= 'staging';
 process.env.PROCESS_ROLE ??= 'api';
 process.env.PORT ??= '4099';
-process.env.DATABASE_URL ??= 'postgresql://mgm:mgm@localhost:5432/mgm_asset_library_e2e?schema=public';
+process.env.DATABASE_URL ??=
+  'postgresql://mgm:mgm@localhost:5432/mgm_asset_library_e2e?schema=public';
 process.env.MONGO_URL ??= 'mongodb://localhost:27017/mgm_asset_library_e2e';
 process.env.REDIS_URL ??= 'redis://localhost:6379/9';
 process.env.KEYCLOAK_ISSUER_URL ??= 'https://test-keycloak.local/realms/mgm';
 process.env.KEYCLOAK_AUDIENCE ??= 'mgm-asset-library';
-process.env.KEYCLOAK_JWKS_URI ??= 'https://test-keycloak.local/realms/mgm/protocol/openid-connect/certs';
+process.env.KEYCLOAK_JWKS_URI ??=
+  'https://test-keycloak.local/realms/mgm/protocol/openid-connect/certs';
 process.env.PUBLIC_BASE_URL ??= 'http://localhost:4099';
 process.env.S3_REGION ??= 'us-east-1';
 process.env.S3_ENDPOINT ??= 'http://localhost:9000';

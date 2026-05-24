@@ -20,10 +20,14 @@ export class EmailRendererService {
   private readonly logger = new Logger(EmailRendererService.name);
   private readonly htmlCache = new Map<string, string>();
 
-  render(type: NotificationType, locale: Locale, vars: Record<string, unknown>): RenderedEmail {
+  async render(
+    type: NotificationType,
+    locale: Locale,
+    vars: Record<string, unknown>,
+  ): Promise<RenderedEmail> {
     const spec = EMAIL_SPECS[type];
     if (!spec) throw new Error(`No email spec for notification type ${type}`);
-    const html = this.compileHtml(type, spec, locale);
+    const html = await this.compileHtml(type, spec, locale);
     const substituted = this.substitute(html, vars);
     return {
       subject: this.substitute(spec.subject[locale] ?? spec.subject.en, vars),
@@ -32,7 +36,11 @@ export class EmailRendererService {
     };
   }
 
-  private compileHtml(type: NotificationType, spec: EmailSpec, locale: Locale): string {
+  private async compileHtml(
+    type: NotificationType,
+    spec: EmailSpec,
+    locale: Locale,
+  ): Promise<string> {
     const cacheKey = `${type}:${locale}`;
     const cached = this.htmlCache.get(cacheKey);
     if (cached) return cached;
@@ -84,10 +92,10 @@ export class EmailRendererService {
       </mjml>
     `.trim();
 
-    const compiled = mjml2html(mjml, { validationLevel: 'soft' });
+    const compiled = await mjml2html(mjml, { validationLevel: 'soft' });
     if (compiled.errors.length) {
       this.logger.warn(
-        `MJML warnings for ${type}/${locale}: ${compiled.errors.map((e) => e.message).join('; ')}`,
+        `MJML warnings for ${type}/${locale}: ${compiled.errors.map((e: { message: string }) => e.message).join('; ')}`,
       );
     }
     this.htmlCache.set(cacheKey, compiled.html);

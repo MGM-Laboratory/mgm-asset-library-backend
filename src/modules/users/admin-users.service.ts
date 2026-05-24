@@ -3,10 +3,7 @@ import { NotificationType, Prisma, User } from '@prisma/client';
 import { AuditService } from '../../common/audit/audit.service';
 import { AppConfigService } from '../../config/app-config.service';
 import { ErrorCode } from '../../common/errors/error-code';
-import {
-  ConflictDomainException,
-  NotFoundDomainException,
-} from '../../common/errors/problem.dto';
+import { ConflictDomainException, NotFoundDomainException } from '../../common/errors/problem.dto';
 import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
 import { resolvePageSize } from '../../common/pagination/list-query.dto';
 import { PrismaService } from '../../infra/prisma/prisma.service';
@@ -59,7 +56,10 @@ export class AdminUsersService {
       pageInfo: {
         nextCursor:
           hasMore && slice.length
-            ? encodeCursor({ id: slice[slice.length - 1].id, createdAt: slice[slice.length - 1].createdAt.toISOString() })
+            ? encodeCursor({
+                id: slice[slice.length - 1].id,
+                createdAt: slice[slice.length - 1].createdAt.toISOString(),
+              })
             : null,
         hasMore,
       },
@@ -68,7 +68,8 @@ export class AdminUsersService {
 
   async promote(id: string, admin: User): Promise<void> {
     const target = await this.prisma.user.findUnique({ where: { id } });
-    if (!target) throw new NotFoundDomainException(ErrorCode.USER_NOT_FOUND, `User ${id} not found.`);
+    if (!target)
+      throw new NotFoundDomainException(ErrorCode.USER_NOT_FOUND, `User ${id} not found.`);
     if (target.isAdmin) return;
     await this.prisma.user.update({ where: { id }, data: { isAdmin: true } });
     await this.producer.enqueueNotify({
@@ -88,7 +89,8 @@ export class AdminUsersService {
 
   async demote(id: string, admin: User): Promise<void> {
     const target = await this.prisma.user.findUnique({ where: { id } });
-    if (!target) throw new NotFoundDomainException(ErrorCode.USER_NOT_FOUND, `User ${id} not found.`);
+    if (!target)
+      throw new NotFoundDomainException(ErrorCode.USER_NOT_FOUND, `User ${id} not found.`);
     if (!target.isAdmin) return;
     if (target.email.toLowerCase() === this.config.get('ADMIN_BOOTSTRAP_EMAIL').toLowerCase()) {
       throw new ConflictDomainException(

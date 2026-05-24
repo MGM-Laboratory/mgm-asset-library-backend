@@ -1,9 +1,32 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { RateLimit } from '../../common/rate-limit/rate-limit.decorator';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
-import { AssetRequestDto, CreateAssetRequestDto, ListAssetRequestsQueryDto } from './dto/request.dto';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AssetRequestDto,
+  CreateAssetRequestDto,
+  ListAssetRequestsQueryDto,
+} from './dto/request.dto';
 import { RequestsService } from './requests.service';
 
 @ApiTags('AssetRequests')
@@ -28,10 +51,7 @@ export class RequestsController {
   @Get()
   @ApiOperation({ summary: 'List requests — admins see all; others see only their own.' })
   @ApiOkResponse()
-  list(
-    @AuthUser() principal: AuthenticatedRequestUser,
-    @Query() query: ListAssetRequestsQueryDto,
-  ) {
+  list(@AuthUser() principal: AuthenticatedRequestUser, @Query() query: ListAssetRequestsQueryDto) {
     return this.requests.list(query, principal.user);
   }
 

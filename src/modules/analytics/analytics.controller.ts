@@ -2,7 +2,10 @@ import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AdminGuard } from '../../common/guards/admin.guard';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
 import { AnalyticsService } from './analytics.service';
 
 @ApiTags('Analytics')
@@ -25,10 +28,7 @@ export class AnalyticsController {
   @UseGuards(KeycloakAuthGuard)
   @ApiOperation({ summary: 'Per-asset breakdown (owner / admin only).' })
   @ApiOkResponse()
-  assetDetail(
-    @AuthUser() principal: AuthenticatedRequestUser,
-    @Param('assetId') assetId: string,
-  ) {
+  assetDetail(@AuthUser() principal: AuthenticatedRequestUser, @Param('assetId') assetId: string) {
     return this.analytics.assetDetail(principal.user, assetId);
   }
 
@@ -58,10 +58,10 @@ export class AnalyticsController {
       sort === 'saves'
         ? 'totalSaves'
         : sort === 'last7d'
-        ? 'last7dDownloads'
-        : sort === 'last30d'
-        ? 'last30dDownloads'
-        : 'totalDownloads';
+          ? 'last7dDownloads'
+          : sort === 'last30d'
+            ? 'last30dDownloads'
+            : 'totalDownloads';
     const rows = await this.analytics['prisma'].assetStats.findMany({
       orderBy: { [sortBy]: 'desc' as const },
       take,

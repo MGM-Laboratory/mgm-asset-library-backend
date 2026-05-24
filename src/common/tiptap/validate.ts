@@ -115,15 +115,26 @@ interface WalkState {
   allowlist: TipTapAllowlist;
 }
 
+function isTipTapNode(node: TipTapNode | TipTapDoc): node is TipTapNode {
+  return node.type !== 'doc' || 'attrs' in node || 'marks' in node || 'text' in node;
+}
+
 function walk(node: TipTapNode | TipTapDoc, path: string, state: WalkState): TipTapNode {
+  const typedNode: TipTapNode = isTipTapNode(node)
+    ? node
+    : { type: node.type, content: node.content };
   const out: TipTapNode = { type: node.type };
   if (!state.allowlist.nodes.has(node.type)) {
-    state.violations.push({ path, code: 'node.disallowed', message: `Node type "${node.type}" is not allowed.` });
+    state.violations.push({
+      path,
+      code: 'node.disallowed',
+      message: `Node type "${node.type}" is not allowed.`,
+    });
     return out;
   }
-  if (node.type === 'heading' && typeof node.attrs?.level === 'number') {
+  if (node.type === 'heading' && typeof typedNode.attrs?.level === 'number') {
     const max = state.allowlist.maxHeadingLevel ?? 3;
-    if (node.attrs.level < 1 || node.attrs.level > max) {
+    if (typedNode.attrs.level < 1 || typedNode.attrs.level > max) {
       state.violations.push({
         path: `${path}.attrs.level`,
         code: 'heading.level_out_of_range',
@@ -131,19 +142,19 @@ function walk(node: TipTapNode | TipTapDoc, path: string, state: WalkState): Tip
       });
     }
   }
-  if (node.attrs) {
+  if (typedNode.attrs) {
     const allowedAttrs = state.allowlist.nodeAttrs[node.type];
     if (allowedAttrs) {
       const filtered: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(node.attrs)) {
+      for (const [k, v] of Object.entries(typedNode.attrs)) {
         if (allowedAttrs.has(k)) filtered[k] = v;
       }
       if (Object.keys(filtered).length > 0) out.attrs = filtered;
     }
   }
-  if (node.marks) {
+  if (typedNode.marks) {
     const safeMarks: TipTapNode['marks'] = [];
-    for (const [i, mark] of node.marks.entries()) {
+    for (const [i, mark] of typedNode.marks.entries()) {
       if (!state.allowlist.marks.has(mark.type)) {
         state.violations.push({
           path: `${path}.marks[${i}]`,
@@ -164,11 +175,14 @@ function walk(node: TipTapNode | TipTapDoc, path: string, state: WalkState): Tip
         cleanAttrs['rel'] = 'noopener nofollow';
         if (!cleanAttrs['target']) cleanAttrs['target'] = '_blank';
       }
-      safeMarks.push({ type: mark.type, attrs: Object.keys(cleanAttrs).length ? cleanAttrs : undefined });
+      safeMarks.push({
+        type: mark.type,
+        attrs: Object.keys(cleanAttrs).length ? cleanAttrs : undefined,
+      });
     }
     if (safeMarks.length) out.marks = safeMarks;
   }
-  if (typeof node.text === 'string') out.text = node.text;
+  if (typeof typedNode.text === 'string') out.text = typedNode.text;
   if (Array.isArray(node.content) && node.content.length) {
     out.content = node.content.map((child, idx) => walk(child, `${path}.content[${idx}]`, state));
   }
@@ -203,7 +217,11 @@ export function validateTipTap(
   const state: WalkState = { violations: [], allowlist };
   const sanitized = walk(root, '$', state);
   if (state.violations.length > 0) {
-    throw new BadRequestDomainException(errorCode, 'TipTap document contains disallowed content.', state.violations);
+    throw new BadRequestDomainException(
+      errorCode,
+      'TipTap document contains disallowed content.',
+      state.violations,
+    );
   }
   return sanitized;
 }

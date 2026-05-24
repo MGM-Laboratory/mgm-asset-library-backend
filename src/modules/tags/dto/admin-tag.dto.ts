@@ -16,8 +16,18 @@ const SLUG_REGEX = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
 
 export class ListTagsQueryDto extends ListQueryDto {
   @ApiPropertyOptional() @IsOptional() @IsString() q?: string;
-  @ApiPropertyOptional() @IsOptional() @Transform(({ value }) => Number(value)) @IsInt() @Min(0) minUsage?: number;
-  @ApiPropertyOptional() @IsOptional() @Transform(({ value }) => Number(value)) @IsInt() @Min(0) maxUsage?: number;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(0)
+  minUsage?: number;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => Number(value))
+  @IsInt()
+  @Min(0)
+  maxUsage?: number;
 }
 
 export class MergeTagsDto {

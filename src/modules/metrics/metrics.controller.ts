@@ -1,4 +1,4 @@
-import { Controller, ForbiddenException, Get, Logger, Req, Res } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, Req, Res } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { isIP } from 'node:net';
@@ -20,14 +20,16 @@ import { MetricsService } from './metrics.service';
 @ApiTags('Admin')
 @Controller()
 export class MetricsController {
-  private readonly logger = new Logger(MetricsController.name);
   private readonly cidrs: ParsedCidr[];
 
   constructor(
     private readonly metrics: MetricsService,
     config: AppConfigService,
   ) {
-    this.cidrs = config.get('METRICS_ALLOW_CIDRS').map(parseCidr).filter((c): c is ParsedCidr => !!c);
+    this.cidrs = config
+      .get('METRICS_ALLOW_CIDRS')
+      .map(parseCidr)
+      .filter((c): c is ParsedCidr => !!c);
   }
 
   @Public()

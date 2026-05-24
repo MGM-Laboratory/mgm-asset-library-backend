@@ -75,15 +75,15 @@ export class AnalyzeService {
       case AssetFileKind.TEXTURE_2D:
       case AssetFileKind.SPRITE: {
         const img = await extractImage(filePath);
-        return { ...base, meta: img ?? {} };
+        return { ...base, meta: (img ?? {}) as Record<string, unknown> };
       }
       case AssetFileKind.AUDIO: {
         const audio = await extractAudio(filePath, this.config.get('FFPROBE_BIN'), timeoutMs);
-        return { ...base, meta: audio ?? {} };
+        return { ...base, meta: (audio ?? {}) as Record<string, unknown> };
       }
       case AssetFileKind.VIDEO: {
         const video = await extractVideo(filePath, this.config.get('FFPROBE_BIN'), timeoutMs);
-        return { ...base, meta: video ?? {} };
+        return { ...base, meta: (video ?? {}) as Record<string, unknown> };
       }
       case AssetFileKind.FBX:
       case AssetFileKind.OBJ:
@@ -93,14 +93,14 @@ export class AnalyzeService {
           venvBin: this.config.get('PYANALYZE_VENV') + '/bin',
           timeoutMs,
         });
-        return { ...base, meta: mesh ?? {} };
+        return { ...base, meta: (mesh ?? {}) as Record<string, unknown> };
       }
       case AssetFileKind.BLEND: {
         const mesh = await extractBlendViaBlender(filePath, {
           blenderBin: this.config.get('BLENDER_BIN'),
           timeoutMs,
         });
-        return { ...base, meta: mesh ?? {} };
+        return { ...base, meta: (mesh ?? {}) as Record<string, unknown> };
       }
       case AssetFileKind.UNITYPACKAGE: {
         const pkg = await extractUnityPackage(filePath);
@@ -123,7 +123,7 @@ export class AnalyzeService {
         const plugin = await extractUPlugin(filePath);
         return {
           ...base,
-          meta: plugin ?? {},
+          meta: (plugin ?? {}) as Record<string, unknown>,
           dependencies:
             plugin?.plugins
               .filter((p) => p.enabled)
@@ -134,7 +134,7 @@ export class AnalyzeService {
         const proj = await extractUProject(filePath);
         return {
           ...base,
-          meta: proj ?? {},
+          meta: (proj ?? {}) as Record<string, unknown>,
           requiresEmptyProject: true,
           dependencies:
             proj?.plugins

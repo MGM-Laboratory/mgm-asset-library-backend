@@ -1,12 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  Asset,
-  AssetEngine,
-  AssetStatus,
-  Locale,
-  Prisma,
-  User,
-} from '@prisma/client';
+import { Asset, AssetEngine, AssetStatus, Locale, Prisma, User } from '@prisma/client';
 import { ErrorCode } from '../../common/errors/error-code';
 import {
   BadRequestDomainException,
@@ -21,11 +14,7 @@ import { TagsService } from '../tags/tags.service';
 import { CategoriesService } from '../categories/categories.service';
 import { LicensesService } from '../licenses/licenses.service';
 import { AssetMapperService } from './asset-mapper.service';
-import {
-  AssetDetailDto,
-  CreateAssetDto,
-  UpdateAssetDto,
-} from './dto/asset.dto';
+import { AssetDetailDto, CreateAssetDto, UpdateAssetDto } from './dto/asset.dto';
 import { appendSlugSuffix, slugify } from './slug';
 import { PublishChecklistService, PublishViolation } from './publish-checklist.service';
 
@@ -75,7 +64,10 @@ export class AssetsService {
       if (!taken) return slug;
       slug = appendSlugSuffix(slug);
     }
-    throw new ConflictDomainException(ErrorCode.ASSET_SLUG_TAKEN, 'Could not derive a unique slug — try a different title.');
+    throw new ConflictDomainException(
+      ErrorCode.ASSET_SLUG_TAKEN,
+      'Could not derive a unique slug — try a different title.',
+    );
   }
 
   // ─── Create ───────────────────────────────────────────────────────────────
@@ -145,7 +137,11 @@ export class AssetsService {
     return asset;
   }
 
-  async getDetail(idOrSlug: string, requester: User | null, locale: Locale): Promise<AssetDetailDto> {
+  async getDetail(
+    idOrSlug: string,
+    requester: User | null,
+    locale: Locale,
+  ): Promise<AssetDetailDto> {
     const asset = await this.findFullByIdOrSlug(idOrSlug);
     const isOwnerOrAdmin = !!requester && (requester.id === asset.ownerId || requester.isAdmin);
     if (asset.status !== 'PUBLISHED' && !isOwnerOrAdmin) {
@@ -171,7 +167,8 @@ export class AssetsService {
 
   async update(id: string, dto: UpdateAssetDto, requester: User): Promise<void> {
     const asset = await this.prisma.asset.findUnique({ where: { id } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${id} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${id} not found.`);
     this.assertCanEdit(asset, requester);
 
     const data: Prisma.AssetUpdateInput = {};
@@ -191,7 +188,9 @@ export class AssetsService {
     await this.prisma.$transaction(async (tx) => {
       if (dto.translations) {
         for (const translation of dto.translations) {
-          const longDescription = validateFullTipTap(translation.longDescription) as unknown as Prisma.InputJsonValue;
+          const longDescription = validateFullTipTap(
+            translation.longDescription,
+          ) as unknown as Prisma.InputJsonValue;
           await tx.assetTranslation.upsert({
             where: { assetId_locale: { assetId: id, locale: translation.locale } },
             create: {
@@ -227,9 +226,14 @@ export class AssetsService {
 
   // ─── Publish / Archive / Restore / Delete ─────────────────────────────────
 
-  async publish(id: string, requester: User, confirmInfectedWarning: boolean): Promise<PublishViolation[]> {
+  async publish(
+    id: string,
+    requester: User,
+    confirmInfectedWarning: boolean,
+  ): Promise<PublishViolation[]> {
     const asset = await this.prisma.asset.findUnique({ where: { id } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${id} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${id} not found.`);
     this.assertCanEdit(asset, requester);
 
     const violations = await this.publishChecklist.evaluate(asset);
@@ -281,10 +285,14 @@ export class AssetsService {
 
   async restore(id: string, requester: User): Promise<void> {
     const asset = await this.prisma.asset.findUnique({ where: { id } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${id} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${id} not found.`);
     this.assertCanEdit(asset, requester);
     if (asset.status !== 'ARCHIVED' && asset.status !== 'DELETED') {
-      throw new BadRequestDomainException(ErrorCode.ASSET_ARCHIVE_BLOCKED, 'Asset is not archived.');
+      throw new BadRequestDomainException(
+        ErrorCode.ASSET_ARCHIVE_BLOCKED,
+        'Asset is not archived.',
+      );
     }
     await this.prisma.asset.update({
       where: { id },
@@ -305,7 +313,8 @@ export class AssetsService {
     reason: 'asset.archive' | 'asset.delete',
   ): Promise<void> {
     const asset = await this.prisma.asset.findUnique({ where: { id } });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${id} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${id} not found.`);
     this.assertCanEdit(asset, requester);
     await this.prisma.asset.update({
       where: { id },
@@ -349,7 +358,8 @@ export class AssetsService {
     }
     if (filters.renderPipelines?.length || filters.targets?.length) {
       const compatWhere: Prisma.EngineCompatibilityWhereInput = {};
-      if (filters.renderPipelines?.length) compatWhere.renderPipelines = { hasSome: filters.renderPipelines };
+      if (filters.renderPipelines?.length)
+        compatWhere.renderPipelines = { hasSome: filters.renderPipelines };
       if (filters.targets?.length) compatWhere.targets = { hasSome: filters.targets };
       where.versions = where.versions ?? {};
       (where.versions as Prisma.AssetVersionListRelationFilter).some = {
@@ -367,7 +377,8 @@ export class AssetsService {
       where: { id: assetId },
       include: { tags: true },
     });
-    if (!asset) throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
+    if (!asset)
+      throw new NotFoundDomainException(ErrorCode.ASSET_NOT_FOUND, `Asset ${assetId} not found.`);
 
     const tagIds = asset.tags.map((t) => t.tagId);
     const candidates = await this.prisma.asset.findMany({

@@ -31,7 +31,7 @@ export class RolesGuard implements CanActivate {
     }
 
     const minRank = Math.min(...required.map((r) => ROLE_RANK[r]));
-    if (ROLE_RANK[principal.role] < minRank) {
+    if (ROLE_RANK[principal.role as AppRole] < minRank) {
       throw new ForbiddenException(`Requires one of: ${required.join(', ')}.`);
     }
     return true;

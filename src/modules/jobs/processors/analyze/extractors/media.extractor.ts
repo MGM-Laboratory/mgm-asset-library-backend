@@ -21,7 +21,11 @@ export interface VideoMeta {
  * for the first audio/video stream — assets with multiple streams are rare
  * and the analyzer treats them as opaque.
  */
-export async function extractAudio(filePath: string, ffprobeBin: string, timeoutMs: number): Promise<AudioMeta | null> {
+export async function extractAudio(
+  filePath: string,
+  ffprobeBin: string,
+  timeoutMs: number,
+): Promise<AudioMeta | null> {
   const probe = await runFfprobe(filePath, ffprobeBin, timeoutMs);
   if (!probe) return null;
   const audio = probe.streams.find((s) => s.codec_type === 'audio');
@@ -30,11 +34,17 @@ export async function extractAudio(filePath: string, ffprobeBin: string, timeout
     durationSec: Number(probe.format.duration ?? audio.duration ?? 0),
     sampleRate: Number(audio.sample_rate ?? 0),
     channels: Number(audio.channels ?? 0),
-    bitrateKbps: probe.format.bit_rate ? Math.round(Number(probe.format.bit_rate) / 1000) : undefined,
+    bitrateKbps: probe.format.bit_rate
+      ? Math.round(Number(probe.format.bit_rate) / 1000)
+      : undefined,
   };
 }
 
-export async function extractVideo(filePath: string, ffprobeBin: string, timeoutMs: number): Promise<VideoMeta | null> {
+export async function extractVideo(
+  filePath: string,
+  ffprobeBin: string,
+  timeoutMs: number,
+): Promise<VideoMeta | null> {
   const probe = await runFfprobe(filePath, ffprobeBin, timeoutMs);
   if (!probe) return null;
   const video = probe.streams.find((s) => s.codec_type === 'video');
@@ -45,17 +55,33 @@ export async function extractVideo(filePath: string, ffprobeBin: string, timeout
     width: Number(video.width ?? 0),
     height: Number(video.height ?? 0),
     codec: String(video.codec_name ?? 'unknown'),
-    bitrateKbps: probe.format.bit_rate ? Math.round(Number(probe.format.bit_rate) / 1000) : undefined,
+    bitrateKbps: probe.format.bit_rate
+      ? Math.round(Number(probe.format.bit_rate) / 1000)
+      : undefined,
     hasAudio: !!audio,
   };
 }
 
 interface FfprobeOutput {
-  streams: Array<Record<string, unknown> & { codec_type?: string; duration?: string; codec_name?: string; width?: number; height?: number; sample_rate?: string; channels?: number }>;
+  streams: Array<
+    Record<string, unknown> & {
+      codec_type?: string;
+      duration?: string;
+      codec_name?: string;
+      width?: number;
+      height?: number;
+      sample_rate?: string;
+      channels?: number;
+    }
+  >;
   format: { duration?: string; bit_rate?: string };
 }
 
-async function runFfprobe(filePath: string, ffprobeBin: string, timeoutMs: number): Promise<FfprobeOutput | null> {
+async function runFfprobe(
+  filePath: string,
+  ffprobeBin: string,
+  timeoutMs: number,
+): Promise<FfprobeOutput | null> {
   const result = await runSubprocess(
     ffprobeBin,
     ['-v', 'error', '-print_format', 'json', '-show_format', '-show_streams', filePath],

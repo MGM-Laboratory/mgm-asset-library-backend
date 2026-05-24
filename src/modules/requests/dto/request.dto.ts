@@ -1,15 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { AssetRequestStatus } from '@prisma/client';
 import { Type } from 'class-transformer';
-import {
-  IsIn,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUrl,
-  MaxLength,
-  Min,
-} from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString, IsUrl, MaxLength, Min } from 'class-validator';
 import { ListQueryDto } from '../../../common/pagination/list-query.dto';
 
 export class CreateAssetRequestDto {
@@ -69,7 +61,12 @@ export class AssetRequestDto {
   @ApiProperty() requester!: { id: string; displayName: string };
 }
 
-import { IsIn as IsIn2, IsOptional as IsOptional2, IsString as IsString2, MaxLength as MaxLength2 } from 'class-validator';
+import {
+  IsIn as IsIn2,
+  IsOptional as IsOptional2,
+  IsString as IsString2,
+  MaxLength as MaxLength2,
+} from 'class-validator';
 
 const ADMIN_REVIEW_STATUSES: AssetRequestStatus[] = [
   AssetRequestStatus.IN_REVIEW,

@@ -89,10 +89,8 @@ export class KeycloakAuthGuard implements CanActivate {
     if (!email) {
       throw new UnauthorizedException('Keycloak token has no email claim.');
     }
-    const displayName =
-      claims.name ?? claims.preferred_username ?? email.split('@')[0];
-    const isBootstrapAdmin =
-      email === this.config.get('ADMIN_BOOTSTRAP_EMAIL').toLowerCase();
+    const displayName = claims.name ?? claims.preferred_username ?? email.split('@')[0];
+    const isBootstrapAdmin = email === this.config.get('ADMIN_BOOTSTRAP_EMAIL').toLowerCase();
 
     return this.prisma.user.upsert({
       where: { keycloakSub: claims.sub },

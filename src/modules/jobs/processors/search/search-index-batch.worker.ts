@@ -54,7 +54,10 @@ interface AssetDocument {
  * removed from Meilisearch.
  */
 @Injectable()
-export class SearchIndexBatchWorker extends JobWorkerBase<SearchIndexBatchJob> implements OnModuleInit {
+export class SearchIndexBatchWorker
+  extends JobWorkerBase<SearchIndexBatchJob>
+  implements OnModuleInit
+{
   constructor(
     config: AppConfigService,
     sentry: SentryService,
@@ -66,12 +69,12 @@ export class SearchIndexBatchWorker extends JobWorkerBase<SearchIndexBatchJob> i
     super(QUEUE.SEARCH_INDEX_BATCH, config, sentry, { concurrency: 1 });
   }
 
-  async onModuleInit(): Promise<void> {
+  override async onModuleInit(): Promise<void> {
     super.onModuleInit();
     await this.ensureSettings();
   }
 
-  async process(_job: Job<SearchIndexBatchJob>): Promise<void> {
+  override async process(_job: Job<SearchIndexBatchJob>): Promise<void> {
     const ids: string[] = await this.redis.client.smembers(SEARCH_DIRTY_SET);
     if (ids.length === 0) return;
     // Atomically empty the set so concurrent enqueues collect into a fresh batch.
@@ -149,7 +152,9 @@ export class SearchIndexBatchWorker extends JobWorkerBase<SearchIndexBatchJob> i
     return asset.translations.map((t) => ({
       id: `${asset.id}:${t.locale}`,
       locale: t.locale,
-      categoryName: this.pickJsonLocalized(asset.category.name as Prisma.JsonValue, t.locale) ?? asset.category.slug,
+      categoryName:
+        this.pickJsonLocalized(asset.category.name as Prisma.JsonValue, t.locale) ??
+        asset.category.slug,
       shortDescription: t.shortDescription,
       ...baseDoc,
     }));

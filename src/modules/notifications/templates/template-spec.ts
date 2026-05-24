@@ -45,7 +45,10 @@ export const EMAIL_SPECS: Record<NotificationType, EmailSpec> = {
     cta: { label: { en: 'Open comment', id: 'Buka komentar' }, href: '{{links.commentUrl}}' },
   },
   [NotificationType.COMMENT_REPLY]: {
-    subject: { en: '{{author.displayName}} replied to your comment', id: '{{author.displayName}} membalas komentar Anda' },
+    subject: {
+      en: '{{author.displayName}} replied to your comment',
+      id: '{{author.displayName}} membalas komentar Anda',
+    },
     eyebrow: { en: 'New reply', id: 'Balasan baru' },
     title: { en: 'New reply to your comment', id: 'Balasan baru pada komentar Anda' },
     body: {
@@ -82,10 +85,16 @@ export const EMAIL_SPECS: Record<NotificationType, EmailSpec> = {
       en: '{{requester.displayName}} requested a {{assetType}}.\nIntended use: {{intendedUse}}',
       id: '{{requester.displayName}} meminta {{assetType}}.\nTujuan penggunaan: {{intendedUse}}',
     },
-    cta: { label: { en: 'Review in admin panel', id: 'Tinjau di panel admin' }, href: '{{links.adminRequestUrl}}' },
+    cta: {
+      label: { en: 'Review in admin panel', id: 'Tinjau di panel admin' },
+      href: '{{links.adminRequestUrl}}',
+    },
   },
   [NotificationType.REQUEST_STATUS_CHANGED]: {
-    subject: { en: 'Your asset request is now {{newStatus}}', id: 'Permintaan aset Anda kini {{newStatus}}' },
+    subject: {
+      en: 'Your asset request is now {{newStatus}}',
+      id: 'Permintaan aset Anda kini {{newStatus}}',
+    },
     eyebrow: { en: 'Request update', id: 'Pembaruan permintaan' },
     title: { en: 'Your asset request was updated', id: 'Permintaan aset Anda diperbarui' },
     body: {
@@ -102,7 +111,10 @@ export const EMAIL_SPECS: Record<NotificationType, EmailSpec> = {
       en: '{{reporter.displayName}} filed a {{category}} report on “{{assetTitle}}”.',
       id: '{{reporter.displayName}} melaporkan {{category}} pada “{{assetTitle}}”.',
     },
-    cta: { label: { en: 'Open in moderation queue', id: 'Buka di antrean moderasi' }, href: '{{links.adminReportUrl}}' },
+    cta: {
+      label: { en: 'Open in moderation queue', id: 'Buka di antrean moderasi' },
+      href: '{{links.adminReportUrl}}',
+    },
   },
   [NotificationType.REPORT_RECEIVED_FOR_YOUR_ASSET]: {
     subject: { en: 'Your asset was reported', id: 'Aset Anda dilaporkan' },
@@ -116,8 +128,11 @@ export const EMAIL_SPECS: Record<NotificationType, EmailSpec> = {
   },
   [NotificationType.FEATURED_FEATURED]: {
     subject: { en: '“{{assetTitle}}” is featured!', id: '“{{assetTitle}}” telah ditampilkan!' },
-    eyebrow: { en: 'You\'re featured', id: 'Anda ditampilkan' },
-    title: { en: 'Your asset is featured on the landing page', id: 'Aset Anda ditampilkan di halaman utama' },
+    eyebrow: { en: "You're featured", id: 'Anda ditampilkan' },
+    title: {
+      en: 'Your asset is featured on the landing page',
+      id: 'Aset Anda ditampilkan di halaman utama',
+    },
     body: {
       en: '“{{assetTitle}}” is now in the Discover carousel.',
       id: '“{{assetTitle}}” kini ada di korsel Discover.',
@@ -125,9 +140,15 @@ export const EMAIL_SPECS: Record<NotificationType, EmailSpec> = {
     cta: { label: { en: 'Open Discover', id: 'Buka Discover' }, href: '{{links.discoverUrl}}' },
   },
   [NotificationType.VERSION_PUBLISHED]: {
-    subject: { en: '{{assetTitle}} v{{semver}} is available', id: '{{assetTitle}} v{{semver}} kini tersedia' },
+    subject: {
+      en: '{{assetTitle}} v{{semver}} is available',
+      id: '{{assetTitle}} v{{semver}} kini tersedia',
+    },
     eyebrow: { en: 'New version', id: 'Versi baru' },
-    title: { en: 'A new version of an asset you saved is live', id: 'Versi baru aset yang Anda simpan telah dirilis' },
+    title: {
+      en: 'A new version of an asset you saved is live',
+      id: 'Versi baru aset yang Anda simpan telah dirilis',
+    },
     body: {
       en: '“{{assetTitle}}” v{{semver}} is now available in your library.',
       id: '“{{assetTitle}}” v{{semver}} kini tersedia di pustaka Anda.',
@@ -135,9 +156,15 @@ export const EMAIL_SPECS: Record<NotificationType, EmailSpec> = {
     cta: { label: { en: 'Download', id: 'Unduh' }, href: '{{links.assetUrl}}' },
   },
   [NotificationType.ANALYZER_FAILED]: {
-    subject: { en: 'Analysis failed for “{{assetTitle}}”', id: 'Analisis gagal untuk “{{assetTitle}}”' },
+    subject: {
+      en: 'Analysis failed for “{{assetTitle}}”',
+      id: 'Analisis gagal untuk “{{assetTitle}}”',
+    },
     eyebrow: { en: 'Action needed', id: 'Perlu tindakan' },
-    title: { en: 'We couldn\'t finish analyzing your upload', id: 'Kami tidak dapat menyelesaikan analisis unggahan Anda' },
+    title: {
+      en: "We couldn't finish analyzing your upload",
+      id: 'Kami tidak dapat menyelesaikan analisis unggahan Anda',
+    },
     body: {
       en: 'Analysis failed: {{reason}}. You can retry from the version page.',
       id: 'Analisis gagal: {{reason}}. Anda dapat mengulang dari halaman versi.',
@@ -145,7 +172,10 @@ export const EMAIL_SPECS: Record<NotificationType, EmailSpec> = {
     cta: { label: { en: 'Open version', id: 'Buka versi' }, href: '{{links.versionUrl}}' },
   },
   [NotificationType.AV_INFECTED_WARNING]: {
-    subject: { en: 'AV scan flagged “{{assetTitle}}”', id: 'Pemindaian AV menandai “{{assetTitle}}”' },
+    subject: {
+      en: 'AV scan flagged “{{assetTitle}}”',
+      id: 'Pemindaian AV menandai “{{assetTitle}}”',
+    },
     eyebrow: { en: 'AV warning', id: 'Peringatan AV' },
     title: { en: 'The AV scanner flagged your upload', id: 'Pemindai AV menandai unggahan Anda' },
     body: {
@@ -157,11 +187,35 @@ export const EMAIL_SPECS: Record<NotificationType, EmailSpec> = {
   [NotificationType.AV_INFECTED_ADMIN_ALERT]: {
     subject: { en: 'AV scan flagged an asset', id: 'Pemindaian AV menandai sebuah aset' },
     eyebrow: { en: 'AV alert', id: 'Peringatan AV' },
-    title: { en: 'AV scanner flagged an uploaded asset', id: 'Pemindai AV menandai aset yang diunggah' },
+    title: {
+      en: 'AV scanner flagged an uploaded asset',
+      id: 'Pemindai AV menandai aset yang diunggah',
+    },
     body: {
       en: 'AV scan flagged content in “{{assetTitle}}” by {{owner.displayName}}.',
       id: 'Pemindaian AV menandai konten di “{{assetTitle}}” milik {{owner.displayName}}.',
     },
-    cta: { label: { en: 'Open in admin panel', id: 'Buka di panel admin' }, href: '{{links.adminAssetUrl}}' },
+    cta: {
+      label: { en: 'Open in admin panel', id: 'Buka di panel admin' },
+      href: '{{links.adminAssetUrl}}',
+    },
+  },
+  [NotificationType.ADMIN_PROMOTED]: {
+    subject: { en: 'You have been promoted to admin', id: 'Anda telah dipromosikan sebagai admin' },
+    eyebrow: { en: 'Role update', id: 'Pembaruan peran' },
+    title: { en: 'You are now an admin', id: 'Anda kini adalah admin' },
+    body: {
+      en: 'Your account has been granted admin privileges.',
+      id: 'Akun Anda telah diberikan hak akses admin.',
+    },
+  },
+  [NotificationType.ADMIN_DEMOTED]: {
+    subject: { en: 'Your admin role has been removed', id: 'Peran admin Anda telah dicabut' },
+    eyebrow: { en: 'Role update', id: 'Pembaruan peran' },
+    title: { en: 'Your admin role was removed', id: 'Peran admin Anda dihapus' },
+    body: {
+      en: 'Your admin privileges have been revoked.',
+      id: 'Hak akses admin Anda telah dicabut.',
+    },
   },
 };

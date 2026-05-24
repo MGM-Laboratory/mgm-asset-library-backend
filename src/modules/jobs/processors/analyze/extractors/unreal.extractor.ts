@@ -38,7 +38,9 @@ export async function extractUPlugin(filePath: string): Promise<UPluginMeta | nu
       versionName: parsed.VersionName,
       engineVersion: parsed.EngineVersion,
       modules: (parsed.Modules ?? []).map((m) => m.Name ?? '').filter(Boolean),
-      plugins: (parsed.Plugins ?? []).map((p) => ({ name: p.Name ?? '', enabled: !!p.Enabled })).filter((p) => p.name),
+      plugins: (parsed.Plugins ?? [])
+        .map((p) => ({ name: p.Name ?? '', enabled: !!p.Enabled }))
+        .filter((p) => p.name),
     };
   } catch {
     return null;
@@ -52,7 +54,9 @@ export async function extractUProject(filePath: string): Promise<UProjectMeta | 
     return {
       engineVersion: parsed.EngineAssociation,
       modules: (parsed.Modules ?? []).map((m) => m.Name ?? '').filter(Boolean),
-      plugins: (parsed.Plugins ?? []).map((p) => ({ name: p.Name ?? '', enabled: !!p.Enabled })).filter((p) => p.name),
+      plugins: (parsed.Plugins ?? [])
+        .map((p) => ({ name: p.Name ?? '', enabled: !!p.Enabled }))
+        .filter((p) => p.name),
     };
   } catch {
     return null;

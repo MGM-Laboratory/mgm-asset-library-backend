@@ -17,7 +17,11 @@ export const SEARCH_DIRTY_SET = 'search:pending';
  */
 @Injectable()
 export class SearchIndexMarkWorker extends JobWorkerBase<SearchIndexJob> {
-  constructor(config: AppConfigService, sentry: SentryService, private readonly redis: RedisService) {
+  constructor(
+    config: AppConfigService,
+    sentry: SentryService,
+    private readonly redis: RedisService,
+  ) {
     super(QUEUE.SEARCH_INDEX, config, sentry);
   }
 

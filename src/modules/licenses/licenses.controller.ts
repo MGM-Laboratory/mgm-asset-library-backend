@@ -2,7 +2,10 @@ import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Locale } from '@prisma/client';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
 import { LicenseDetailDto, LicenseSummaryDto } from './dto/license.dto';
 import { LicensesService } from './licenses.service';
 

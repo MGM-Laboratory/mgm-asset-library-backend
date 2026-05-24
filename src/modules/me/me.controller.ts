@@ -1,9 +1,12 @@
-import { Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuditAction } from '../../common/audit/audit-action.decorator';
 import { AuditService } from '../../common/audit/audit.service';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
-import { AuthenticatedRequestUser, KeycloakAuthGuard } from '../../infra/keycloak/keycloak-auth.guard';
+import {
+  AuthenticatedRequestUser,
+  KeycloakAuthGuard,
+} from '../../infra/keycloak/keycloak-auth.guard';
 import { AuthService } from '../auth/auth.service';
 import { MeResponseDto, PluginDeviceDto } from '../auth/dto/me-response.dto';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -26,7 +29,7 @@ export class MeController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Same payload as /auth/me, plus the user\'s active plugin devices.' })
+  @ApiOperation({ summary: "Same payload as /auth/me, plus the user's active plugin devices." })
   @ApiOkResponse()
   async me(@AuthUser() principal: AuthenticatedRequestUser): Promise<MeWithDevicesDto> {
     const [base, devices] = await Promise.all([
@@ -39,7 +42,7 @@ export class MeController {
   @Post('devices/:id/revoke')
   @AuditAction({ action: 'me.revoke_device', subjectType: 'PluginDeviceToken' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Revoke one of the user\'s plugin devices.' })
+  @ApiOperation({ summary: "Revoke one of the user's plugin devices." })
   async revokeDevice(
     @AuthUser() principal: AuthenticatedRequestUser,
     @Param('id') id: string,
@@ -49,7 +52,9 @@ export class MeController {
 
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Logout side-effect: audit row + WS broadcast to the user\'s open tabs.' })
+  @ApiOperation({
+    summary: "Logout side-effect: audit row + WS broadcast to the user's open tabs.",
+  })
   async logout(@AuthUser() principal: AuthenticatedRequestUser): Promise<void> {
     await this.audit.record({
       actorId: principal.user.id,

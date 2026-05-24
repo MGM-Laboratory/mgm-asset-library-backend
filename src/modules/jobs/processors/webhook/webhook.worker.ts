@@ -33,16 +33,18 @@ export class WebhookWorker extends JobWorkerBase<WebhookDeliveryJob> implements 
     this.secret = config.get('N8N_WEBHOOK_SECRET');
   }
 
-  async onModuleInit(): Promise<void> {
+  override async onModuleInit(): Promise<void> {
     super.onModuleInit();
     // Apply TTL — Mongo accepts repeat `createIndex` calls so this is safe.
     const retentionDays = this.config.get('WEBHOOK_LOG_RETENTION_DAYS');
     await this.deliveries.collection
       .createIndex({ createdAt: 1 }, { expireAfterSeconds: retentionDays * 86400 })
-      .catch((err) => this.logger.warn(`Could not set webhook_deliveries TTL: ${(err as Error).message}`));
+      .catch((err) =>
+        this.logger.warn(`Could not set webhook_deliveries TTL: ${(err as Error).message}`),
+      );
   }
 
-  async process(job: Job<WebhookDeliveryJob>): Promise<void> {
+  override async process(job: Job<WebhookDeliveryJob>): Promise<void> {
     if (!this.url) {
       this.logger.debug('N8N_WEBHOOK_URL blank — webhook is a no-op.');
       return;

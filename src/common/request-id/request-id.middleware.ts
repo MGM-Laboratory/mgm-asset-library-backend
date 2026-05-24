@@ -10,7 +10,11 @@ import { randomUUID } from 'node:crypto';
  */
 @Injectable()
 export class RequestIdMiddleware implements NestMiddleware {
-  use(req: FastifyRequest['raw'] & { id?: string }, res: FastifyReply['raw'], next: () => void): void {
+  use(
+    req: FastifyRequest['raw'] & { id?: string },
+    res: FastifyReply['raw'],
+    next: () => void,
+  ): void {
     const inbound =
       (req.headers['x-request-id'] as string | undefined) ??
       (req.headers['x-amzn-trace-id'] as string | undefined);

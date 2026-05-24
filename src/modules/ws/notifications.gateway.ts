@@ -59,7 +59,12 @@ export class NotificationsGateway
       for (const socket of this.registry.forUser(message.userId)) {
         if (socket.readyState === socket.OPEN) {
           socket.send(
-            JSON.stringify({ type: message.type, id: message.id, ts: message.ts, payload: message.payload }),
+            JSON.stringify({
+              type: message.type,
+              id: message.id,
+              ts: message.ts,
+              payload: message.payload,
+            }),
           );
         }
       }
@@ -135,9 +140,11 @@ export class NotificationsGateway
 
   private tick(): void {
     const now = Date.now();
-    for (const [userId, set] of (this.registry as unknown as {
-      sockets: Map<string, Set<AuthedSocket>>;
-    }).sockets.entries()) {
+    for (const [userId, set] of (
+      this.registry as unknown as {
+        sockets: Map<string, Set<AuthedSocket>>;
+      }
+    ).sockets.entries()) {
       for (const socket of set) {
         if (!socket.isAlive || (socket.lastSeenAt && now - socket.lastSeenAt > IDLE_TIMEOUT_MS)) {
           this.registry.remove(userId, socket);

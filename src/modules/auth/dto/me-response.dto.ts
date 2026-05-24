@@ -39,7 +39,10 @@ export class MeResponseDto {
   @ApiProperty()
   hasPublishedAssets!: boolean;
 
-  @ApiProperty({ example: 0, description: 'Stub returns 0 until Part 3 notification fan-out lands.' })
+  @ApiProperty({
+    example: 0,
+    description: 'Stub returns 0 until Part 3 notification fan-out lands.',
+  })
   unreadNotifications!: number;
 
   @ApiProperty({ description: 'ISO 8601 UTC.' })

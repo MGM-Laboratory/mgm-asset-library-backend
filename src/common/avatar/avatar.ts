@@ -27,7 +27,11 @@ export function computeInitials(displayName: string | null | undefined, email: s
 }
 
 /** Deterministic colour pick keyed off `userId`. */
-export function resolveAvatar(userId: string, displayName: string | null | undefined, email: string): ResolvedAvatar {
+export function resolveAvatar(
+  userId: string,
+  displayName: string | null | undefined,
+  email: string,
+): ResolvedAvatar {
   const digest = createHash('sha256').update(userId).digest();
   const slot = digest[0] % PALETTE.length;
   const palette = PALETTE[slot];

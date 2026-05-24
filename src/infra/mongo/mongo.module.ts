@@ -17,6 +17,7 @@ import { MongoHealthService } from './mongo-health.service';
       inject: [AppConfigService],
       useFactory: (config: AppConfigService) => ({
         uri: config.get('MONGO_URL'),
+        ...(process.env.OPENAPI_EXPORT === '1' && { lazyConnection: true }),
       }),
     }),
   ],

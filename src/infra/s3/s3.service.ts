@@ -74,9 +74,14 @@ export class S3Service {
     await this.client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
   }
 
-  async headObject(role: S3BucketRole, key: string): Promise<{ bytes: number; contentType?: string } | null> {
+  async headObject(
+    role: S3BucketRole,
+    key: string,
+  ): Promise<{ bytes: number; contentType?: string } | null> {
     try {
-      const out = await this.client.send(new HeadObjectCommand({ Bucket: this.bucketFor(role), Key: key }));
+      const out = await this.client.send(
+        new HeadObjectCommand({ Bucket: this.bucketFor(role), Key: key }),
+      );
       return { bytes: Number(out.ContentLength ?? 0), contentType: out.ContentType };
     } catch (err) {
       this.logger.debug(`headObject ${key}: ${(err as Error).message}`);
@@ -145,7 +150,11 @@ export class S3Service {
       .catch(() => undefined);
   }
 
-  async presignLongLivedGet(role: S3BucketRole, key: string, expiresInSec: number): Promise<string> {
+  async presignLongLivedGet(
+    role: S3BucketRole,
+    key: string,
+    expiresInSec: number,
+  ): Promise<string> {
     const bucket = this.bucketFor(role);
     return getSignedUrl(this.client, new GetObjectCommand({ Bucket: bucket, Key: key }), {
       expiresIn: expiresInSec,

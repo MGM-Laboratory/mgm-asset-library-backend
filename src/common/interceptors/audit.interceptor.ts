@@ -1,4 +1,10 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor, SetMetadata } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+  SetMetadata,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { FastifyRequest } from 'fastify';
 import { Observable, tap } from 'rxjs';
@@ -21,10 +27,13 @@ export const Audit = (action: string) => SetMetadata(AUDIT_KEY, action);
 function resolveSubjectId(req: FastifyRequest, path = 'params.id'): string | null {
   const [section, ...rest] = path.split('.');
   const root =
-    section === 'params' ? (req as unknown as { params: Record<string, unknown> }).params :
-    section === 'body' ? (req as unknown as { body: Record<string, unknown> }).body :
-    section === 'query' ? (req as unknown as { query: Record<string, unknown> }).query :
-    undefined;
+    section === 'params'
+      ? (req as unknown as { params: Record<string, unknown> }).params
+      : section === 'body'
+        ? (req as unknown as { body: Record<string, unknown> }).body
+        : section === 'query'
+          ? (req as unknown as { query: Record<string, unknown> }).query
+          : undefined;
   if (!root) return null;
   if (rest.length === 0) return typeof root === 'string' ? root : null;
   let cursor: unknown = root;
@@ -52,15 +61,19 @@ export class AuditInterceptor implements NestInterceptor {
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const config = this.reflector.getAllAndOverride<AuditActionConfig | undefined>(AUDIT_ACTION_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const config = this.reflector.getAllAndOverride<AuditActionConfig | undefined>(
+      AUDIT_ACTION_KEY,
+      [context.getHandler(), context.getClass()],
+    );
     if (!config) return next.handle();
 
-    const req = context
-      .switchToHttp()
-      .getRequest<FastifyRequest & { user?: AuthenticatedRequestUser; body?: Record<string, unknown>; params?: Record<string, unknown> }>();
+    const req = context.switchToHttp().getRequest<
+      FastifyRequest & {
+        user?: AuthenticatedRequestUser;
+        body?: Record<string, unknown>;
+        params?: Record<string, unknown>;
+      }
+    >();
 
     return next.handle().pipe(
       tap({
@@ -79,7 +92,9 @@ export class AuditInterceptor implements NestInterceptor {
     );
   }
 
-  private buildMetadata(req: FastifyRequest & { body?: unknown; params?: unknown }): Record<string, unknown> {
+  private buildMetadata(
+    req: FastifyRequest & { body?: unknown; params?: unknown },
+  ): Record<string, unknown> {
     const safe = (input: unknown): unknown => {
       if (!input || typeof input !== 'object') return input;
       const out: Record<string, unknown> = {};

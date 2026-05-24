@@ -38,7 +38,9 @@ describe('E2E [16] idempotency on POST /assets', () => {
       categoryId: category.id,
       licenseId: license.id,
       semver: '1.0.0',
-      translations: [{ locale: 'en', shortDescription: 'x', longDescription: { type: 'doc', content: [] } }],
+      translations: [
+        { locale: 'en', shortDescription: 'x', longDescription: { type: 'doc', content: [] } },
+      ],
     };
     const a = await supertest(app.getHttpServer())
       .post('/assets')
@@ -69,7 +71,9 @@ describe('E2E [16] idempotency on POST /assets', () => {
       categoryId: category.id,
       licenseId: license.id,
       semver: '1.0.0',
-      translations: [{ locale: 'en', shortDescription: 'x', longDescription: { type: 'doc', content: [] } }],
+      translations: [
+        { locale: 'en', shortDescription: 'x', longDescription: { type: 'doc', content: [] } },
+      ],
     };
     await supertest(app.getHttpServer())
       .post('/assets')

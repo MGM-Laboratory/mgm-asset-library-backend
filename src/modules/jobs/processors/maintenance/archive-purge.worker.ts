@@ -33,7 +33,7 @@ export class ArchivePurgeWorker extends JobWorkerBase<ArchivePurgeJob> implement
     super(QUEUE.ARCHIVE_PURGE, config, sentry);
   }
 
-  async onModuleInit(): Promise<void> {
+  override async onModuleInit(): Promise<void> {
     super.onModuleInit();
     await this.scheduleDaily();
   }
@@ -51,7 +51,7 @@ export class ArchivePurgeWorker extends JobWorkerBase<ArchivePurgeJob> implement
     );
   }
 
-  async process(_job: Job<ArchivePurgeJob>): Promise<void> {
+  override async process(_job: Job<ArchivePurgeJob>): Promise<void> {
     const cutoff = new Date(Date.now() - this.config.get('ARCHIVE_PURGE_DAYS') * 86_400_000);
     const candidates = await this.prisma.asset.findMany({
       where: {
@@ -60,7 +60,9 @@ export class ArchivePurgeWorker extends JobWorkerBase<ArchivePurgeJob> implement
       },
       select: { id: true, slug: true, thumbnailKey: true, status: true },
     });
-    this.logger.log(`archive-purge: ${candidates.length} asset(s) older than ${cutoff.toISOString()}`);
+    this.logger.log(
+      `archive-purge: ${candidates.length} asset(s) older than ${cutoff.toISOString()}`,
+    );
 
     for (const asset of candidates) {
       try {
@@ -72,7 +74,12 @@ export class ArchivePurgeWorker extends JobWorkerBase<ArchivePurgeJob> implement
     }
   }
 
-  private async purgeOne(asset: { id: string; slug: string; thumbnailKey: string | null; status: string }): Promise<void> {
+  private async purgeOne(asset: {
+    id: string;
+    slug: string;
+    thumbnailKey: string | null;
+    status: string;
+  }): Promise<void> {
     await this.deleteS3Prefix('assets', `assets/${asset.id}/`);
     await this.deleteS3Prefix('thumbs', `thumbs/${asset.id}/`);
     if (asset.thumbnailKey && !asset.thumbnailKey.startsWith(`thumbs/${asset.id}/`)) {

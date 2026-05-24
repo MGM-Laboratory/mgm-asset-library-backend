@@ -20,16 +20,18 @@ export class AuditPurgeWorker extends JobWorkerBase<AuditPurgeJob> implements On
     super(QUEUE.AUDIT_PURGE, config, sentry);
   }
 
-  async onModuleInit(): Promise<void> {
+  override async onModuleInit(): Promise<void> {
     super.onModuleInit();
-    await this.producer.queue(QUEUE.AUDIT_PURGE).add(
-      'cron',
-      { triggeredAt: new Date().toISOString() },
-      { jobId: 'audit-purge-cron', repeat: { pattern: '0 4 * * *', tz: 'UTC' } },
-    );
+    await this.producer
+      .queue(QUEUE.AUDIT_PURGE)
+      .add(
+        'cron',
+        { triggeredAt: new Date().toISOString() },
+        { jobId: 'audit-purge-cron', repeat: { pattern: '0 4 * * *', tz: 'UTC' } },
+      );
   }
 
-  async process(_job: Job<AuditPurgeJob>): Promise<void> {
+  override async process(_job: Job<AuditPurgeJob>): Promise<void> {
     const cutoff = new Date(Date.now() - this.config.get('AUDIT_LOG_RETENTION_DAYS') * 86_400_000);
     const result = await this.prisma.auditLog.deleteMany({ where: { createdAt: { lt: cutoff } } });
     this.logger.log(`audit-purge: removed ${result.count} rows older than ${cutoff.toISOString()}`);

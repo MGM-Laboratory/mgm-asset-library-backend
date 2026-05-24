@@ -13,6 +13,8 @@ import 'reflect-metadata';
 import { AppModule } from '../src/app.module';
 
 async function main(): Promise<void> {
+  // Signal infrastructure services to skip live connections during this export.
+  process.env.OPENAPI_EXPORT = '1';
   // Fill in minimal env so the config schema validates during this CLI run.
   process.env.PUBLIC_BASE_URL ??= 'http://localhost:4000';
   process.env.DATABASE_URL ??= 'postgresql://mgm:mgm@localhost:5432/db?schema=public';
@@ -28,11 +30,10 @@ async function main(): Promise<void> {
   process.env.S3_BUCKET_EDITOR_MEDIA ??= 'e';
   process.env.MEILI_URL ??= 'http://localhost:7700';
 
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-    { logger: false },
-  );
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
+    logger: false,
+    abortOnError: false,
+  });
 
   const doc = new DocumentBuilder()
     .setTitle('MGM Asset Library API')

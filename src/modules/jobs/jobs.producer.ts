@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { AppConfigService } from '../../config/app-config.service';
 import { RedisService } from '../../infra/redis/redis.service';
@@ -32,7 +32,6 @@ import { QUEUE, QueueName } from './queue-names';
  */
 @Injectable()
 export class JobsProducer implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(JobsProducer.name);
   private readonly queues = new Map<QueueName, Queue>();
   private readonly connectionUrl: string;
 
@@ -44,6 +43,7 @@ export class JobsProducer implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
+    if (process.env.OPENAPI_EXPORT === '1') return;
     for (const name of Object.values(QUEUE)) this.queue(name);
     // The batch indexer runs on a fixed repeatable schedule.
     await this.scheduleSearchIndexBatch();
