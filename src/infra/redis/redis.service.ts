@@ -21,7 +21,32 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit(): Promise<void> {
     if (process.env.OPENAPI_EXPORT === '1') return;
-    await this.client.connect();
+    // The client is lazyConnect, so it starts in the 'wait' state. In worker
+    // mode a sibling provider can trip an auto-connect (any queued command
+    // dials the socket) before this hook runs, and ioredis throws
+    // "Redis is already connecting/connected" if connect() is called again —
+    // which crash-looped the worker. Make startup idempotent: only dial from a
+    // fresh state, otherwise wait for the in-flight connection to go ready.
+    if (this.client.status === 'wait' || this.client.status === 'end') {
+      await this.client.connect();
+    } else if (this.client.status !== 'ready') {
+      await new Promise<void>((resolve, reject) => {
+        const onReady = (): void => {
+          cleanup();
+          resolve();
+        };
+        const onError = (err: Error): void => {
+          cleanup();
+          reject(err);
+        };
+        const cleanup = (): void => {
+          this.client.off('ready', onReady);
+          this.client.off('error', onError);
+        };
+        this.client.once('ready', onReady);
+        this.client.once('error', onError);
+      });
+    }
     this.logger.log('Connected to Redis.');
   }
 
