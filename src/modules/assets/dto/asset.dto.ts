@@ -83,6 +83,32 @@ export class UpdateAssetDto {
   @Length(3, 140)
   title?: string;
 
+  @ApiPropertyOptional({
+    description: 'Slug. Server enforces uniqueness; rejected after publish.',
+    maxLength: 120,
+  })
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  slug?: string;
+
+  @ApiPropertyOptional({
+    enum: AssetEngine,
+    description: 'Locked after publish (server rejects with 400).',
+  })
+  @IsOptional()
+  @IsEnum(AssetEngine)
+  engine?: AssetEngine;
+
+  @ApiPropertyOptional({
+    description:
+      'Semver of the latest version. Routed to the latest AssetVersion row, not the Asset itself. Locked after publish.',
+  })
+  @IsOptional()
+  @IsString()
+  @Length(1, 40)
+  semver?: string;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

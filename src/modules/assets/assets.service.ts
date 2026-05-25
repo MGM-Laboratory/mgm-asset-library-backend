@@ -173,6 +173,31 @@ export class AssetsService {
 
     const data: Prisma.AssetUpdateInput = {};
     if (dto.title) data.title = dto.title;
+    if (dto.slug && dto.slug !== asset.slug) {
+      if (asset.status === 'PUBLISHED') {
+        throw new BadRequestDomainException(
+          ErrorCode.ASSET_PUBLISH_BLOCKED,
+          'Slug is locked once an asset is published.',
+        );
+      }
+      const collision = await this.prisma.asset.findUnique({ where: { slug: dto.slug } });
+      if (collision && collision.id !== id) {
+        throw new ConflictDomainException(
+          ErrorCode.ASSET_SLUG_TAKEN,
+          `Slug "${dto.slug}" is already taken.`,
+        );
+      }
+      data.slug = dto.slug;
+    }
+    if (dto.engine && dto.engine !== asset.engine) {
+      if (asset.status === 'PUBLISHED') {
+        throw new BadRequestDomainException(
+          ErrorCode.ASSET_PUBLISH_BLOCKED,
+          'Engine is locked once an asset is published.',
+        );
+      }
+      data.engine = dto.engine;
+    }
     if (dto.categoryId) {
       await this.categories.findByIdOrThrow(dto.categoryId);
       data.category = { connect: { id: dto.categoryId } };
@@ -224,6 +249,44 @@ export class AssetsService {
         await tx.assetTag.createMany({
           data: tagRows.map((t) => ({ assetId: id, tagId: t.id })),
         });
+      }
+      if (dto.semver) {
+        // The wizard sends semver alongside other asset fields, but it
+        // belongs to the latest AssetVersion row. Update there.
+        const latest = await tx.assetVersion.findFirst({
+          where: { assetId: id },
+          orderBy: [{ isLatest: 'desc' }, { createdAt: 'desc' }],
+        });
+        if (latest && latest.semver !== dto.semver) {
+          if (latest.publishedAt) {
+            throw new BadRequestDomainException(
+              ErrorCode.ASSET_PUBLISH_BLOCKED,
+              'Semver is locked once a version is published.',
+            );
+          }
+          if (!/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/.test(dto.semver)) {
+            throw new BadRequestDomainException(
+              ErrorCode.ASSET_PUBLISH_BLOCKED,
+              `"${dto.semver}" is not a valid semver string.`,
+            );
+          }
+          const dupe = await tx.assetVersion.findUnique({
+            where: { assetId_semver: { assetId: id, semver: dto.semver } },
+          });
+          if (dupe && dupe.id !== latest.id) {
+            throw new ConflictDomainException(
+              ErrorCode.VERSION_DUPLICATE,
+              `Version ${dto.semver} already exists for this asset.`,
+            );
+          }
+          await tx.assetVersion.update({
+            where: { id: latest.id },
+            data: {
+              semver: dto.semver,
+              s3Prefix: `assets/${id}/v${dto.semver}/`,
+            },
+          });
+        }
       }
       if (Object.keys(data).length) {
         await tx.asset.update({ where: { id }, data });
