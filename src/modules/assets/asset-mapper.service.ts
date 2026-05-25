@@ -70,6 +70,39 @@ export class AssetMapperService {
     };
   }
 
+  /**
+   * Batched summary mapper. Signs every asset's thumbnail in parallel rather
+   * than awaiting per-asset, turning O(n × s3-roundtrip) into ~1 round-trip
+   * for grid/list endpoints. Use this from Discover, Library, and admin
+   * listings instead of `Promise.all(assets.map(toSummary))`.
+   */
+  async toSummaryMany(assets: AssetWithRelations[], locale: Locale): Promise<AssetSummaryDto[]> {
+    const thumbUrls = await Promise.all(
+      assets.map((a) =>
+        a.thumbnailKey ? this.s3.presignGet('thumbs', a.thumbnailKey) : Promise.resolve(undefined),
+      ),
+    );
+    return assets.map((asset, i) => {
+      const translation = pickTranslation(asset.translations, locale);
+      return {
+        id: asset.id,
+        slug: asset.slug,
+        title: asset.title,
+        shortDescription: translation?.shortDescription ?? '',
+        engine: asset.engine,
+        status: asset.status,
+        thumbnailUrl: thumbUrls[i],
+        ownerDisplayName: asset.owner.displayName,
+        categoryName:
+          resolveLocalized(asset.category.name as LocalizedJson, locale) ?? asset.category.slug,
+        totalDownloads: asset._count?.downloads ?? 0,
+        totalSaves: asset._count?.libraryItems ?? 0,
+        updatedAt: asset.updatedAt.toISOString(),
+        publishedAt: asset.publishedAt?.toISOString(),
+      };
+    });
+  }
+
   async toDetail(asset: AssetWithRelations, ctx: MapperContext): Promise<AssetDetailDto> {
     const translation = pickTranslation(asset.translations, ctx.locale);
     const thumbnailUrl = asset.thumbnailKey

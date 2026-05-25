@@ -79,13 +79,13 @@ export class JobsProducer implements OnModuleInit, OnModuleDestroy {
 
   enqueueAnalyzeFile(job: AnalyzeFileJob): Promise<unknown> {
     return this.queue(QUEUE.ANALYZE).add('analyze-file', job, {
-      jobId: `${job.versionId}:${job.fileId}`,
+      jobId: `${job.versionId}__${job.fileId}`,
     });
   }
 
   enqueueAnalyzeVersion(job: AnalyzeVersionJob): Promise<unknown> {
     return this.queue(QUEUE.ANALYZE_VERSION).add('rollup', job, {
-      jobId: `${job.versionId}:${job.reason}`,
+      jobId: `${job.versionId}__${job.reason}`,
     });
   }
 
@@ -93,7 +93,7 @@ export class JobsProducer implements OnModuleInit, OnModuleDestroy {
 
   enqueueAvScanFile(job: AvScanFileJob): Promise<unknown> {
     return this.queue(QUEUE.AV_SCAN).add('scan-file', job, {
-      jobId: `${job.versionId}:${job.fileId}`,
+      jobId: `${job.versionId}__${job.fileId}`,
     });
   }
 
@@ -110,12 +110,16 @@ export class JobsProducer implements OnModuleInit, OnModuleDestroy {
   }
 
   enqueueThumbnailVariants(job: ThumbnailVariantsJob): Promise<unknown> {
-    return this.queue(QUEUE.THUMBNAIL_VARIANTS).add('process', job, { jobId: job.sourceKey });
+    // BullMQ rejects custom job IDs containing ':' (it's the Redis key
+    // separator); sanitize any colons we might see in S3 keys.
+    return this.queue(QUEUE.THUMBNAIL_VARIANTS).add('process', job, {
+      jobId: job.sourceKey.replace(/:/g, '__'),
+    });
   }
 
   enqueueThumbnailRender(job: ThumbnailRenderJob): Promise<unknown> {
     return this.queue(QUEUE.THUMBNAIL_RENDER).add('render', job, {
-      jobId: `${job.versionId}:${job.glbKey}`,
+      jobId: `${job.versionId}__${job.glbKey}`,
     });
   }
 
@@ -136,7 +140,7 @@ export class JobsProducer implements OnModuleInit, OnModuleDestroy {
    */
   async enqueueSearchIndex(job: SearchIndexJob): Promise<void> {
     await this.queue(QUEUE.SEARCH_INDEX).add('mark-dirty', job, {
-      jobId: `${job.assetId}:${job.reason}`,
+      jobId: `${job.assetId}__${job.reason}`,
     });
   }
 

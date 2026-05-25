@@ -103,7 +103,7 @@ export class DiscoverService {
         categoryId: cat.id,
         categorySlug: cat.slug,
         name: resolveLocalized(cat.name as LocalizedJson, locale) ?? cat.slug,
-        assets: await Promise.all(rowAssets.map((r) => this.mapper.toSummary(r, locale))),
+        assets: await this.mapper.toSummaryMany(rowAssets, locale),
       });
     }
 
