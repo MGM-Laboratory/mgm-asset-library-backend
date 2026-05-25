@@ -35,6 +35,12 @@ enum Locale {
 enum AssetEngine {
   UNITY
   UNREAL
+  BLENDER
+  STANDALONE_3D
+  AUDIO
+  IMAGE
+  VIDEO
+  OTHER
   ENGINE_AGNOSTIC
 }
 
