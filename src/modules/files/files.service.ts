@@ -46,7 +46,10 @@ const HANDLE_TTL_SECONDS = 24 * 60 * 60;
  */
 @Injectable()
 export class FilesService {
-  private readonly editorMediaTtlSec = 90 * 24 * 60 * 60;
+  // AWS SigV4 caps presigned URLs at 7 days (604800 s); we keep a margin and
+  // expose POST /files/editor-media/refresh so the frontend can re-sign older
+  // links without losing the underlying S3 object.
+  private readonly editorMediaTtlSec = 6 * 24 * 60 * 60;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -324,6 +327,26 @@ export class FilesService {
       this.s3.presignLongLivedGet('editor', key, this.editorMediaTtlSec),
     ]);
     return { putUrl: presigned.url, key, viewUrl, expiresAt: this.expiresAt() };
+  }
+
+  async refreshEditorMedia(
+    key: string,
+    _requester: User,
+  ): Promise<{ viewUrl: string; expiresAt: string }> {
+    if (!key.startsWith('editor/')) {
+      throw new BadRequestDomainException(
+        ErrorCode.FILE_UPLOAD_INIT_FAILED,
+        'Editor-media key must live under the editor/ prefix.',
+      );
+    }
+    if (key.includes('..')) {
+      throw new ForbiddenDomainException(
+        ErrorCode.AUTH_FORBIDDEN,
+        'Editor-media key contains illegal segments.',
+      );
+    }
+    const viewUrl = await this.s3.presignLongLivedGet('editor', key, this.editorMediaTtlSec);
+    return { viewUrl, expiresAt: this.expiresAt() };
   }
 
   // ─── Shared post-completion plumbing ────────────────────────────────────

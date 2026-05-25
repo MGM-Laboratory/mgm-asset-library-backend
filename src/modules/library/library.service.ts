@@ -85,13 +85,15 @@ export class LibraryService {
     });
     const hasMore = rows.length > limit;
     const itemsRaw = rows.slice(0, limit);
-    const items: LibraryItemDto[] = await Promise.all(
-      itemsRaw.map(async (row) => ({
-        addedAt: row.addedAt.toISOString(),
-        hidden: row.hidden,
-        asset: await this.mapper.toSummary(row.asset, locale),
-      })),
+    const assetSummaries = await this.mapper.toSummaryMany(
+      itemsRaw.map((row) => row.asset),
+      locale,
     );
+    const items: LibraryItemDto[] = itemsRaw.map((row, i) => ({
+      addedAt: row.addedAt.toISOString(),
+      hidden: row.hidden,
+      asset: assetSummaries[i],
+    }));
     const last = itemsRaw[itemsRaw.length - 1];
     const nextCursor =
       hasMore && last ? encodeCursor({ id: last.id, createdAt: last.addedAt.toISOString() }) : null;

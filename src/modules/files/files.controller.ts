@@ -16,6 +16,8 @@ import {
   InitiateThumbnailResponseDto,
   InitiateUploadDto,
   InitiateUploadResponseDto,
+  RefreshEditorMediaDto,
+  RefreshEditorMediaResponseDto,
   SignMultipartPartsDto,
 } from './dto/upload.dto';
 import { FilesService } from './files.service';
@@ -115,7 +117,7 @@ export class FilesController {
   @Post('editor-media/initiate')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Get a presigned PUT URL for a TipTap embed; also returns a 90-day GET URL.',
+    summary: 'Get a presigned PUT URL for a TipTap embed; also returns a ~6-day GET URL.',
   })
   @ApiOkResponse({ type: InitiateEditorMediaResponseDto })
   initiateEditorMedia(
@@ -123,5 +125,18 @@ export class FilesController {
     @Body() dto: InitiateEditorMediaDto,
   ): Promise<InitiateEditorMediaResponseDto> {
     return this.files.initiateEditorMedia(dto, principal.user);
+  }
+
+  @Post('editor-media/refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Re-sign an existing editor-media key, returning a fresh ~6-day GET URL.',
+  })
+  @ApiOkResponse({ type: RefreshEditorMediaResponseDto })
+  refreshEditorMedia(
+    @AuthUser() principal: AuthenticatedRequestUser,
+    @Body() dto: RefreshEditorMediaDto,
+  ): Promise<RefreshEditorMediaResponseDto> {
+    return this.files.refreshEditorMedia(dto.key, principal.user);
   }
 }

@@ -38,16 +38,26 @@ export class AvVersionWorker extends JobWorkerBase<AvScanVersionJob> {
       return {
         path: f.relativePath,
         result: meta.avResult as
-          | { status: 'OK' | 'FOUND' | 'ERROR'; signature?: string; message?: string }
+          | {
+              status: 'OK' | 'FOUND' | 'ERROR' | 'SKIPPED';
+              signature?: string;
+              message?: string;
+              skipReason?: string;
+            }
           | undefined,
       };
     });
 
     const infected = fileVerdicts.filter((v) => v.result?.status === 'FOUND');
     const errored = fileVerdicts.filter((v) => v.result?.status === 'ERROR');
+    const skipped = fileVerdicts.filter((v) => v.result?.status === 'SKIPPED');
+    const cleanish = fileVerdicts.filter((v) => v.result?.status === 'OK');
     let avStatus: AvStatus;
     if (infected.length > 0) avStatus = AvStatus.INFECTED;
     else if (errored.length > 0) avStatus = AvStatus.ERROR;
+    // If every non-skipped file is clean and at least one file was skipped for
+    // size, mark the version SKIPPED_SIZE so the UI explains why no scan ran.
+    else if (skipped.length > 0 && cleanish.length === 0) avStatus = AvStatus.SKIPPED_SIZE;
     else avStatus = AvStatus.CLEAN;
 
     await this.prisma.assetVersion.update({
