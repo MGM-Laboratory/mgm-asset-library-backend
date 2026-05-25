@@ -7,13 +7,17 @@ import { S3Service } from '../../../../infra/s3/s3.service';
 export type ClamdResult =
   | { status: 'OK' }
   | { status: 'FOUND'; signature: string }
-  | { status: 'ERROR'; message: string };
+  | { status: 'ERROR'; message: string }
+  | { status: 'SKIPPED'; reason: 'oversize'; bytes: number };
 
 interface ClamdOptions {
   host: string;
   port: number;
   timeoutMs: number;
+  /** Soft per-stream byte budget the INSTREAM transport can carry without dying. */
   maxStreamBytes: number;
+  /** Hard byte threshold above which we deliberately skip scanning entirely. */
+  hardSkipBytes: number;
 }
 
 /**
@@ -31,6 +35,11 @@ export class ClamdClient {
 
   async scanS3Object(bucketRole: 'assets' | 'thumbs' | 'editor', key: string): Promise<ClamdResult> {
     const head = await this.s3.headObject(bucketRole, key);
+    // Hard skip — these are deliberately not scanned; surface as a benign
+    // SKIPPED_SIZE badge instead of an ERROR that pages admins.
+    if (head && head.bytes > this.opts.hardSkipBytes) {
+      return { status: 'SKIPPED', reason: 'oversize', bytes: head.bytes };
+    }
     if (head && head.bytes > this.opts.maxStreamBytes) {
       return { status: 'ERROR', message: `file too large for INSTREAM (${head.bytes} > ${this.opts.maxStreamBytes})` };
     }

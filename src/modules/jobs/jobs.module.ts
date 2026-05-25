@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { AdminQueueAuthGuard } from './admin-queue-auth.guard';
 import { JobsProducer } from './jobs.producer';
 import { QueueDashboardController } from './queue-dashboard.controller';
 
@@ -10,7 +11,7 @@ import { QueueDashboardController } from './queue-dashboard.controller';
 @Global()
 @Module({
   controllers: [QueueDashboardController],
-  providers: [JobsProducer],
+  providers: [JobsProducer, AdminQueueAuthGuard],
   exports: [JobsProducer],
 })
 export class JobsModule {}

@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsString,
   MaxLength,
@@ -14,7 +15,11 @@ import {
 export class InitiateUploadDto {
   @ApiProperty() @IsString() assetId!: string;
   @ApiProperty() @IsString() versionId!: string;
-  @ApiProperty({ maxLength: 512 }) @IsString() @MaxLength(512) relativePath!: string;
+  @ApiProperty({ maxLength: 512 })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(512)
+  relativePath!: string;
   @ApiProperty({ maxLength: 200 }) @IsString() @MaxLength(200) contentType!: string;
   @ApiProperty() @IsInt() @Min(0) bytes!: number;
 }
@@ -100,6 +105,19 @@ export class InitiateEditorMediaDto {
 export class InitiateEditorMediaResponseDto {
   @ApiProperty() putUrl!: string;
   @ApiProperty() key!: string;
+  @ApiProperty() viewUrl!: string;
+  @ApiProperty() expiresAt!: string;
+}
+
+export class RefreshEditorMediaDto {
+  @ApiProperty({ maxLength: 512 })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(512)
+  key!: string;
+}
+
+export class RefreshEditorMediaResponseDto {
   @ApiProperty() viewUrl!: string;
   @ApiProperty() expiresAt!: string;
 }

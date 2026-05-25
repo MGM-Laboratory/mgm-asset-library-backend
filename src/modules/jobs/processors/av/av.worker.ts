@@ -36,6 +36,7 @@ export class AvWorker extends JobWorkerBase<AvScanFileJob> {
       port: config.get('CLAMD_PORT'),
       timeoutMs: config.get('CLAMD_TIMEOUT_MS'),
       maxStreamBytes: config.get('CLAMD_MAX_STREAM_BYTES'),
+      hardSkipBytes: config.get('AV_HARD_SKIP_BYTES'),
     });
   }
 
@@ -58,6 +59,8 @@ export class AvWorker extends JobWorkerBase<AvScanFileJob> {
             status: result.status,
             signature: result.status === 'FOUND' ? result.signature : undefined,
             message: result.status === 'ERROR' ? result.message : undefined,
+            skipReason: result.status === 'SKIPPED' ? result.reason : undefined,
+            skippedBytes: result.status === 'SKIPPED' ? result.bytes : undefined,
             scannedAt: new Date().toISOString(),
           },
         } as unknown as Prisma.InputJsonValue,
