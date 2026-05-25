@@ -229,7 +229,7 @@ export class AssetsService {
   async publish(
     id: string,
     requester: User,
-    confirmInfectedWarning: boolean,
+    _confirmInfectedWarning: boolean,
   ): Promise<PublishViolation[]> {
     const asset = await this.prisma.asset.findUnique({ where: { id } });
     if (!asset)
@@ -238,20 +238,12 @@ export class AssetsService {
 
     const violations = await this.publishChecklist.evaluate(asset);
     const hardErrors = violations.filter((v) => v.severity === 'error');
-    const warnings = violations.filter((v) => v.severity === 'warning');
 
     if (hardErrors.length > 0) {
       throw new BadRequestDomainException(
         ErrorCode.ASSET_PUBLISH_BLOCKED,
         'Publish blocked by checklist failures.',
         hardErrors.map((v) => ({ path: v.field, code: v.code, message: v.message })),
-      );
-    }
-    if (warnings.length > 0 && !confirmInfectedWarning) {
-      throw new ConflictDomainException(
-        ErrorCode.FILE_AV_INFECTED_UNCONFIRMED,
-        'AV warnings are present — re-publish with `confirmInfectedWarning: true` to proceed.',
-        warnings.map((v) => ({ path: v.field, code: v.code, message: v.message })),
       );
     }
 
@@ -276,7 +268,7 @@ export class AssetsService {
 
     await this.categories.invalidateCache();
     await this.jobs.enqueueSearchIndex({ reason: 'asset.publish', assetId: id });
-    return warnings;
+    return [];
   }
 
   async archive(id: string, requester: User): Promise<void> {

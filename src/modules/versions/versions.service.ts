@@ -49,17 +49,13 @@ export class VersionsService {
     // Reset the rollup status so the UI can show "analyzing" again.
     await this.prisma.assetVersion.update({
       where: { id: versionId },
-      data: { analysisStatus: 'PENDING', avStatus: 'PENDING' },
+      data: { analysisStatus: 'PENDING' },
     });
 
     await this.redis.client.set(`analyze:version:${versionId}:remaining`, version.files.length);
-    await this.redis.client.set(`av:version:${versionId}:remaining`, version.files.length);
 
     await Promise.all(
-      version.files.flatMap((f) => [
-        this.jobs.enqueueAnalyzeFile({ versionId, fileId: f.id }),
-        this.jobs.enqueueAvScanFile({ versionId, fileId: f.id }),
-      ]),
+      version.files.map((f) => this.jobs.enqueueAnalyzeFile({ versionId, fileId: f.id })),
     );
   }
 
@@ -69,7 +65,6 @@ export class VersionsService {
       semver: v.semver,
       isLatest: v.isLatest,
       analysisStatus: v.analysisStatus,
-      avStatus: v.avStatus,
       publishedAt: v.publishedAt?.toISOString(),
       bytesTotal: v.bytesTotal.toString(),
       fileCount: v.fileCount,
@@ -85,9 +80,7 @@ export class VersionsService {
     const rows = await this.prisma.assetVersion.findMany({
       where: {
         assetId,
-        ...(isOwnerOrAdmin
-          ? {}
-          : { publishedAt: { not: null }, analysisStatus: 'READY', avStatus: { not: 'INFECTED' } }),
+        ...(isOwnerOrAdmin ? {} : { publishedAt: { not: null }, analysisStatus: 'READY' }),
       },
       orderBy: { createdAt: 'desc' },
     });

@@ -20,15 +20,6 @@ export interface AnalyzeVersionJob {
   reason: 'fan-in' | 'reanalyze';
 }
 
-export interface AvScanFileJob {
-  versionId: string;
-  fileId: string;
-}
-
-export interface AvScanVersionJob {
-  versionId: string;
-}
-
 export interface GltfConvertJob {
   versionId: string;
   fileId: string;

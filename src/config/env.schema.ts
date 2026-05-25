@@ -100,15 +100,6 @@ export const envSchema = z
     HDRI_PATH: z.string().default('/opt/mgm/hdri/studio_small_03.hdr'),
     WORKER_SCRATCH_DIR: z.string().default('/tmp/mgm-analyze'),
 
-    // ─────────── ClamAV daemon ──────────────────────────────────────────────
-    CLAMD_HOST: z.string().default('127.0.0.1'),
-    CLAMD_PORT: portNumber.default(3310),
-    CLAMD_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
-    CLAMD_MAX_STREAM_BYTES: z.coerce.number().int().positive().default(524_288_000),
-    // Files larger than this byte threshold deliberately skip AV scanning and
-    // are marked SKIPPED_SIZE on the asset detail page. Default: 15 GiB.
-    AV_HARD_SKIP_BYTES: z.coerce.number().int().positive().default(16_106_127_360),
-
     // ─────────── Worker job limits ──────────────────────────────────────────
     ANALYZE_TIMEOUT_SEC: z.coerce.number().int().positive().default(300),
     GLTF_CONVERT_TIMEOUT_SEC: z.coerce.number().int().positive().default(600),

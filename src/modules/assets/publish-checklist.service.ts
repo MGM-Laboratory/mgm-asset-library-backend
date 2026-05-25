@@ -105,17 +105,6 @@ export class PublishChecklistService {
         severity: 'error',
       });
     }
-    if (latest.avStatus === 'INFECTED') {
-      // Per spec: warning, not a hard block. Publish endpoint requires
-      // `confirmInfectedWarning: true` to proceed.
-      violations.push({
-        field: 'version.av',
-        code: 'av.infected',
-        message: 'The AV scanner flagged content in the latest version. Confirm to publish anyway.',
-        severity: 'warning',
-      });
-    }
-
     return violations;
   }
 }

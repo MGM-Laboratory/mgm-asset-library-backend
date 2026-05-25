@@ -8,7 +8,6 @@ import {
 } from '../jobs/processors/webhook/webhook-delivery.schema';
 import { AdminAssetsController } from './assets-moderation.controller';
 import { AdminAssetsModerationService } from './assets-moderation.service';
-import { AdminAvQueueController } from './av-queue.controller';
 import { AdminDashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
 import { AdminStorageController } from './storage.controller';
@@ -31,7 +30,6 @@ import { WebhookDeliveriesController } from './webhook-deliveries.controller';
     AdminDashboardController,
     AdminStorageController,
     AdminAssetsController,
-    AdminAvQueueController,
     WebhookDeliveriesController,
   ],
   providers: [AdminAssetsModerationService, DashboardService],

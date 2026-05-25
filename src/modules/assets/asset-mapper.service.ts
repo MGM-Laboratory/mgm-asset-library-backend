@@ -22,7 +22,6 @@ type AssetWithRelations = Asset & {
     publishedAt: Date | null;
     isLatest: boolean;
     analysisStatus: string;
-    avStatus: string;
     bytesTotal: bigint;
     fileCount: number;
     files: Array<{ id: string; relativePath: string; kind: string; bytes: bigint; meta: unknown }>;
@@ -124,7 +123,6 @@ export class AssetMapperService {
         publishedAt: v.publishedAt?.toISOString(),
         isLatest: v.isLatest,
         analysisStatus: v.analysisStatus,
-        avStatus: v.avStatus,
         bytesTotal: v.bytesTotal.toString(),
         fileCount: v.fileCount,
         files: v.files.map((f) => ({

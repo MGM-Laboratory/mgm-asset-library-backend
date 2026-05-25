@@ -5,12 +5,10 @@ import { MongoHealthService } from '../infra/mongo/mongo-health.service';
 import { PrismaService } from '../infra/prisma/prisma.service';
 import { RedisService } from '../infra/redis/redis.service';
 import { S3Service } from '../infra/s3/s3.service';
-import { AvDefinitionsService } from '../modules/jobs/processors/av/av-definitions.service';
 
 export interface WorkerReadinessReport {
   status: 'ok' | 'degraded';
   checks: Record<string, boolean>;
-  avDefinitionsUpdatedAt: string | null;
   timestamp: string;
 }
 
@@ -22,7 +20,6 @@ export class WorkerHealthController {
     private readonly redis: RedisService,
     private readonly mongo: MongoHealthService,
     private readonly s3: S3Service,
-    private readonly avDefs: AvDefinitionsService,
   ) {}
 
   /** Always-200 liveness so orchestrators don't reap the container on a flake. */
@@ -34,11 +31,7 @@ export class WorkerHealthController {
     return { status: 'ok', role: 'worker' };
   }
 
-  /**
-   * Readiness — checks every external dependency the worker needs to do its
-   * job. Also reports the freshness of ClamAV's virus definitions so ops can
-   * spot a stuck freshclam without paging into the container.
-   */
+  /** Readiness — checks every external dependency the worker needs. */
   @Public()
   @Get('readyz')
   async readiness(): Promise<WorkerReadinessReport> {
@@ -53,7 +46,6 @@ export class WorkerHealthController {
     return {
       status: allGreen ? 'ok' : 'degraded',
       checks,
-      avDefinitionsUpdatedAt: this.avDefs.lastUpdatedAt()?.toISOString() ?? null,
       timestamp: new Date().toISOString(),
     };
   }

@@ -193,7 +193,6 @@ export class AssetVersionPayloadDto {
   @ApiPropertyOptional() publishedAt?: string;
   @ApiProperty() isLatest!: boolean;
   @ApiProperty() analysisStatus!: string;
-  @ApiProperty() avStatus!: string;
   @ApiProperty() bytesTotal!: string;
   @ApiProperty() fileCount!: number;
   @ApiProperty({ type: AssetVersionFileTreeNodeDto, isArray: true })

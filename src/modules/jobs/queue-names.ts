@@ -6,8 +6,6 @@
 export const QUEUE = {
   ANALYZE: 'analyze',
   ANALYZE_VERSION: 'analyze-version',
-  AV_SCAN: 'av-scan',
-  AV_SCAN_VERSION: 'av-scan-version',
   GLTF_CONVERT: 'gltf-convert',
   THUMBNAIL_VARIANTS: 'thumbnail-variants',
   THUMBNAIL_RENDER: 'thumbnail-render',
@@ -28,8 +26,6 @@ export type QueueName = (typeof QUEUE)[keyof typeof QUEUE];
 export const QUEUE_CONCURRENCY: Record<QueueName, number> = {
   [QUEUE.ANALYZE]: 2,
   [QUEUE.ANALYZE_VERSION]: 2,
-  [QUEUE.AV_SCAN]: 2,
-  [QUEUE.AV_SCAN_VERSION]: 2,
   [QUEUE.GLTF_CONVERT]: 2,
   [QUEUE.THUMBNAIL_VARIANTS]: 4,
   [QUEUE.THUMBNAIL_RENDER]: 2,

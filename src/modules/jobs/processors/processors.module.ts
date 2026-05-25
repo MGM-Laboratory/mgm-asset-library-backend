@@ -5,9 +5,6 @@ import { WebhookDelivery, WebhookDeliverySchema } from './webhook/webhook-delive
 import { AnalyzeService } from './analyze/analyze.service';
 import { AnalyzeWorker } from './analyze/analyze.worker';
 import { AnalyzeVersionWorker } from './analyze/analyze-version.worker';
-import { AvDefinitionsService } from './av/av-definitions.service';
-import { AvWorker } from './av/av.worker';
-import { AvVersionWorker } from './av/av-version.worker';
 import { GltfConvertWorker } from './convert/gltf-convert.worker';
 import { NotifyWorker } from './notify.worker';
 import { SearchIndexBatchWorker } from './search/search-index-batch.worker';
@@ -36,9 +33,6 @@ import { StorageRollupWorker } from './maintenance/storage-rollup.worker';
     AnalyzeService,
     AnalyzeWorker,
     AnalyzeVersionWorker,
-    AvDefinitionsService,
-    AvWorker,
-    AvVersionWorker,
     GltfConvertWorker,
     ThumbnailVariantsWorker,
     ThumbnailRenderWorker,
@@ -52,6 +46,5 @@ import { StorageRollupWorker } from './maintenance/storage-rollup.worker';
     AnalyticsRollupWorker,
     StorageRollupWorker,
   ],
-  exports: [AvDefinitionsService],
 })
 export class ProcessorsModule {}
