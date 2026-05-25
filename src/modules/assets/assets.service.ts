@@ -184,6 +184,18 @@ export class AssetsService {
     if (typeof dto.requiresEmptyProject === 'boolean') {
       data.requiresEmptyProject = dto.requiresEmptyProject;
     }
+    if (dto.previewMedia) {
+      // Strip any client-supplied viewUrl — we always re-sign from `key`
+      // on read. Limit the gallery to 24 items to keep the JSON column
+      // bounded.
+      data.previewMedia = dto.previewMedia.slice(0, 24).map((m) => ({
+        id: m.id,
+        kind: m.kind,
+        key: m.key,
+        label: m.label,
+        mime: m.mime ?? null,
+      })) as unknown as Prisma.InputJsonValue;
+    }
 
     await this.prisma.$transaction(async (tx) => {
       if (dto.translations) {
