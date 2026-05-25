@@ -67,7 +67,6 @@ export class VersionSummaryDto {
   @ApiProperty() semver!: string;
   @ApiProperty() isLatest!: boolean;
   @ApiProperty() analysisStatus!: string;
-  @ApiProperty() avStatus!: string;
   @ApiPropertyOptional() publishedAt?: string;
   @ApiProperty() bytesTotal!: string;
   @ApiProperty() fileCount!: number;

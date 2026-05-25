@@ -367,19 +367,13 @@ export class FilesService {
   }
 
   /**
-   * Schedules the analyzer + AV scan for a freshly-completed file. Bumps the
-   * per-version fan-in counters in Redis so the rollup workers fire when the
-   * last per-file job for the version finishes (Part 3 §3.1).
+   * Schedules the analyzer for a freshly-completed file. Bumps the per-version
+   * fan-in counter in Redis so the analyzer rollup fires when the last
+   * per-file job for the version finishes.
    */
   private async enqueueAfterCompletion(file: AssetFile): Promise<void> {
-    await Promise.all([
-      this.redis.client.incr(`analyze:version:${file.versionId}:remaining`),
-      this.redis.client.incr(`av:version:${file.versionId}:remaining`),
-    ]);
-    await Promise.all([
-      this.jobs.enqueueAnalyzeFile({ versionId: file.versionId, fileId: file.id }),
-      this.jobs.enqueueAvScanFile({ versionId: file.versionId, fileId: file.id }),
-    ]);
+    await this.redis.client.incr(`analyze:version:${file.versionId}:remaining`);
+    await this.jobs.enqueueAnalyzeFile({ versionId: file.versionId, fileId: file.id });
   }
 
   private validateParts(parts: CompletedPartDto[]): void {

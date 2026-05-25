@@ -44,27 +44,6 @@ describe('PublishChecklistService', () => {
     );
   });
 
-  it('flags AV infection as a *warning*, not an error', async () => {
-    const prisma = {
-      assetTranslation: { count: jest.fn().mockResolvedValue(1) },
-      assetVersion: {
-        findFirst: jest.fn().mockResolvedValue({
-          id: 'v1',
-          semver: '1.0.0',
-          analysisStatus: 'READY',
-          avStatus: 'INFECTED',
-          _count: { files: 2, compatibility: 1 },
-        }),
-      },
-    } as never;
-    const svc = new PublishChecklistService(prisma);
-    const violations = await svc.evaluate(makeAsset());
-    const av = violations.find((v) => v.code === 'av.infected');
-    expect(av).toBeDefined();
-    expect(av!.severity).toBe('warning');
-    expect(violations.filter((v) => v.severity === 'error')).toHaveLength(0);
-  });
-
   it('requires compatibility for engine-specific assets', async () => {
     const prisma = {
       assetTranslation: { count: jest.fn().mockResolvedValue(1) },

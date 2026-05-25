@@ -79,17 +79,6 @@ export interface AnalyzerFailedPayload extends AssetRef {
   reason: string;
 }
 
-export interface AvInfectedWarningPayload extends AssetRef {
-  versionId: string;
-  affectedFilePaths: string[];
-}
-
-export interface AvInfectedAdminAlertPayload extends AssetRef {
-  versionId: string;
-  affectedFilePaths: string[];
-  owner: UserRef;
-}
-
 /** Discriminated union — events index by NotificationType. */
 export type NotificationPayloadMap = {
   [NotificationType.COMMENT_CREATED]: CommentCreatedPayload;
@@ -103,6 +92,4 @@ export type NotificationPayloadMap = {
   [NotificationType.FEATURED_FEATURED]: FeaturedFeaturedPayload;
   [NotificationType.VERSION_PUBLISHED]: VersionPublishedPayload;
   [NotificationType.ANALYZER_FAILED]: AnalyzerFailedPayload;
-  [NotificationType.AV_INFECTED_WARNING]: AvInfectedWarningPayload;
-  [NotificationType.AV_INFECTED_ADMIN_ALERT]: AvInfectedAdminAlertPayload;
 };

@@ -171,35 +171,6 @@ export const EMAIL_SPECS: Record<NotificationType, EmailSpec> = {
     },
     cta: { label: { en: 'Open version', id: 'Buka versi' }, href: '{{links.versionUrl}}' },
   },
-  [NotificationType.AV_INFECTED_WARNING]: {
-    subject: {
-      en: 'AV scan flagged “{{assetTitle}}”',
-      id: 'Pemindaian AV menandai “{{assetTitle}}”',
-    },
-    eyebrow: { en: 'AV warning', id: 'Peringatan AV' },
-    title: { en: 'The AV scanner flagged your upload', id: 'Pemindai AV menandai unggahan Anda' },
-    body: {
-      en: 'One or more files in “{{assetTitle}}” were flagged. You can still publish, but reviewers will see a warning.',
-      id: 'Satu atau lebih file di “{{assetTitle}}” ditandai. Anda tetap dapat menerbitkan, tetapi peninjau akan melihat peringatan.',
-    },
-    cta: { label: { en: 'Review version', id: 'Tinjau versi' }, href: '{{links.versionUrl}}' },
-  },
-  [NotificationType.AV_INFECTED_ADMIN_ALERT]: {
-    subject: { en: 'AV scan flagged an asset', id: 'Pemindaian AV menandai sebuah aset' },
-    eyebrow: { en: 'AV alert', id: 'Peringatan AV' },
-    title: {
-      en: 'AV scanner flagged an uploaded asset',
-      id: 'Pemindai AV menandai aset yang diunggah',
-    },
-    body: {
-      en: 'AV scan flagged content in “{{assetTitle}}” by {{owner.displayName}}.',
-      id: 'Pemindaian AV menandai konten di “{{assetTitle}}” milik {{owner.displayName}}.',
-    },
-    cta: {
-      label: { en: 'Open in admin panel', id: 'Buka di panel admin' },
-      href: '{{links.adminAssetUrl}}',
-    },
-  },
   [NotificationType.ADMIN_PROMOTED]: {
     subject: { en: 'You have been promoted to admin', id: 'Anda telah dipromosikan sebagai admin' },
     eyebrow: { en: 'Role update', id: 'Pembaruan peran' },

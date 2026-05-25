@@ -58,16 +58,6 @@ enum AnalysisStatus {
   FAILED
 }
 
-enum AvStatus {
-  PENDING
-  CLEAN
-  INFECTED
-  ERROR
-  // File exceeded the AV hard-skip size (e.g. 15 GiB); scan was deliberately
-  // skipped. Surfaced as an informational badge on the asset detail page.
-  SKIPPED_SIZE
-}
-
 enum AssetFileKind {
   UNITYPACKAGE
   UPLUGIN
@@ -144,8 +134,6 @@ enum NotificationType {
   FEATURED_FEATURED
   VERSION_PUBLISHED
   ANALYZER_FAILED
-  AV_INFECTED_WARNING
-  AV_INFECTED_ADMIN_ALERT
   ADMIN_PROMOTED
   ADMIN_DEMOTED
 }
@@ -279,7 +267,6 @@ model AssetVersion {
   /// Manifest tree produced by the analyzer (files, sizes, kinds).
   manifest       Json?
   analysisStatus AnalysisStatus @default(PENDING)
-  avStatus       AvStatus       @default(PENDING)
   isLatest       Boolean        @default(false)
   createdAt      DateTime       @default(now())
   publishedAt    DateTime?
@@ -293,7 +280,6 @@ model AssetVersion {
   @@unique([assetId, semver])
   @@index([assetId])
   @@index([analysisStatus])
-  @@index([avStatus])
   @@index([isLatest])
   @@map("asset_versions")
 }

@@ -8,8 +8,6 @@ import {
   AnalyzeVersionJob,
   ArchivePurgeJob,
   AuditPurgeJob,
-  AvScanFileJob,
-  AvScanVersionJob,
   EditorMediaGcJob,
   GltfConvertJob,
   NotifyJob,
@@ -86,20 +84,6 @@ export class JobsProducer implements OnModuleInit, OnModuleDestroy {
   enqueueAnalyzeVersion(job: AnalyzeVersionJob): Promise<unknown> {
     return this.queue(QUEUE.ANALYZE_VERSION).add('rollup', job, {
       jobId: `${job.versionId}__${job.reason}`,
-    });
-  }
-
-  // ─── AV ─────────────────────────────────────────────────────────────────
-
-  enqueueAvScanFile(job: AvScanFileJob): Promise<unknown> {
-    return this.queue(QUEUE.AV_SCAN).add('scan-file', job, {
-      jobId: `${job.versionId}__${job.fileId}`,
-    });
-  }
-
-  enqueueAvScanVersion(job: AvScanVersionJob): Promise<unknown> {
-    return this.queue(QUEUE.AV_SCAN_VERSION).add('rollup', job, {
-      jobId: job.versionId,
     });
   }
 

@@ -21,7 +21,6 @@ export const ErrorCode = {
 
   FILE_UPLOAD_INIT_FAILED: 'file.upload_init_failed',
   FILE_UPLOAD_NOT_FOUND: 'file.upload_not_found',
-  FILE_AV_INFECTED_UNCONFIRMED: 'file.av_infected_unconfirmed',
 
   LIBRARY_DUPLICATE: 'library.duplicate',
 
