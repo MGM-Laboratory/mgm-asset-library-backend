@@ -32,13 +32,7 @@ import { OptionalAuthGuard } from '../../infra/keycloak/optional-auth.guard';
 import { AssetsListService } from './assets-list.service';
 import { AssetsService } from './assets.service';
 import { DiscoverResponseDto, DiscoverService } from './discover.service';
-import {
-  AssetDetailDto,
-  AssetSummaryDto,
-  CreateAssetDto,
-  PublishAssetDto,
-  UpdateAssetDto,
-} from './dto/asset.dto';
+import { AssetDetailDto, AssetSummaryDto, CreateAssetDto, UpdateAssetDto } from './dto/asset.dto';
 import { ListAssetsQueryDto } from './dto/list-assets-query.dto';
 
 interface AssetListEnvelope {
@@ -170,13 +164,8 @@ export class AssetsController {
   async publish(
     @AuthUser() principal: AuthenticatedRequestUser,
     @Param('id') id: string,
-    @Body() dto: PublishAssetDto = {},
   ): Promise<{ warnings: Array<{ field: string; code: string; message: string }> }> {
-    const warnings = await this.assets.publish(
-      id,
-      principal.user,
-      dto.confirmInfectedWarning === true,
-    );
+    const warnings = await this.assets.publish(id, principal.user, false);
     return {
       warnings: warnings.map((w) => ({ field: w.field, code: w.code, message: w.message })),
     };
