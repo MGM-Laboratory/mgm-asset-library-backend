@@ -5,11 +5,9 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { FastifyAdapter as BullFastifyAdapter } from '@bull-board/fastify';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
-import {
-  AuthenticatedRequestUser,
-  KeycloakAuthGuard,
-} from '../../infra/keycloak/keycloak-auth.guard';
+import { AuthenticatedRequestUser } from '../../infra/keycloak/keycloak-auth.guard';
 import { AppConfigService } from '../../config/app-config.service';
+import { AdminQueueAuthGuard } from './admin-queue-auth.guard';
 import { JobsProducer } from './jobs.producer';
 
 /**
@@ -22,7 +20,7 @@ import { JobsProducer } from './jobs.producer';
 @ApiTags('Admin')
 @ApiBearerAuth('keycloak')
 @Controller()
-@UseGuards(KeycloakAuthGuard)
+@UseGuards(AdminQueueAuthGuard)
 export class QueueDashboardController {
   private readonly adapter: BullFastifyAdapter | null;
 

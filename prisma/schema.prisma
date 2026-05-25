@@ -57,6 +57,9 @@ enum AvStatus {
   CLEAN
   INFECTED
   ERROR
+  // File exceeded the AV hard-skip size (e.g. 15 GiB); scan was deliberately
+  // skipped. Surfaced as an informational badge on the asset detail page.
+  SKIPPED_SIZE
 }
 
 enum AssetFileKind {

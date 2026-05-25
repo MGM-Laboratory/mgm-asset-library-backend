@@ -163,12 +163,10 @@ export class VersionsService {
         'Version has no files — upload at least one before publishing.',
       );
     }
-    if (version.analysisStatus !== 'READY') {
-      throw new BadRequestDomainException(
-        ErrorCode.ASSET_PUBLISH_BLOCKED,
-        'Analyzer has not completed for this version.',
-      );
-    }
+    // Async publish: we no longer block on analyzer / AV completion. Both run
+    // in the background and surface their status (PENDING / READY / FAILED /
+    // CLEAN / INFECTED / SKIPPED_SIZE) on the asset detail page. Files flagged
+    // INFECTED are quarantined separately by the AV worker.
 
     // Transactionally flip isLatest off on the previous winner, then on this row.
     await this.prisma.$transaction([

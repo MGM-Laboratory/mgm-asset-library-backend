@@ -74,9 +74,7 @@ export class AssetsListService {
       ...(cursor ? { skip: 1, cursor: { id: cursor.id } } : {}),
     });
     const hasMore = rows.length > limit;
-    const items = await Promise.all(
-      rows.slice(0, limit).map((r) => this.mapper.toSummary(r, locale)),
-    );
+    const items = await this.mapper.toSummaryMany(rows.slice(0, limit), locale);
     const last = rows[items.length - 1];
     const nextCursor =
       hasMore && last
@@ -103,7 +101,7 @@ export class AssetsListService {
     const ordered = ids
       .map((id) => byId.get(id))
       .filter((r): r is NonNullable<typeof r> => Boolean(r));
-    return Promise.all(ordered.map((r) => this.mapper.toSummary(r, locale)));
+    return this.mapper.toSummaryMany(ordered, locale);
   }
 
   private buildOrderBy(sort: AssetSort): Prisma.AssetOrderByWithRelationInput[] {

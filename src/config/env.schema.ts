@@ -105,6 +105,9 @@ export const envSchema = z
     CLAMD_PORT: portNumber.default(3310),
     CLAMD_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
     CLAMD_MAX_STREAM_BYTES: z.coerce.number().int().positive().default(524_288_000),
+    // Files larger than this byte threshold deliberately skip AV scanning and
+    // are marked SKIPPED_SIZE on the asset detail page. Default: 15 GiB.
+    AV_HARD_SKIP_BYTES: z.coerce.number().int().positive().default(16_106_127_360),
 
     // ─────────── Worker job limits ──────────────────────────────────────────
     ANALYZE_TIMEOUT_SEC: z.coerce.number().int().positive().default(300),
