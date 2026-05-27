@@ -84,6 +84,11 @@ export const envSchema = z
     N8N_WEBHOOK_URL: z.string().optional().default(''),
     N8N_WEBHOOK_SECRET: z.string().optional().default(''),
 
+    // ─────────── GIF providers (comment composer) ───────────────────────────
+    // Server-side keys for the /gifs proxy. Empty disables that provider.
+    GIPHY_API_KEY: z.string().optional().default(''),
+    TENOR_API_KEY: z.string().optional().default(''),
+
     // ─────────── Sentry ─────────────────────────────────────────────────────
     SENTRY_DSN: z.string().optional().default(''),
     SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),

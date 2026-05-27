@@ -98,16 +98,21 @@ export const LITE_TIPTAP_ALLOWLIST: TipTapAllowlist = {
     'hardBreak',
     'text',
     'mention',
+    // Inline media: uploaded images and embedded GIFs (both render as image
+    // nodes pointing at our editor-media bucket or a provider CDN).
+    'image',
   ]),
   marks: new Set(['bold', 'italic', 'code', 'link']),
   nodeAttrs: {
     codeBlock: new Set(['language']),
     mention: new Set(['id', 'label']),
+    image: new Set(['src', 'alt', 'title']),
   },
   markAttrs: {
     link: new Set(['href', 'target', 'rel']),
   },
-  maxBytes: 10 * 1024,
+  // Bumped from 10 KiB — image src URLs (presigned S3 / provider CDN) are long.
+  maxBytes: 24 * 1024,
 };
 
 interface WalkState {

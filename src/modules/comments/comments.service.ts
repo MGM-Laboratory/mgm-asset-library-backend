@@ -30,6 +30,7 @@ export class CommentsService {
 
   async list(assetId: string, query: ListCommentsQueryDto): Promise<CommentListResponseDto> {
     const cursor = decodeCursor(query.cursor ?? null);
+    const pageSize = Math.min(Math.max(query.limit ?? PAGE_SIZE, 1), 100);
     const kindFilter: Prisma.CommentWhereInput =
       query.kind && query.kind !== 'ALL'
         ? { kind: query.kind === 'ISSUE' ? 'ISSUE' : 'COMMENT' }
@@ -41,12 +42,12 @@ export class CommentsService {
     const topRows = await this.prisma.comment.findMany({
       where: { assetId, parentId: null, deletedAt: null, ...kindFilter },
       orderBy: { createdAt: 'desc' },
-      take: PAGE_SIZE + 1,
+      take: pageSize + 1,
       ...(cursor ? { skip: 1, cursor: { id: cursor.id } } : {}),
       include: { author: true },
     });
-    const hasMore = topRows.length > PAGE_SIZE;
-    const topRowsClipped = topRows.slice(0, PAGE_SIZE);
+    const hasMore = topRows.length > pageSize;
+    const topRowsClipped = topRows.slice(0, pageSize);
     if (topRowsClipped.length === 0) {
       return { items: [], pageInfo: { nextCursor: null, hasMore: false } };
     }
