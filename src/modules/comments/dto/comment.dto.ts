@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CommentKind, IssueStatus } from '@prisma/client';
-import { IsEnum, IsIn, IsObject, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsEnum, IsIn, IsInt, IsObject, IsOptional, IsString, Max, Min } from 'class-validator';
 
 const COMMENT_LISTS = ['ALL', 'COMMENT', 'ISSUE'] as const;
 type CommentListMode = (typeof COMMENT_LISTS)[number];
@@ -11,6 +12,13 @@ export class ListCommentsQueryDto {
   @IsOptional()
   @IsIn(COMMENT_LISTS as unknown as string[])
   kind?: CommentListMode;
+  @ApiPropertyOptional({ minimum: 1, maximum: 100, default: 25 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
 }
 
 export class CreateCommentDto {

@@ -7,6 +7,7 @@ import { ConflictDomainException, NotFoundDomainException } from '../../common/e
 import { decodeCursor, encodeCursor } from '../../common/pagination/cursor';
 import { resolvePageSize } from '../../common/pagination/list-query.dto';
 import { PrismaService } from '../../infra/prisma/prisma.service';
+import { RedisService } from '../../infra/redis/redis.service';
 import { JobsProducer } from '../jobs/jobs.producer';
 import { AdminUserDto, ListAdminUsersQueryDto } from './dto/admin-user.dto';
 
@@ -17,7 +18,13 @@ export class AdminUsersService {
     private readonly audit: AuditService,
     private readonly producer: JobsProducer,
     private readonly config: AppConfigService,
+    private readonly redis: RedisService,
   ) {}
+
+  /** Drop the auth guard's cached principal so a role change applies at once. */
+  private async invalidatePrincipal(keycloakSub: string): Promise<void> {
+    await this.redis.client.del(`authz:principal:${keycloakSub}`).catch(() => undefined);
+  }
 
   async list(query: ListAdminUsersQueryDto): Promise<{
     items: AdminUserDto[];
@@ -72,6 +79,7 @@ export class AdminUsersService {
       throw new NotFoundDomainException(ErrorCode.USER_NOT_FOUND, `User ${id} not found.`);
     if (target.isAdmin) return;
     await this.prisma.user.update({ where: { id }, data: { isAdmin: true } });
+    await this.invalidatePrincipal(target.keycloakSub);
     await this.producer.enqueueNotify({
       recipientUserId: id,
       type: NotificationType.ADMIN_PROMOTED,
@@ -108,6 +116,7 @@ export class AdminUsersService {
       );
     }
     await this.prisma.user.update({ where: { id }, data: { isAdmin: false } });
+    await this.invalidatePrincipal(target.keycloakSub);
     await this.producer.enqueueNotify({
       recipientUserId: id,
       type: NotificationType.ADMIN_DEMOTED,

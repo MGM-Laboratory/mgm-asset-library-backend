@@ -113,7 +113,7 @@ describe('TipTap validators', () => {
   });
 
   it('declares the expected allowlist sizes', () => {
-    expect(LITE_TIPTAP_ALLOWLIST.maxBytes).toBe(10 * 1024);
+    expect(LITE_TIPTAP_ALLOWLIST.maxBytes).toBe(24 * 1024);
     expect(FULL_TIPTAP_ALLOWLIST.maxBytes).toBe(100 * 1024);
   });
 });

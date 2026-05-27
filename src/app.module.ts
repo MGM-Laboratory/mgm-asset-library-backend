@@ -34,6 +34,7 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { DownloadsModule } from './modules/downloads/downloads.module';
 import { FeaturedModule } from './modules/featured/featured.module';
 import { FilesModule } from './modules/files/files.module';
+import { GifsModule } from './modules/gifs/gifs.module';
 import { IssuesModule } from './modules/issues/issues.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
@@ -93,6 +94,7 @@ import { WsModule } from './modules/ws/ws.module';
     AssetsModule,
     VersionsModule,
     FilesModule,
+    GifsModule,
     DownloadsModule,
     CategoriesModule,
     TagsModule,
