@@ -63,17 +63,20 @@ export class SignMultipartPartsDto {
 
 export class CompletedPartDto {
   @ApiProperty() @IsInt() partNumber!: number;
-  @ApiProperty() @IsString() etag!: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() etag?: string;
 }
 
 export class CompleteMultipartDto {
   @ApiProperty() @IsString() uploadId!: string;
 
-  @ApiProperty({ type: [CompletedPartDto] })
+  // Optional + ignored: the server now sources authoritative ETags via
+  // S3 ListParts. Kept so older clients posting `parts` still validate.
+  @ApiPropertyOptional({ type: [CompletedPartDto] })
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CompletedPartDto)
-  parts!: CompletedPartDto[];
+  parts?: CompletedPartDto[];
 }
 
 export class AbortMultipartDto {
@@ -120,4 +123,11 @@ export class RefreshEditorMediaDto {
 export class RefreshEditorMediaResponseDto {
   @ApiProperty() viewUrl!: string;
   @ApiProperty() expiresAt!: string;
+}
+
+export class ReorderFilesDto {
+  @ApiProperty({ type: [String], description: 'File ids in the desired display order.' })
+  @IsArray()
+  @IsString({ each: true })
+  orderedFileIds!: string[];
 }

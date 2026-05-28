@@ -26,7 +26,7 @@ const FULL_INCLUDE = {
   tags: { include: { tag: true } },
   versions: {
     include: {
-      files: true,
+      files: { orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] },
       compatibility: true,
       dependencies: true,
     },
@@ -210,15 +210,17 @@ export class AssetsService {
       data.requiresEmptyProject = dto.requiresEmptyProject;
     }
     if (dto.previewMedia) {
-      // Strip any client-supplied viewUrl — we always re-sign from `key`
-      // on read. Limit the gallery to 24 items to keep the JSON column
-      // bounded.
+      // Strip any client-supplied URLs — we always re-sign from the keys on
+      // read. The array order IS the gallery order. Capped at 24 items.
       data.previewMedia = dto.previewMedia.slice(0, 24).map((m) => ({
         id: m.id,
         kind: m.kind,
         key: m.key,
+        displayKey: m.displayKey ?? null,
         label: m.label,
         mime: m.mime ?? null,
+        visibility: m.visibility ?? 'visible',
+        warning: m.warning ?? null,
       })) as unknown as Prisma.InputJsonValue;
     }
 

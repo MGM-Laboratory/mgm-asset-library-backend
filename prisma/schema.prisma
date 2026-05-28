@@ -298,6 +298,9 @@ model AssetFile {
   bytes        BigInt
   mimeType     String
   kind         AssetFileKind
+  /// Owner-controlled display order within the version (drag-to-reorder).
+  /// Lower comes first; ties break by createdAt.
+  sortOrder    Int           @default(0)
   /// Kind-specific metadata: polycount, animationLengthSeconds, etc.
   meta         Json?
   createdAt    DateTime      @default(now())
