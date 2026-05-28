@@ -114,7 +114,9 @@ export class CommentsService {
       //     and `authorEmail` columns from the LEFT JOIN)
       // Reading only the SQL-flat columns made every top-level commenter
       // render as "(unknown)" — falling back to the relation fixes it.
-      const withAuthor = row as CommentRow & { author?: { displayName?: string | null; email?: string | null } };
+      const withAuthor = row as CommentRow & {
+        author?: { displayName?: string | null; email?: string | null };
+      };
       const displayName = row.authorDisplayName ?? withAuthor.author?.displayName ?? null;
       const email = row.authorEmail ?? withAuthor.author?.email ?? '';
       return {
