@@ -1,4 +1,13 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthUser } from '../../common/decorators/auth-user.decorator';
 import { AuthenticatedRequestUser } from '../../infra/keycloak/keycloak-auth.guard';
@@ -18,6 +27,7 @@ import {
   InitiateUploadResponseDto,
   RefreshEditorMediaDto,
   RefreshEditorMediaResponseDto,
+  ReorderFilesDto,
   SignMultipartPartsDto,
 } from './dto/upload.dto';
 import { FilesService } from './files.service';
@@ -138,5 +148,26 @@ export class FilesController {
     @Body() dto: RefreshEditorMediaDto,
   ): Promise<RefreshEditorMediaResponseDto> {
     return this.files.refreshEditorMedia(dto.key, principal.user);
+  }
+
+  @Post('versions/:versionId/reorder')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Persist a new display order for a version's package files." })
+  reorderFiles(
+    @AuthUser() principal: AuthenticatedRequestUser,
+    @Param('versionId') versionId: string,
+    @Body() dto: ReorderFilesDto,
+  ): Promise<void> {
+    return this.files.reorderFiles(versionId, dto.orderedFileIds, principal.user);
+  }
+
+  @Delete(':fileId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a single uploaded package file (owner/admin).' })
+  deleteFile(
+    @AuthUser() principal: AuthenticatedRequestUser,
+    @Param('fileId') fileId: string,
+  ): Promise<void> {
+    return this.files.deleteFile(fileId, principal.user);
   }
 }

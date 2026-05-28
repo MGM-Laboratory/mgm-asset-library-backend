@@ -15,7 +15,6 @@ import { AssetsService } from '../assets/assets.service';
 import { JobsProducer } from '../jobs/jobs.producer';
 import {
   CompleteMultipartDto,
-  CompletedPartDto,
   InitiateMultipartDto,
   InitiateMultipartResponseDto,
   InitiateThumbnailDto,
@@ -135,6 +134,7 @@ export class FilesService {
         bytes: BigInt(0),
         mimeType: dto.contentType,
         kind: AssetFileKind.OTHER,
+        sortOrder: await this.nextSortOrder(version.id),
       },
     });
 
@@ -204,6 +204,7 @@ export class FilesService {
         bytes: BigInt(0),
         mimeType: dto.contentType,
         kind: AssetFileKind.OTHER,
+        sortOrder: await this.nextSortOrder(version.id),
       },
     });
 
@@ -255,9 +256,21 @@ export class FilesService {
       );
     }
     if (handle.versionId) await this.getVersionOrThrow(handle.versionId, requester);
-    this.validateParts(dto.parts);
 
-    await this.s3.completeMultipart('assets', handle.key, handle.s3UploadId, dto.parts);
+    // Source the authoritative ETags from S3 itself rather than trusting the
+    // client. The browser can only read the PUT response's `ETag` header when
+    // the bucket CORS exposes it; without that the client sends empty ETags and
+    // CompleteMultipartUpload fails ("parts could not be found / entity tag may
+    // not match"). ListParts is CORS-independent and always correct.
+    const parts = await this.s3.listParts('assets', handle.key, handle.s3UploadId);
+    if (parts.length === 0) {
+      throw new BadRequestDomainException(
+        ErrorCode.FILE_UPLOAD_INIT_FAILED,
+        'No uploaded parts found for this upload — please re-upload the file.',
+      );
+    }
+
+    await this.s3.completeMultipart('assets', handle.key, handle.s3UploadId, parts);
     const head = await this.s3.headObject('assets', handle.key);
     const file = await this.prisma.assetFile.update({
       where: { id: handle.fileId },
@@ -280,6 +293,56 @@ export class FilesService {
       if (handle.versionId) await this.recountVersion(handle.versionId);
     }
     await this.dropHandle(uploadId);
+  }
+
+  // ─── File management (reorder / delete) ──────────────────────────────────
+
+  /** Next sort order = current file count, so new uploads append to the end. */
+  private async nextSortOrder(versionId: string): Promise<number> {
+    return this.prisma.assetFile.count({ where: { versionId } });
+  }
+
+  /**
+   * Persists a new file display order. `orderedFileIds` must be the full set of
+   * the version's file ids; any omitted files keep their relative order after
+   * the listed ones.
+   */
+  async reorderFiles(versionId: string, orderedFileIds: string[], requester: User): Promise<void> {
+    const version = await this.getVersionOrThrow(versionId, requester);
+    const files = await this.prisma.assetFile.findMany({
+      where: { versionId: version.id },
+      select: { id: true },
+    });
+    const known = new Set(files.map((f) => f.id));
+    const rank = new Map<string, number>();
+    orderedFileIds.forEach((id, i) => {
+      if (known.has(id)) rank.set(id, i);
+    });
+    await this.prisma.$transaction(
+      files.map((f) =>
+        this.prisma.assetFile.update({
+          where: { id: f.id },
+          data: { sortOrder: rank.get(f.id) ?? orderedFileIds.length },
+        }),
+      ),
+    );
+  }
+
+  /** Hard-deletes a single uploaded file (S3 object + row). Owner/admin only. */
+  async deleteFile(fileId: string, requester: User): Promise<void> {
+    const file = await this.prisma.assetFile.findUnique({
+      where: { id: fileId },
+      include: { version: { include: { asset: true } } },
+    });
+    if (!file)
+      throw new NotFoundDomainException(
+        ErrorCode.FILE_UPLOAD_NOT_FOUND,
+        `File ${fileId} not found.`,
+      );
+    this.assets.assertCanEdit(file.version.asset, requester);
+    await this.s3.deleteObject('assets', file.s3Key).catch(() => undefined);
+    await this.prisma.assetFile.delete({ where: { id: fileId } });
+    await this.recountVersion(file.versionId);
   }
 
   // ─── Thumbnails ─────────────────────────────────────────────────────────
@@ -374,31 +437,6 @@ export class FilesService {
   private async enqueueAfterCompletion(file: AssetFile): Promise<void> {
     await this.redis.client.incr(`analyze:version:${file.versionId}:remaining`);
     await this.jobs.enqueueAnalyzeFile({ versionId: file.versionId, fileId: file.id });
-  }
-
-  private validateParts(parts: CompletedPartDto[]): void {
-    if (parts.length === 0) {
-      throw new BadRequestDomainException(
-        ErrorCode.FILE_UPLOAD_INIT_FAILED,
-        'Provide at least one part.',
-      );
-    }
-    const seen = new Set<number>();
-    for (const p of parts) {
-      if (p.partNumber < 1) {
-        throw new BadRequestDomainException(
-          ErrorCode.FILE_UPLOAD_INIT_FAILED,
-          'Part numbers start at 1.',
-        );
-      }
-      if (seen.has(p.partNumber)) {
-        throw new BadRequestDomainException(
-          ErrorCode.FILE_UPLOAD_INIT_FAILED,
-          `Duplicate part ${p.partNumber}.`,
-        );
-      }
-      seen.add(p.partNumber);
-    }
   }
 
   /**

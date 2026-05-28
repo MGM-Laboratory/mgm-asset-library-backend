@@ -29,6 +29,7 @@
     "prisma:studio": "prisma studio",
     "seed": "ts-node --transpile-only scripts/seed.ts",
     "reindex": "ts-node --transpile-only scripts/reindex-search.ts",
+    "compress:images": "ts-node --transpile-only scripts/compress-existing-images.ts",
     "purge:archived": "ts-node --transpile-only scripts/purge-archived.ts",
     "openapi:export": "ts-node --transpile-only scripts/export-openapi.ts",
     "prepare": "husky install || true"
