@@ -107,6 +107,16 @@ export class CommentsService {
     }
     const buildNode = (row: CommentRow): CommentNodeDto => {
       const children = (byParent.get(row.id) ?? []).map((c) => buildNode(c));
+      // Two row shapes flow into this mapper:
+      //   - top-level rows from Prisma with `include: { author: true }` (the
+      //     User relation on `row.author`)
+      //   - subtree rows from the recursive raw SQL (flat `authorDisplayName`
+      //     and `authorEmail` columns from the LEFT JOIN)
+      // Reading only the SQL-flat columns made every top-level commenter
+      // render as "(unknown)" — falling back to the relation fixes it.
+      const withAuthor = row as CommentRow & { author?: { displayName?: string | null; email?: string | null } };
+      const displayName = row.authorDisplayName ?? withAuthor.author?.displayName ?? null;
+      const email = row.authorEmail ?? withAuthor.author?.email ?? '';
       return {
         id: row.id,
         kind: row.kind,
@@ -118,8 +128,8 @@ export class CommentsService {
         createdAt: row.createdAt.toISOString(),
         author: {
           id: row.authorId,
-          displayName: row.authorDisplayName ?? '(unknown)',
-          avatar: resolveAvatar(row.authorId, row.authorDisplayName ?? null, row.authorEmail ?? ''),
+          displayName: displayName ?? '(unknown)',
+          avatar: resolveAvatar(row.authorId, displayName, email),
         },
         replies: children,
       };
