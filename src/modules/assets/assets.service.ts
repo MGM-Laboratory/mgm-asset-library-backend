@@ -464,16 +464,16 @@ export class AssetsService {
       orderBy: [{ downloads: { _count: 'desc' } }, { publishedAt: 'desc' }],
       take: 6,
     });
-    return Promise.all(
-      candidates.map((c) =>
-        this.mapper.toSummary(
-          {
-            ...c,
-            versions: [],
-          } as unknown as Parameters<AssetMapperService['toSummary']>[0],
-          locale,
-        ),
+    // toSummaryMany batches every candidate's thumbnail presign into a single
+    // round-trip; was N×presignGet via Promise.all(candidates.map(toSummary)).
+    return this.mapper.toSummaryMany(
+      candidates.map(
+        (c) =>
+          ({ ...c, versions: [] }) as unknown as Parameters<
+            AssetMapperService['toSummaryMany']
+          >[0][number],
       ),
+      locale,
     );
   }
 }
