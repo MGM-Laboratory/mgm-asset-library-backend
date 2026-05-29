@@ -54,22 +54,23 @@ export class SearchService {
       filter,
       sort: ['publishedAt:desc'],
     });
-    const hits: SearchAssetHitDto[] = await Promise.all(
-      result.hits.map(async (h) => ({
-        id: h.id,
-        slug: h.slug,
-        title: h.title,
-        shortDescription:
-          locale === 'id' ? (h.shortDescription_id ?? '') : (h.shortDescription_en ?? ''),
-        thumbnailUrl: h.thumbnailKey
-          ? await this.s3.presignGet('thumbs', h.thumbnailKey)
-          : undefined,
-        engine: h.engine,
-        categoryName: (locale === 'id' ? h.categoryName_id : h.categoryName_en) ?? '',
-        ownerName: h.ownerDisplayName,
-        totalDownloads: h.totalDownloads,
-      })),
-    );
+    // Batch-presign every hit's thumbnail in one bounded-concurrency pass
+    // instead of awaiting per-row inside a .map(async) — that was a 24×
+    // S3 RPC round-trip per page.
+    const thumbnailKeys = result.hits.map((h) => h.thumbnailKey).filter((k): k is string => !!k);
+    const thumbUrlByKey = await this.s3.presignGetMany('thumbs', thumbnailKeys);
+    const hits: SearchAssetHitDto[] = result.hits.map((h) => ({
+      id: h.id,
+      slug: h.slug,
+      title: h.title,
+      shortDescription:
+        locale === 'id' ? (h.shortDescription_id ?? '') : (h.shortDescription_en ?? ''),
+      thumbnailUrl: h.thumbnailKey ? thumbUrlByKey[h.thumbnailKey] : undefined,
+      engine: h.engine,
+      categoryName: (locale === 'id' ? h.categoryName_id : h.categoryName_en) ?? '',
+      ownerName: h.ownerDisplayName,
+      totalDownloads: h.totalDownloads,
+    }));
     return {
       hits,
       processingTimeMs: result.processingTimeMs,

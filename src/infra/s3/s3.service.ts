@@ -70,6 +70,27 @@ export class S3Service {
     return getSignedUrl(this.client, command, { expiresIn });
   }
 
+  /**
+   * Batched GET presigning for grid/list endpoints. Dedupes keys, runs them
+   * through `presignGet` in fixed-size concurrent batches (cap 8), and returns
+   * a `key → url` map so callers can hydrate their DTOs without an N+1.
+   * Uses the same TTL semantics as `presignGet` (per-request env config).
+   */
+  async presignGetMany(role: S3BucketRole, keys: string[]): Promise<Record<string, string>> {
+    const unique = Array.from(new Set(keys.filter((k): k is string => !!k)));
+    if (unique.length === 0) return {};
+    const out: Record<string, string> = {};
+    const concurrency = 8;
+    for (let i = 0; i < unique.length; i += concurrency) {
+      const chunk = unique.slice(i, i + concurrency);
+      const urls = await Promise.all(chunk.map((key) => this.presignGet(role, key)));
+      chunk.forEach((key, idx) => {
+        out[key] = urls[idx];
+      });
+    }
+    return out;
+  }
+
   async deleteObject(role: S3BucketRole, key: string): Promise<void> {
     const bucket = this.bucketFor(role);
     await this.client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
