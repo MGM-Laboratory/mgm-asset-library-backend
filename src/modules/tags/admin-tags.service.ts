@@ -8,6 +8,7 @@ import { resolvePageSize } from '../../common/pagination/list-query.dto';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { JobsProducer } from '../jobs/jobs.producer';
 import { AdminTagDto, ListTagsQueryDto, MergeTagsDto, UpdateTagDto } from './dto/admin-tag.dto';
+import { TagsService } from './tags.service';
 
 @Injectable()
 export class AdminTagsService {
@@ -15,6 +16,7 @@ export class AdminTagsService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly producer: JobsProducer,
+    private readonly tags: TagsService,
   ) {}
 
   async list(query: ListTagsQueryDto) {
@@ -102,6 +104,7 @@ export class AdminTagsService {
         this.producer.enqueueSearchIndex({ reason: 'asset.update', assetId: id }),
       ),
     );
+    await this.tags.invalidatePopularCache();
     await this.audit.record({
       actorId: admin.id,
       action: 'tag.merge',
@@ -141,6 +144,7 @@ export class AdminTagsService {
         this.producer.enqueueSearchIndex({ reason: 'asset.update', assetId: a.assetId }),
       ),
     );
+    await this.tags.invalidatePopularCache();
     await this.audit.record({
       actorId: admin.id,
       action: 'tag.update',
@@ -162,6 +166,7 @@ export class AdminTagsService {
     const row = await this.prisma.tag.findUnique({ where: { id } });
     if (!row) throw new NotFoundDomainException(ErrorCode.TAG_IN_USE, `Tag ${id} not found.`);
     await this.prisma.tag.delete({ where: { id } });
+    await this.tags.invalidatePopularCache();
     await this.audit.record({
       actorId: admin.id,
       action: 'tag.delete',
