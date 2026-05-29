@@ -22,4 +22,18 @@ export class TagsController {
   ): Promise<TagDto[]> {
     return this.tags.autocomplete(q, limit);
   }
+
+  @Get('popular')
+  @ApiOperation({
+    summary: 'Most-used tags overall, ranked by denormalised usage count.',
+    description:
+      'Cached server-side for ~10 minutes; usage counts are batched by the search-index worker.',
+  })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Max 50, default 24.' })
+  @ApiOkResponse({ type: TagDto, isArray: true })
+  popular(
+    @Query('limit', new DefaultValuePipe(24), ParseIntPipe) limit: number,
+  ): Promise<TagDto[]> {
+    return this.tags.popular(limit);
+  }
 }

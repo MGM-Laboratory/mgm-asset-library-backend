@@ -5,12 +5,14 @@ import { ErrorCode } from '../../common/errors/error-code';
 import { ConflictDomainException, NotFoundDomainException } from '../../common/errors/problem.dto';
 import { PrismaService } from '../../infra/prisma/prisma.service';
 import { AdminLicenseDto, CreateLicenseDto, UpdateLicenseDto } from './dto/admin-license.dto';
+import { LicensesService } from './licenses.service';
 
 @Injectable()
 export class AdminLicensesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    private readonly licenses: LicensesService,
   ) {}
 
   async list(): Promise<AdminLicenseDto[]> {
@@ -40,6 +42,7 @@ export class AdminLicensesService {
       },
       include: { _count: { select: { assets: true } } },
     });
+    await this.licenses.invalidateCache();
     await this.audit.record({
       actorId: admin.id,
       action: 'license.create',
@@ -79,6 +82,7 @@ export class AdminLicensesService {
       },
       include: { _count: { select: { assets: true } } },
     });
+    await this.licenses.invalidateCache();
     await this.audit.record({
       actorId: admin.id,
       action: 'license.update',
@@ -101,6 +105,7 @@ export class AdminLicensesService {
     if (!row)
       throw new NotFoundDomainException(ErrorCode.LICENSE_NOT_FOUND, `License ${id} not found.`);
     await this.prisma.license.delete({ where: { id } });
+    await this.licenses.invalidateCache();
     await this.audit.record({
       actorId: admin.id,
       action: 'license.delete',

@@ -3,18 +3,21 @@ import { Category, Locale } from '@prisma/client';
 import { ErrorCode } from '../../common/errors/error-code';
 import { NotFoundDomainException } from '../../common/errors/problem.dto';
 import { resolveLocalized, LocalizedJson } from '../../common/i18n/locale-resolver';
+import { CachedService } from '../../infra/redis/cached.service';
 import { PrismaService } from '../../infra/prisma/prisma.service';
-import { RedisService } from '../../infra/redis/redis.service';
 import { CategoryDto } from './dto/category.dto';
 
-const CACHE_KEY = (locale: Locale) => `categories:list:${locale}`;
-const CACHE_TTL_SECONDS = 60;
+const CACHE_KEY = (locale: Locale) => `cache:categories:v1:locale:${locale}`;
+// 10 min: categories are admin-managed and change on a weekly timescale at
+// most. Admin mutations call `invalidateCache()` so on-demand staleness is
+// bounded by the TTL only when invalidation itself fails.
+const CACHE_TTL_SECONDS = 600;
 
 @Injectable()
 export class CategoriesService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly redis: RedisService,
+    private readonly cached: CachedService,
   ) {}
 
   async findByIdOrThrow(id: string): Promise<Category> {
@@ -26,12 +29,15 @@ export class CategoriesService {
 
   /**
    * Lists active categories with per-category `assetCount`. Result is cached
-   * in Redis for 60 s (see `invalidateCache` below).
+   * in Redis for 10 minutes per locale; admin mutations call `invalidateCache`.
    */
   async list(locale: Locale): Promise<CategoryDto[]> {
-    const cached = await this.redis.client.get(CACHE_KEY(locale));
-    if (cached) return JSON.parse(cached) as CategoryDto[];
+    return this.cached.getOrFetch<CategoryDto[]>(CACHE_KEY(locale), CACHE_TTL_SECONDS, () =>
+      this.computeList(locale),
+    );
+  }
 
+  private async computeList(locale: Locale): Promise<CategoryDto[]> {
     const rows = await this.prisma.category.findMany({
       where: { isActive: true },
       orderBy: { sortOrder: 'asc' },
@@ -43,7 +49,7 @@ export class CategoriesService {
     });
     const countByCategory = new Map(counts.map((c) => [c.categoryId, c._count._all]));
 
-    const dto: CategoryDto[] = rows.map((row) => ({
+    return rows.map((row) => ({
       id: row.id,
       slug: row.slug,
       name: resolveLocalized(row.name as LocalizedJson, locale) ?? row.slug,
@@ -51,16 +57,10 @@ export class CategoriesService {
       sortOrder: row.sortOrder,
       assetCount: countByCategory.get(row.id) ?? 0,
     }));
-
-    await this.redis.client.set(CACHE_KEY(locale), JSON.stringify(dto), 'EX', CACHE_TTL_SECONDS);
-    return dto;
   }
 
   /** Drops the cached listings — call after an asset's category/publish state changes. */
   async invalidateCache(): Promise<void> {
-    await Promise.all([
-      this.redis.client.del(CACHE_KEY('en')),
-      this.redis.client.del(CACHE_KEY('id')),
-    ]);
+    await this.cached.invalidate(CACHE_KEY('en'), CACHE_KEY('id'));
   }
 }
