@@ -5,6 +5,7 @@ import { KeycloakJwksProvider } from './keycloak-jwks.provider';
 import { OptionalAuthGuard } from './optional-auth.guard';
 import { PluginTokenGuard } from './plugin-token.guard';
 import { PluginTokenService } from './plugin-token.service';
+import { PrincipalResolverService } from './principal-resolver.service';
 import { RoleResolverService } from './role-resolver.service';
 
 /**
@@ -24,6 +25,7 @@ import { RoleResolverService } from './role-resolver.service';
   providers: [
     KeycloakJwksProvider,
     RoleResolverService,
+    PrincipalResolverService,
     KeycloakAuthGuard,
     PluginTokenService,
     PluginTokenGuard,
@@ -33,6 +35,7 @@ import { RoleResolverService } from './role-resolver.service';
   exports: [
     KeycloakJwksProvider,
     RoleResolverService,
+    PrincipalResolverService,
     KeycloakAuthGuard,
     PluginTokenService,
     PluginTokenGuard,

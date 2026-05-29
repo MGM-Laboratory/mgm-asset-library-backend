@@ -12,10 +12,10 @@ import type { IncomingMessage } from 'node:http';
 import { URL } from 'node:url';
 import { KeycloakJwksProvider } from '../../infra/keycloak/keycloak-jwks.provider';
 import { PluginTokenService } from '../../infra/keycloak/plugin-token.service';
+import { PrincipalResolverService } from '../../infra/keycloak/principal-resolver.service';
 import { ConnectionRegistry } from './connection-registry';
 import { WsFanoutService } from '../notifications/ws-fanout.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { PrismaService } from '../../infra/prisma/prisma.service';
 
 const HEARTBEAT_INTERVAL_MS = 30_000;
 const IDLE_TIMEOUT_MS = 90_000;
@@ -51,7 +51,7 @@ export class NotificationsGateway
     private readonly registry: ConnectionRegistry,
     private readonly wsFanout: WsFanoutService,
     private readonly notifications: NotificationsService,
-    private readonly prisma: PrismaService,
+    private readonly principals: PrincipalResolverService,
   ) {}
 
   onModuleInit(): void {
@@ -128,8 +128,11 @@ export class NotificationsGateway
     const pluginToken = fullUrl.searchParams.get('pluginToken');
     if (bearer) {
       const claims = await this.jwks.verify(bearer);
-      const user = await this.prisma.user.findUnique({ where: { keycloakSub: claims.sub } });
-      return user?.id ?? null;
+      // Reuse the HTTP guard's Redis-cached principal resolution (same
+      // `authz:principal:<sub>` key) so reconnects within the cache window skip
+      // the Postgres lookup and admin promote/demote invalidation covers WS too.
+      const { user } = await this.principals.resolvePrincipal(claims);
+      return user.id;
     }
     if (pluginToken) {
       const verified = await this.pluginTokens.verifyAndTouch(pluginToken);
